@@ -45,7 +45,7 @@ class BasePlotter:
 
         self.axes = {}
         self.lines = {}
-        self.plots_dict = {}
+        self.plots = {}
         self.extra_elements = {}
 
         self.num_plots = 0
@@ -90,7 +90,7 @@ class BasePlotter:
         pass
 
     def _create_subplot(self, plot, plot_num):
-        self.plots_dict[plot.name] = plot
+        self.plots[plot.name] = plot
         if plot.flat:
             self.axes[plot.name] = self.fig.add_subplot(self.num_rows, self.num_columns, plot_num)
         else:
@@ -193,40 +193,53 @@ class BasePlotter:
                 return
 
             if plot_name in self.axes.keys():
-                if self.plots_dict[plot_name].flat:
+                if self.plots[plot_name].flat:
                     self.axes[plot_name].plot(x, y, 'o', **dot_properties)
                 else:
                     self.axes[plot_name].plot([x], [y], [z], 'o', **dot_properties)
 
-    def draw_image(self, arg, image_name, img_coord_1, img_coord_2, plot_coord_1, plot_coord_2, img_format="png"):
+    def draw_image(self, plot, image, skew_coords=None, img_format=None, *imshow_args, **imshow_kwargs):
         """
         Draw a dot on the input plot (plot name or plot instance)
-        :param arg: string or robot plot
-        :param x: float
-        :param y: float
-        :param z: float
-        :param dot_properties: matplotlib properties (color, markersize, etc)
         """
         if self.enabled:
-            plot_name = self._get_name(arg)
+            plot_name = self._get_name(plot)
             if plot_name is None:
                 return
+            image_artist = self.plots[plot_name].image_artist
 
-            image = self.plt.imread(image_name, format=img_format)
-            height, width = image.shape[0:2]
-            img_x1 = height - img_coord_1[1]
-            img_x2 = height - img_coord_2[1]
-            img_y1 = width - img_coord_1[0]
-            img_y2 = width - img_coord_2[0]
-            height, width = width, height
+            if type(image) == str:
+                if img_format is None:
+                    img_format = "png"
+                image = self.plt.imread(image, format=img_format)
 
-            plot_x1 = (plot_coord_1[0] - plot_coord_2[0]) / (img_x1 - img_x2) * (0 - img_x2) + plot_coord_2[0]
-            plot_x2 = (plot_coord_1[0] - plot_coord_2[0]) / (img_x1 - img_x2) * (width - img_x2) + plot_coord_2[0]
-            plot_y1 = (plot_coord_1[1] - plot_coord_2[1]) / (img_y1 - img_y2) * (0 - img_y2) + plot_coord_2[1]
-            plot_y2 = (plot_coord_1[1] - plot_coord_2[1]) / (img_y1 - img_y2) * (height - img_y2) + plot_coord_2[1]
-            image = np.rot90(image, k=3)
+            if skew_coords is not None:
+                img_coord_1, img_coord_2, plot_coord_1, plot_coord_2 = skew_coords
+                height, width = image.shape[0:2]
+                img_x1 = height - img_coord_1[1]
+                img_x2 = height - img_coord_2[1]
+                img_y1 = width - img_coord_1[0]
+                img_y2 = width - img_coord_2[0]
+                height, width = width, height
 
-            self.axes[plot_name].imshow(image, extent=(plot_x1, plot_x2, plot_y1, plot_y2))
+                plot_x1 = (plot_coord_1[0] - plot_coord_2[0]) / (img_x1 - img_x2) * (0 - img_x2) + plot_coord_2[0]
+                plot_x2 = (plot_coord_1[0] - plot_coord_2[0]) / (img_x1 - img_x2) * (width - img_x2) + plot_coord_2[0]
+                plot_y1 = (plot_coord_1[1] - plot_coord_2[1]) / (img_y1 - img_y2) * (0 - img_y2) + plot_coord_2[1]
+                plot_y2 = (plot_coord_1[1] - plot_coord_2[1]) / (img_y1 - img_y2) * (height - img_y2) + plot_coord_2[1]
+                image = np.rot90(image, k=3)
+
+                if image_artist is None:
+                    self.plots[plot_name].image_artist = \
+                        self.axes[plot_name].imshow(image, extent=(plot_x1, plot_x2, plot_y1, plot_y2),
+                                                    *imshow_args, **imshow_kwargs)
+                else:
+                    self.plots[plot_name].image_artist.set_data(image)
+            else:
+                if image_artist is None:
+                    self.plots[plot_name].image_artist = \
+                        self.axes[plot_name].imshow(image, *imshow_args, **imshow_kwargs)
+                else:
+                    self.plots[plot_name].image_artist.set_data(image)
 
     def draw_text(self, arg, text, x, y, z=None, text_name=None, **text_properties):
         """
@@ -250,7 +263,7 @@ class BasePlotter:
             if plot_name in self.axes.keys():
                 if text_name is not None and text_name in self.extra_elements:
                     self.extra_elements[text_name].remove()
-                if self.plots_dict[plot_name].flat:
+                if self.plots[plot_name].flat:
                     self.extra_elements[text_name] = self.axes[plot_name].text(x, y, text, **text_properties)
                 else:
                     self.extra_elements[text_name] = self.axes[plot_name].text([x], [y], [z], text, **text_properties)

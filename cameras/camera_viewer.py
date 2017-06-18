@@ -114,5 +114,5 @@ class CameraViewer(AsyncStream):
         if key == 'q':
             self.exit()
 
-    def close(self):
+    def stop(self):
         cv2.destroyWindow(self.name)

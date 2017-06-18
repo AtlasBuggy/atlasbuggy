@@ -14,7 +14,9 @@ class Robot:
 
         self.loop_fn = loop_fn
         self.setup_fn = setup_fn
-        self.close_fn = close_fn
+        self.stop_fn = close_fn
+
+        self.loop_started = False
 
         self.log_info = dict(
             file_name=None,
@@ -26,9 +28,11 @@ class Robot:
         )
         self.log_info.update(log_options)
         self.init_logger()
+
         DataStream._log_info = self.log_info
 
         self.loop = asyncio.get_event_loop()
+        self.coroutine = None
 
     def init_logger(self):
         if self.log_info["file_name"] is None:
@@ -39,7 +43,8 @@ class Robot:
                 self.log_info["directory"] = time.strftime("logs/%Y_%b_%d")
 
         # make directory if writing a log, if directory is not None or empty, and if the directory doesn't exist
-        if self.log_info["write"] and self.log_info["directory"] and not os.path.isdir(self.log_info["directory"]):
+        if self.log_info["write"] and self.log_info["directory"] and not os.path.isdir(
+                self.log_info["directory"]):
             os.makedirs(self.log_info["directory"])
 
         if self.log_info["write"]:
@@ -54,10 +59,9 @@ class Robot:
             if stream.enabled:
                 self.streams.append(stream)
 
-        coroutine = None
         try:
             if len(self.streams) > 0:
-                coroutine = self.get_coroutine()
+                self.coroutine = self.get_coroutine()
 
                 for stream in self.streams:
                     stream._start()
@@ -65,7 +69,8 @@ class Robot:
                 if self.setup_fn is not None:
                     self.setup_fn(self)
 
-                self.loop.run_until_complete(coroutine)
+                self.loop.run_until_complete(self.coroutine)
+                self.loop_started = True
 
                 if self.wait_for_all:
                     while DataStream.all_running():
@@ -76,19 +81,24 @@ class Robot:
                         time.sleep(0.1)
             else:
                 logging.warning("No streams to run!")
-        except KeyboardInterrupt:
-            if coroutine is not None:
-                coroutine.cancel()
-        except asyncio.CancelledError:
-            pass
-        finally:
-            if self.close_fn is not None:
-                self.close_fn(self)
-            self.exit_all()
-            for stream in self.streams:
-                stream._close()
+        except BaseException:
+            self.stop()
+            raise
+        self.stop()
+
+    def stop(self):
+        if self.stop_fn is not None:
+            self.stop_fn(self)
+        self.exit_all()
+        for stream in self.streams:
+            stream._stop()
+
+        if self.loop_started:
+            if self.coroutine is not None:
+                self.coroutine.cancel()
             self.loop.close()
-            self.compress_log()
+
+        self.compress_log()
 
     def compress_log(self):
         if self.log_info["write"]:

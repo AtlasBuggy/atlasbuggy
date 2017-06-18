@@ -167,12 +167,10 @@ class SerialStream(AsyncStream):
         self.ports = used_ports
 
     def list_ports(self):
-        ports = list(serial.tools.list_ports.comports())
-
         port_addresses = []
 
         # return the port if 'USB' is in the description
-        for port_no, description, address in ports:
+        for port_no, description, address in serial.tools.list_ports.comports():
             if 'USB' in address:
                 port_addresses.append(port_no)
         return port_addresses
@@ -195,10 +193,10 @@ class SerialStream(AsyncStream):
         try:
             if self.objects[whoiam].receive_first(first_packet) is not None:
                 self.logger.warning("Closing all from first_packets()")
-                self.close()
+                self.stop()
                 self.exit()
         except BaseException as _error:
-            self.close()
+            self.stop()
             self.exit()
             error = _error
 
@@ -219,7 +217,7 @@ class SerialStream(AsyncStream):
 
         for robot_port in self.ports.values():
             if not robot_port.send_start():
-                self.close()
+                self.stop()
                 raise self.handle_error(
                     RobotSerialPortWritePacketError(
                         "Unable to send start packet!", self.timestamp, self.packet, robot_port),
@@ -235,7 +233,7 @@ class SerialStream(AsyncStream):
         try:
             self.serial_start()
         except BaseException as _error:
-            self.close()
+            self.stop()
             self.exit()
             error = _error
 
@@ -292,7 +290,7 @@ class SerialStream(AsyncStream):
         status = port.is_running()
         if status < 1:
             self.logger.warning("Closing all from check_port_status")
-            self.close()
+            self.stop()
             self.logger.debug("status:", status)
             if status == 0:
                 raise self.handle_error(
@@ -317,10 +315,10 @@ class SerialStream(AsyncStream):
                     self.logger.warning(
                         "callback with whoiam ID: '%s' signalled to exit. Packet: %s" % (
                             whoiam, repr(self.packet)))
-                    self.close()
+                    self.stop()
         except BaseException as _error:
             self.logger.warning("Closing all from received")
-            self.close()
+            self.stop()
             self.exit()
             error = _error
 
@@ -337,10 +335,10 @@ class SerialStream(AsyncStream):
                 self.logger.warning(
                     "receive for object signalled to exit. whoiam ID: '%s', packet: %s" % (
                         whoiam, repr(self.packet)))
-                self.close()
+                self.stop()
         except BaseException as _error:
             self.logger.warning("Closing from deliver")
-            self.close()
+            self.stop()
             self.exit()
             error = _error
 
@@ -376,7 +374,7 @@ class SerialStream(AsyncStream):
                     # if write packet fails, throw an error
                     if not self.ports[whoiam].write_packet(command):
                         self.logger.warning("Closing all from _send_commands")
-                        self.close()
+                        self.stop()
                         self.exit()
                         raise self.handle_error(
                             RobotSerialPortWritePacketError(
@@ -445,7 +443,7 @@ class SerialStream(AsyncStream):
                     port), traceback.format_stack())
         self.logger.debug("All ports exited")
 
-    def close(self):
+    def stop(self):
         """
         Close all SerialPort processes and close their serial ports
         """

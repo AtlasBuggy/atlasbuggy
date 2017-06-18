@@ -55,6 +55,6 @@ class PiCamera(CameraStream):
             self.bytes_frame = self.numpy_to_bytes(self.frame)
         return self.bytes_frame
 
-    def close(self):
+    def stop(self):
         # self.capture.stop_preview()  # picamera complains when this is called while recording
         self.recorder.stop_recording()

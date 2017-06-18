@@ -18,7 +18,7 @@ class LivePlotter(BasePlotter, AsyncStream):
 
     def __init__(self, num_columns, *robot_plots, enabled=True, name=None, log_level=None, draw_legend=True,
                  legend_args=None, lag_cap=0.005, skip_count=0, matplotlib_events=None, active_window_resizing=True,
-                 exit_all=False):
+                 default_resize_behavior=True, exit_all=False):
         """
         Only one LivePlotter instance can run at one time. Multiple interactive matplotlib
         windows don't behave well. This also conserves CPU usage.
@@ -48,6 +48,7 @@ class LivePlotter(BasePlotter, AsyncStream):
         self.is_paused = False
         self.should_exit_all = exit_all
         self.active_window_resizing = active_window_resizing
+        self.default_resize_behavior = default_resize_behavior
 
         if self.enabled:
             # create a plot line for each RobotPlot or RobotPlotCollection.
@@ -55,7 +56,7 @@ class LivePlotter(BasePlotter, AsyncStream):
                 self._create_lines(plot)
 
             # define a clean close event
-            self.fig.canvas.mpl_connect('close_event', lambda event: self.close())
+            self.fig.canvas.mpl_connect('close_event', lambda event: self.stop())
             self.init_legend()
             self.plt.show(block=False)
 
@@ -132,13 +133,17 @@ class LivePlotter(BasePlotter, AsyncStream):
                             subplot.changed_properties = {}
 
                 if self.active_window_resizing and plot.window_resizing:
-                    if plot.flat:
-                        self.axes[plot.name].set_xlim(plot.x_range)
-                        self.axes[plot.name].set_ylim(plot.y_range)
+                    if self.default_resize_behavior:
+                        self.axes[plot.name].relim()
+                        self.axes[plot.name].autoscale_view()
                     else:
-                        self.axes[plot.name].set_xlim3d(plot.x_range)
-                        self.axes[plot.name].set_ylim3d(plot.y_range)
-                        self.axes[plot.name].set_zlim3d(plot.z_range)
+                        if plot.flat:
+                            self.axes[plot.name].set_xlim(plot.x_range)
+                            self.axes[plot.name].set_ylim(plot.y_range)
+                        else:
+                            self.axes[plot.name].set_xlim3d(plot.x_range)
+                            self.axes[plot.name].set_ylim3d(plot.y_range)
+                            self.axes[plot.name].set_zlim3d(plot.z_range)
 
             try:
                 self.fig.canvas.draw()
@@ -167,10 +172,11 @@ class LivePlotter(BasePlotter, AsyncStream):
             self.plt.gcf()
             self.plt.show()
 
-    def close(self):
+    def stop(self):
         """
         Close the plot safely
         """
+        self.logger.debug("Closing live plotter")
         if self.enabled and not self.is_closed:
             self.is_closed = True
             self.plt.ioff()
@@ -179,4 +185,3 @@ class LivePlotter(BasePlotter, AsyncStream):
 
             if self.should_exit_all:
                 self.exit_all()
-

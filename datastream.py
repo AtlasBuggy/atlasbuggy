@@ -21,31 +21,37 @@ class DataStream:
         self.name = name
         self.enabled = enabled
 
-        self.timestamp = None
-        self.start_time = None
+        self.timestamp = None  # current time since epoch
+        self.start_time = None  # stream start time. Can be set externally
 
-        self.started = Event()
-        self.closed = Event()
-        self.exited = Event()
-        DataStream._exit_events.append(self.exited)
+        self.started = Event()  # self._start flag
+        self.stopped = Event()  # self._stop flag
+        self.exited = Event()  # signal to exit
+        DataStream._exit_events.append(self.exited)  # give streams ability to close each other
 
-        self.streams = {}
+        self.streams = {}  # other streams this one has access to. (Call the give method)
 
+        # instance of logging. Use this instance to print debug statement and log
         self.logger = logging.getLogger(self.name)
+
+        # make sure robot has instantiated the log info before this stream
         if len(DataStream._log_info) == 0:
             raise ValueError("Declare Robot before initializing any streams.")
-        if DataStream._log_info["log_level"] < log_level:
+        if DataStream._log_info["log_level"] < log_level:  # robot's log level takes priority over individual streams
             self.log_level = DataStream._log_info["log_level"]
         else:
             self.log_level = log_level
         self.logger.setLevel(logging.DEBUG)  # catch all logs
 
-        self.print_handle = logging.StreamHandler()
+        self.print_handle = logging.StreamHandler()  # initialize log printing
         self.print_handle.setLevel(self.log_level)  # only print what user specifies
+
+        # define how logs are formatted based on how they were defined in Robot
         formatter = logging.Formatter(self._log_info["format"])
         self.print_handle.setFormatter(formatter)
         self.logger.addHandler(self.print_handle)
 
+        # add file logging if Robot has enabled it
         if DataStream._log_info["file_handle"] is not None:
             self.logger.addHandler(DataStream._log_info["file_handle"])
 
@@ -55,6 +61,8 @@ class DataStream:
         Overwrite time_started to change the initial time
         :return:
         """
+        # use the system time as current time by default. If you have another time source (e.g. log files),
+        # use this method to update the stream's time
         if current_time is None and use_current_time:
             current_time = time.time()
         self.timestamp = current_time
@@ -66,7 +74,7 @@ class DataStream:
 
     def give(self, **streams):
         """
-        Share an instance of another stream. Should be called before start
+        Share an instance of another stream. Should be called before start (before Robot.run)
         :param streams: keyword arguments of all streams being shared
         :return:
         """
@@ -74,12 +82,34 @@ class DataStream:
         self.take()
         self.logger.debug("receiving streams:" + str([str(stream) for stream in streams.values()]))
 
-    def receive_log(self, message, line_info):
+    def receive_log(self, log_level, message, line_info):
+        """
+        If LogParser is given to Robot and this stream is given to LogParser, it will give any matching log messages it
+        finds in a log file. This includes error messages
+        
+        :param log_level: type of log message 
+        :param message: string found in the log file 
+        :param line_info: a dictionary of information discovered. Keys in the dictionary:
+            timestamp, year, month, day, hour, minute, second, millisecond,
+            name - name of the stream that produced the message,
+            message, linenumber, filename, loglevel  
+        :return: 
+        """
         pass
 
     def take(self):
         """
-        Callback for give. Called before start
+        Callback for give
+        
+        Usage:
+        new_stream = SomeStream()
+        other_stream = OtherStream()
+        
+        new_stream.give(identifying_string=other_stream)  # new_stream's take is called
+        
+        Example (overwrite this method and put this code in):
+        
+        self.other_stream = self.streams["identifying_string"]
         :return:
         """
         pass
@@ -98,7 +128,7 @@ class DataStream:
         :return: False when all streams have called self.exit
           All streams have exited when:
             - their run methods have completed
-            - when Robot catches a KeyboardInterrupt or an asyncio.CancelledError
+            - when Robot catches an exception
             - DataStream.exit_all() is called
             - All streams have called self.exit themselves
         """
@@ -107,32 +137,31 @@ class DataStream:
     @staticmethod
     def any_stopped():
         """
-        Check if all exit events are False
-        :return: False when all streams have called self.exit
-          All streams have exited when:
-            - their run methods have completed
-            - when Robot catches a KeyboardInterrupt or an asyncio.CancelledError
-            - DataStream.exit_all() is called
-            - All streams have called self.exit themselves
+        Check if any exit events are True
+        :return: False when any stream has called self.exit
         """
         return any([result.is_set() for result in DataStream._exit_events])
 
     def running(self):
         """
-        Check if stream is running. Use this in your while loops in your run methods
+        Check if stream is running. Use this in your while loops in your run methods:
+        
+        while self.running():
+            ...
+        :return:
         """
         return not self.exited.is_set()
 
     def time_started(self):
         """
         Behavior for starting the timer.
-        :return: What the initial time should be
+        :return: What the initial time should be (None is acceptable. Set self.start_time later)
         """
         return time.time()
 
     def _init(self):
         """
-        Extra startup behavior
+        Internal extra startup behavior
         """
 
     def _start(self):
@@ -140,7 +169,7 @@ class DataStream:
         Wrapper for starting the stream
         :return:
         """
-        if not self.started.is_set():
+        if not self.started.is_set():  # only call _start once
             if not self.enabled:
                 self.logger.debug("stream not enabled")
                 return
@@ -153,7 +182,7 @@ class DataStream:
 
     def _run(self):
         """
-        Wrapper for running stream. Doesn't use self.enabled since Robot handles disabled streams
+        Wrapper for running stream
         """
         pass
 
@@ -169,23 +198,21 @@ class DataStream:
         """
         pass
 
-    def _close(self):
+    def _stop(self):
         """
-        Wrapper for closing the stream. Assumes that exit has been set
+        Wrapper for stopping the stream. Assumes that exit has been set
         """
         if not self.enabled:
             return
-        if not self.closed.is_set():
-            self.closed.set()
-            self.close()
+        if not self.stopped.is_set():  # only call _stop once
+            self.stopped.set()
+            self.logger.debug("stopping")
+            self.stop()
             self.logger.debug("closed")
-            # if DataStream.log_info["write"]:
-            #     self.logger.removeHandler(DataStream.log_info["file_handle"])
-            # self.logger.removeHandler(self.print_handle)
 
-    def close(self):
+    def stop(self):
         """
-        Close behavior of the stream
+        Stop behavior of the stream
         """
         pass
 
@@ -193,6 +220,7 @@ class DataStream:
         """
         Signal for this stream to exit
         """
+        self.logger.debug("exiting")
         self.exited.set()
 
     @staticmethod
@@ -228,9 +256,25 @@ class ThreadedStream(DataStream):
         self.logger.debug("thread is now daemon")
 
     def _run(self):
-        self.run()
+        try:
+            self.run()
+        except BaseException:
+            self.threaded_stop()
+            self.logger.debug("catching exception in threaded loop")
+            self.exit()
+            raise
+
         self.logger.debug("run finished")
+        self.threaded_stop()
         self.exit()
+
+    def threaded_stop(self):
+        """
+        Specialized method. If you want a close method that is called within the method,
+        use this method instead of self.stop
+        :return: 
+        """
+        pass
 
     def _init(self):
         """
@@ -258,7 +302,7 @@ class AsyncStream(DataStream):
         Added async tag since this method will be asynchronous
         """
         await self.run()
-        self.logger.debug("run finished")
+        self.logger.debug("run finished, exiting")
         self.exit()
 
     async def run(self):

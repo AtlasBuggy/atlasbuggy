@@ -203,7 +203,7 @@ class CvCamera(CameraStream):
     def update(self):
         pass
 
-    def close(self):
+    def stop(self):
         for cap_name, capture in CvCamera.captures.items():
             capture.release()
         self.recorder.stop_recording()

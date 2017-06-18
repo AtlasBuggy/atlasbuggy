@@ -551,7 +551,7 @@ class SerialPort(Process):
         with self.serial_lock:
             if self.configured:
                 if self.serial_ref.isOpen():
-                    self.serial_ref.close()
+                    self.serial_ref.stop()
                     self.debug_print("Closing serial")
                 else:
                     self.debug_print("Serial port was already closed!")

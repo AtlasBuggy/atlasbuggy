@@ -14,7 +14,7 @@ class SocketClient(AsyncStream):
 
     async def run(self):
         self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
-        self.logger.info("Connection opened with %s:%s" % (self.host, self.port))
+        self.logger.debug("Connection opened with %s:%s" % (self.host, self.port))
         try:
             self.write(self.name + "\n")
             while self.all_running():
@@ -32,7 +32,7 @@ class SocketClient(AsyncStream):
         finally:
             # self.debug_print("Disconnecting from %s %d", self.host, self.port)
             # self.writer.close()
-            self.logger.info("Disconnected from %s %d" % (self.host, self.port))
+            self.logger.debug("Disconnected from %s %d" % (self.host, self.port))
 
     def write(self, data):
         if self.writer is None:
@@ -60,7 +60,7 @@ class SocketServer(AsyncStream):
         self.client_writers = {}
 
     async def run(self):
-        self.logger.info("Starting server on %s:%s" % (self.host, self.port))
+        self.logger.debug("Starting server on %s:%s" % (self.host, self.port))
         await asyncio.start_server(self.accept_client, host=self.host, port=self.port)
         while self.running():
             await asyncio.sleep(0.5)
@@ -72,18 +72,18 @@ class SocketServer(AsyncStream):
 
         def client_done(end_task):
             del self.client_tasks[end_task]
-            client_writer.close()
-            self.logger.info("ending connection")
+            client_writer.stop()
+            self.logger.debug("ending connection")
 
         task.add_done_callback(client_done)
 
     async def handle_client(self, client_reader, client_writer, client_num):
-        self.logger.info("getting remote name...")
+        self.logger.debug("getting remote name...")
         client_name = await asyncio.wait_for(client_reader.readline(), timeout=10.0)
         client_name = client_name.decode().rstrip()
 
         self.client_writers[client_name] = client_writer
-        self.logger.info("'%s' has connected" % client_name)
+        self.logger.debug("'%s' has connected" % client_name)
 
         while True:
             if self.timeout is None:
@@ -92,7 +92,7 @@ class SocketServer(AsyncStream):
                 data = await asyncio.wait_for(client_reader.readline(), timeout=self.timeout)
 
             if data is None or len(data) == 0:
-                self.logger.warning("Received no data")
+                self.logger.debug("Received no data")
                 # exit echo loop and disconnect
                 # self.exit()
                 return
