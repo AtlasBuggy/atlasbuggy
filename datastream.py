@@ -4,7 +4,7 @@ from threading import Thread, Event
 
 
 class DataStream:
-    _exit_events = []
+    _exited = Event()  # signal to exit
     _log_info = {}
 
     def __init__(self, enabled, name=None, log_level=None):
@@ -24,10 +24,8 @@ class DataStream:
         self.timestamp = None  # current time since epoch
         self.start_time = None  # stream start time. Can be set externally
 
-        self.started = Event()  # self._start flag
-        self.stopped = Event()  # self._stop flag
-        self.exited = Event()  # signal to exit
-        DataStream._exit_events.append(self.exited)  # give streams ability to close each other
+        self._has_started = Event()  # self._start flag
+        self._has_stopped = Event()  # self._stop flag
 
         self.streams = {}  # other streams this one has access to. (Call the give method)
 
@@ -122,27 +120,7 @@ class DataStream:
         pass
 
     @staticmethod
-    def all_running():
-        """
-        Check if all exit events are False
-        :return: False when all streams have called self.exit
-          All streams have exited when:
-            - their run methods have completed
-            - when Robot catches an exception
-            - DataStream.exit_all() is called
-            - All streams have called self.exit themselves
-        """
-        return not all([result.is_set() for result in DataStream._exit_events])
-
-    @staticmethod
-    def any_stopped():
-        """
-        Check if any exit events are True
-        :return: False when any stream has called self.exit
-        """
-        return any([result.is_set() for result in DataStream._exit_events])
-
-    def running(self):
+    def running():
         """
         Check if stream is running. Use this in your while loops in your run methods:
         
@@ -150,7 +128,7 @@ class DataStream:
             ...
         :return:
         """
-        return not self.exited.is_set()
+        return not DataStream._exited.is_set()
 
     def time_started(self):
         """
@@ -169,13 +147,13 @@ class DataStream:
         Wrapper for starting the stream
         :return:
         """
-        if not self.started.is_set():  # only call _start once
+        if not self._has_started.is_set():  # only call _start once
             if not self.enabled:
                 self.logger.debug("stream not enabled")
                 return
 
             self.logger.debug("starting")
-            self.started.set()
+            self._has_started.set()
             self.start_time = self.time_started()
             self.start()
             self._init()
@@ -184,7 +162,18 @@ class DataStream:
         """
         Wrapper for running stream
         """
-        pass
+
+        try:
+            self.run()
+        except BaseException:
+            self.stop()  # in threads, stop is called inside the thread instead to avoid race conditions
+            self.logger.debug("catching exception in threaded loop")
+            self.exit()
+            raise
+
+        self.logger.debug("run finished")
+        self.stop()
+        self.exit()
 
     def run(self):
         """
@@ -204,8 +193,8 @@ class DataStream:
         """
         if not self.enabled:
             return
-        if not self.stopped.is_set():  # only call _stop once
-            self.stopped.set()
+        if not self._has_stopped.is_set():  # only call _stop once
+            self._has_stopped.set()
             self.logger.debug("stopping")
             self.stop()
             self.logger.debug("closed")
@@ -216,20 +205,18 @@ class DataStream:
         """
         pass
 
-    def exit(self):
+    def stopped(self):
         """
-        Signal for this stream to exit
+        Behavior after all streams have stopped
         """
-        self.logger.debug("exiting")
-        self.exited.set()
+        pass
 
     @staticmethod
-    def exit_all():
+    def exit():
         """
         Signal for all streams to exit
         """
-        for event in DataStream._exit_events:
-            event.set()
+        DataStream._exited.set()
 
     def __str__(self):
         return self.name
@@ -255,18 +242,8 @@ class ThreadedStream(DataStream):
         self.thread.daemon = True
         self.logger.debug("thread is now daemon")
 
-    def _run(self):
-        try:
-            self.run()
-        except BaseException:
-            self.stop()   # in threads, stop is called inside the thread instead to avoid race conditions
-            self.logger.debug("catching exception in threaded loop")
-            self.exit()
-            raise
-
-        self.logger.debug("run finished")
-        self.stop()
-        self.exit()
+    def join(self):
+        self.thread.join()
 
     def _init(self):
         """
@@ -290,8 +267,17 @@ class AsyncStream(DataStream):
         """
         Added async tag since this method will be asynchronous
         """
-        await self.run()
-        self.logger.debug("run finished, exiting")
+
+        try:
+            await self.run()
+        except BaseException:
+            self.stop()  # in threads, stop is called inside the thread instead to avoid race conditions
+            self.logger.debug("catching exception in threaded loop")
+            self.exit()
+            raise
+
+        self.logger.debug("run finished")
+        self.stop()
         self.exit()
 
     async def run(self):

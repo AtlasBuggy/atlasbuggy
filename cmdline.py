@@ -31,4 +31,4 @@ class CommandLine(AsyncStream):
 
     def handle_input(self, line):
         if line == 'q':
-            self.exit_all()
+            self.exit()

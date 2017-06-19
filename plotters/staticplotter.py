@@ -4,22 +4,23 @@ according to properties defined in RobotPlot.
 """
 
 from atlasbuggy.plotters.baseplotter import BasePlotter
-from atlasbuggy.plotters.plot import RobotPlot
+from atlasbuggy.plotters import RobotPlot, RobotPlotCollection
+from atlasbuggy.datastream import DataStream
 
-from atlasbuggy.plotters.collection import RobotPlotCollection
 
-
-class StaticPlotter(BasePlotter):
-    def __init__(self, num_columns, *robot_plots, enabled=True, draw_legend=True, legend_args=None,
-                 matplotlib_events=None):
+class StaticPlotter(BasePlotter, DataStream):
+    def __init__(self, num_columns, *robot_plots, enabled=True, name=None, log_level=None,
+                 draw_legend=True, legend_args=None, matplotlib_events=None):
         """
         :param num_columns: Configure how the subplots are arranged
         :param robot_plots: RobotPlot or RobotPlotCollection instances. Each one will be a subplot
         :param legend_args: dictionary of arguments to pass to plt.legend
         """
-        super(StaticPlotter, self).__init__(
-            num_columns, legend_args, draw_legend, matplotlib_events, enabled, False, False, *robot_plots
+        BasePlotter.__init__(
+            self, num_columns, legend_args, draw_legend, matplotlib_events, enabled, *robot_plots
         )
+
+        DataStream.__init__(self, enabled, name, log_level)
 
         if self.enabled:
             for plot in self.robot_plots:
@@ -89,9 +90,5 @@ class StaticPlotter(BasePlotter):
 
         self.plt.show()
 
-    def close(self):
-        self.plot_close()
+    def stopped(self):
         self.plot()
-
-    def plot_close(self):
-        pass

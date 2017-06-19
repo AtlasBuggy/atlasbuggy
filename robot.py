@@ -3,14 +3,12 @@ import time
 import logging
 import asyncio
 import lzma as xz
-from atlasbuggy.datastream import DataStream, AsyncStream
+from atlasbuggy.datastream import DataStream, AsyncStream, ThreadedStream
 
 
 class Robot:
-    def __init__(self, wait_for_all=True, setup_fn=None, loop_fn=None, close_fn=None, **log_options):
+    def __init__(self, setup_fn=None, loop_fn=None, close_fn=None, **log_options):
         self.streams = []
-
-        self.wait_for_all = wait_for_all
 
         self.loop_fn = loop_fn
         self.setup_fn = setup_fn
@@ -62,7 +60,7 @@ class Robot:
 
         try:
             if len(self.streams) > 0:
-                self.coroutine = self.get_coroutine()
+                self.coroutine, threads = self.get_loops()
 
                 for stream in self.streams:
                     stream._start()
@@ -73,13 +71,8 @@ class Robot:
                 self.loop.run_until_complete(self.coroutine)
                 self.loop_started = True
 
-                if self.wait_for_all:
-                    while DataStream.all_running():
-                        time.sleep(0.1)
-                else:
-
-                    while not DataStream.any_stopped():
-                        time.sleep(0.1)
+                for thread in threads:
+                    thread.join()
             else:
                 logging.warning("No streams to run!")
         except BaseException:
@@ -90,14 +83,15 @@ class Robot:
     def stop(self):
         if self.stop_fn is not None:
             self.stop_fn(self)
-        self.exit_all()
-        for stream in self.streams:
-            stream._stop()
+        self.exit()
 
         if self.loop_started:
             if self.coroutine is not None:
                 self.coroutine.cancel()
             self.loop.close()
+
+        for stream in self.streams:
+            stream.stopped()
 
         self.logger.debug("applying regex end character\n[")
         self.compress_log()
@@ -109,8 +103,9 @@ class Robot:
                 out.write(xz.compress(log.read().encode()))
             os.remove(full_path)
 
-    def get_coroutine(self):
+    def get_loops(self):
         tasks = []
+        threads = []
         for stream in self.streams:
             if not isinstance(stream, DataStream):
                 raise RuntimeError("Found an object that isn't a stream!", repr(stream))
@@ -120,6 +115,9 @@ class Robot:
                 tasks.append(task)
                 stream.task = task
 
+            elif isinstance(stream, ThreadedStream):
+                threads.append(stream)
+
         if self.loop_fn is not None:
             tasks.append(self.loop_fn(self))
 
@@ -127,8 +125,8 @@ class Robot:
         for stream in self.streams:
             stream.coroutine = coroutine
 
-        return coroutine
+        return coroutine, threads
 
     @staticmethod
-    def exit_all():
-        DataStream.exit_all()
+    def exit():
+        DataStream.exit()

@@ -17,7 +17,7 @@ class SocketClient(AsyncStream):
         self.logger.debug("Connection opened with %s:%s" % (self.host, self.port))
         try:
             self.write(self.name + "\n")
-            while self.all_running():
+            while self.running():
                 if self.timeout:
                     data = await self.reader.readline()
                 else:

@@ -208,4 +208,3 @@ class CvCamera(CameraStream):
             capture.release()
         self.recorder.stop_recording()
         CvCamera.captures = {}
-        cv2.destroyWindow(self.name)

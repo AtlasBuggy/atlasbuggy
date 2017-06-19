@@ -466,7 +466,7 @@ class SerialStream(AsyncStream):
     def serial_close(self):
         pass
 
-    def receive_log(self, message, line_info):
+    def receive_log(self, log_level, message, line_info):
         if not self.match_port_debug(message):
             self.match_log(message, line_info)
 
@@ -505,7 +505,7 @@ class SerialStream(AsyncStream):
                     self.deliver(whoiam)
                     self.received(whoiam)
 
-            self.received_log(self.timestamp, whoiam, packet, packet_type)
+            self.received_log_message(self.timestamp, whoiam, packet, packet_type)
 
-    def received_log(self, timestamp, whoiam, packet, packet_type):
+    def received_log_message(self, timestamp, whoiam, packet, packet_type):
         pass

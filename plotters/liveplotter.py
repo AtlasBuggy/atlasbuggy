@@ -18,7 +18,7 @@ class LivePlotter(BasePlotter, AsyncStream):
 
     def __init__(self, num_columns, *robot_plots, enabled=True, name=None, log_level=None, draw_legend=True,
                  legend_args=None, lag_cap=0.005, skip_count=0, matplotlib_events=None, active_window_resizing=True,
-                 default_resize_behavior=True, exit_all=False):
+                 default_resize_behavior=True, close_when_finished=False):
         """
         Only one LivePlotter instance can run at one time. Multiple interactive matplotlib
         windows don't behave well. This also conserves CPU usage.
@@ -46,9 +46,9 @@ class LivePlotter(BasePlotter, AsyncStream):
         self.skip_counter = 0
         self.is_closed = False
         self.is_paused = False
-        self.should_exit_all = exit_all
         self.active_window_resizing = active_window_resizing
         self.default_resize_behavior = default_resize_behavior
+        self.close_when_finished = close_when_finished
 
         if self.enabled:
             # create a plot line for each RobotPlot or RobotPlotCollection.
@@ -96,7 +96,7 @@ class LivePlotter(BasePlotter, AsyncStream):
         :return: True or False if the plotting operation was successful
         """
 
-        while self.all_running():
+        while self.running():
             if self.is_closed:
                 self.exit()
                 return
@@ -181,7 +181,10 @@ class LivePlotter(BasePlotter, AsyncStream):
             self.is_closed = True
             self.plt.ioff()
             self.plt.gcf()
-            self.plt.close('all')
+            self.exit()
 
-            if self.should_exit_all:
-                self.exit_all()
+    def stopped(self):
+        if self.close_when_finished:
+            self.plt.close('all')
+        else:
+            self.plot()
