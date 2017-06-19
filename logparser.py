@@ -11,8 +11,8 @@ class LogParser(AsyncStream):
     def __init__(self, file_name, directory="", enabled=True, name=None, log_level=None, fps=None):
         # regex string code. Logs follow a certain format. Parse out these pieces of info.
         self.pattern = re.compile(
-            r"\[(?P<name>[a-zA-Z0-9]*) @ "
-            r"(?P<filename>.*.py):"
+            r"(?P<name>[a-zA-Z0-9]*) @ "
+            r"(?P<filename>.*\.py):"
             r"(?P<linenumber>[0-9]*)\]\["
             r"(?P<loglevel>[A-Z]*)\] "
             r"(?P<year>[0-9]*)-"
@@ -22,10 +22,7 @@ class LogParser(AsyncStream):
             r"(?P<minute>[0-9]*):"
             r"(?P<second>[0-9]*),"
             r"(?P<millisecond>[0-9]*): "
-            r"(?P<message>.*)"
-        )
-        self.error_pattern = re.compile(
-            r"Traceback (most recent call last):"
+            r"(?P<message>([.\S\s]+?(\n\[)))"
         )
 
         super(LogParser, self).__init__(enabled, name, log_level)
@@ -78,7 +75,10 @@ class LogParser(AsyncStream):
                 # if line_info["year"] is of type int, convert the match to an int and assign the value to line_info
                 self.line_info[line_key] = type(self.line_info[line_key])(line_value)
 
-            self.line = match.group()
+            line = match.group()
+            self.line = (line[-1] + line[:-1]).strip("\n")
+            self.line_info["message"] = self.line_info["message"][:-1].strip("\n")
+
             # make timestamp from unix epoch
             self.line_info["timestamp"] = time.mktime(datetime.datetime(
                 self.line_info["year"],
@@ -92,7 +92,7 @@ class LogParser(AsyncStream):
             # notify stream if its name is found in the log
             if self.line_info["name"] in stream_names:
                 stream = stream_names[self.line_info["name"]]
-                stream.receive_log(self.line_info["message"], self.line_info)
+                stream.receive_log(self.line_info["loglevel"], self.line_info["message"], self.line_info)
 
             await self.update()
 
@@ -104,22 +104,36 @@ if __name__ == "__main__":
     import sys
     from atlasbuggy.robot import Robot
 
+
     class DemoParser(LogParser):
-        def __init__(self):
-            super(DemoParser, self).__init__(os.path.basename(sys.argv[1]),
-                                             os.path.dirname(sys.argv[1]))
+        def __init__(self, file_name, directory):
+            super(DemoParser, self).__init__(file_name, directory)
 
         async def update(self):
             print("\t'%s'" % self.line)
+            # print(self.line_info)
             await asyncio.sleep(self.delay)
 
-    def parse_file():
 
+    def parse_file(file_name, directory):
         if len(sys.argv) > 1:
             robot = Robot(wait_for_all=True, log_level=10)
-            parser = DemoParser()
+            parser = DemoParser(file_name, directory)
             robot.run(parser)
         else:
             raise RuntimeError("Please input the file path you want to display")
 
-    parse_file()
+
+    def compress_file(file_name, directory):
+        full_path = os.path.join(directory, file_name)
+        with open(full_path, "r") as log, open(full_path + ".xz", "wb") as out:
+            out.write(xz.compress(log.read().encode()))
+
+
+    _input_file_name = os.path.basename(sys.argv[1])
+    _input_dir_name = os.path.dirname(sys.argv[1])
+
+    if _input_file_name.endswith(".log"):
+        compress_file(_input_file_name, _input_dir_name)
+    else:
+        parse_file(_input_file_name, _input_dir_name)

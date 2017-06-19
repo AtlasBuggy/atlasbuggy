@@ -259,31 +259,20 @@ class ThreadedStream(DataStream):
         try:
             self.run()
         except BaseException:
-            self.threaded_stop()
+            self.stop()   # in threads, stop is called inside the thread instead to avoid race conditions
             self.logger.debug("catching exception in threaded loop")
             self.exit()
             raise
 
         self.logger.debug("run finished")
-        self.threaded_stop()
+        self.stop()
         self.exit()
-
-    def threaded_stop(self):
-        """
-        Specialized method. If you want a close method that is called within the method,
-        use this method instead of self.stop
-        :return: 
-        """
-        pass
 
     def _init(self):
         """
         Start the thread
         """
         self.thread.start()
-
-    def __repr__(self):
-        return "<%s, enabled=%s, threaded>" % (self.__class__.__name__, self.enabled)
 
 
 class AsyncStream(DataStream):
@@ -310,6 +299,3 @@ class AsyncStream(DataStream):
         Added async tag since this method will be asynchronous
         """
         pass
-
-    def __repr__(self):
-        return "<%s, enabled=%s, asynchronous>" % (self.__class__.__name__, self.enabled)

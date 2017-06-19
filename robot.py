@@ -28,6 +28,7 @@ class Robot:
         )
         self.log_info.update(log_options)
         self.init_logger()
+        self.logger = logging.getLogger(self.__class__.__name__)
 
         DataStream._log_info = self.log_info
 
@@ -98,6 +99,7 @@ class Robot:
                 self.coroutine.cancel()
             self.loop.close()
 
+        self.logger.debug("applying regex end character\n[")
         self.compress_log()
 
     def compress_log(self):
