@@ -63,7 +63,7 @@ class SocketServer(AsyncStream):
         self.logger.debug("Starting server on %s:%s" % (self.host, self.port))
         await asyncio.start_server(self.accept_client, host=self.host, port=self.port)
         while self.running():
-            await asyncio.sleep(0.5)
+            self.update()
 
     def accept_client(self, client_reader, client_writer):
         task = asyncio.Task(self.handle_client(client_reader, client_writer, len(self.clients)))
@@ -103,12 +103,15 @@ class SocketServer(AsyncStream):
             # response = ("ECHO: %s\n" % (sdata))
             # client_writer.write(response.encode())
 
-    def write(self, arg, line):
+    def write(self, client, line):
         line += "\n"
-        if type(arg) == str:  # arg is remote name
-            self.client_writers[arg].write(line.encode())
+        if type(client) == str:  # arg is remote name
+            self.client_writers[client].write(line.encode())
         else:  # arg is writer
-            arg.write(line.encode())
+            client.write(line.encode())
 
     def received(self, writer, data):
         pass
+
+    async def update(self):
+        await asyncio.sleep(0.5)

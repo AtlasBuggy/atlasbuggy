@@ -7,7 +7,7 @@ from atlasbuggy.datastream import DataStream, AsyncStream, ThreadedStream
 
 
 class Robot:
-    def __init__(self, setup_fn=None, loop_fn=None, close_fn=None, **log_options):
+    def __init__(self, setup_fn=None, loop_fn=None, close_fn=None, event_loop=None, **log_options):
         self.streams = []
 
         self.loop_fn = loop_fn
@@ -30,7 +30,10 @@ class Robot:
 
         DataStream._log_info = self.log_info
 
-        self.loop = asyncio.get_event_loop()
+        if event_loop is None:
+            self.loop = asyncio.get_event_loop()
+        else:
+            self.loop = event_loop
         self.coroutine = None
 
     def init_logger(self):
