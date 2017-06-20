@@ -15,24 +15,22 @@ class SocketClient(AsyncStream):
     async def run(self):
         self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
         self.logger.debug("Connection opened with %s:%s" % (self.host, self.port))
-        try:
-            self.write(self.name + "\n")
-            while self.running():
-                if self.timeout:
-                    data = await self.reader.readline()
-                else:
-                    data = await asyncio.wait_for(self.reader.readline(), timeout=self.timeout)
 
-                self.received(data)
+        self.write(self.name + "\n")
+        while self.running():
+            if self.timeout:
+                data = await self.reader.readline()
+            else:
+                data = await asyncio.wait_for(self.reader.readline(), timeout=self.timeout)
 
-                if data is None or len(data) == 0:
-                    self.logger.warning("socket received nothing")
-                    self.exit()
-                    return
-        finally:
-            # self.debug_print("Disconnecting from %s %d", self.host, self.port)
-            # self.writer.close()
-            self.logger.debug("Disconnected from %s %d" % (self.host, self.port))
+            self.received(data)
+
+            if data is None or len(data) == 0:
+                self.logger.warning("socket received nothing")
+                return
+        # self.debug_print("Disconnecting from %s %d", self.host, self.port)
+        # self.writer.close()
+        self.logger.debug("Disconnected from %s %d" % (self.host, self.port))
 
     def write(self, data):
         if self.writer is None:
@@ -55,8 +53,6 @@ class SocketServer(AsyncStream):
         self.port = port
         self.timeout = timeout
 
-        self.clients = []
-        self.client_tasks = {}
         self.client_writers = {}
 
     async def run(self):
@@ -67,11 +63,9 @@ class SocketServer(AsyncStream):
 
     def accept_client(self, client_reader, client_writer):
         task = asyncio.Task(self.handle_client(client_reader, client_writer, len(self.clients)))
-        self.clients.append((client_reader, client_writer))
-        self.client_tasks[task] = client_writer
 
         def client_done(end_task):
-            del self.client_tasks[end_task]
+            print(end_task)
             client_writer.close()
             self.logger.debug("ending connection")
 
@@ -81,6 +75,9 @@ class SocketServer(AsyncStream):
         self.logger.debug("getting remote name...")
         client_name = await asyncio.wait_for(client_reader.readline(), timeout=10.0)
         client_name = client_name.decode().rstrip()
+        if client_name in self.client_writers:
+            self.logger.error("Client named %s already connected! Ignoring." % client_name)
+            return client_name
 
         self.client_writers[client_name] = client_writer
         self.logger.debug("'%s' has connected" % client_name)
@@ -93,15 +90,10 @@ class SocketServer(AsyncStream):
 
             if data is None or len(data) == 0:
                 self.logger.debug("Received no data")
-                # exit echo loop and disconnect
-                # self.exit()
-                return
+                return client_name
 
             sdata = data.decode().rstrip()
-            self.received(client_writer, sdata)
-
-            # response = ("ECHO: %s\n" % (sdata))
-            # client_writer.write(response.encode())
+            self.received(client_writer, client_name, sdata)
 
     def write(self, client, line, append_newline=True):
         if type(line) == str:
@@ -118,7 +110,7 @@ class SocketServer(AsyncStream):
         else:  # arg is writer
             client.write(line)
 
-    def received(self, writer, data):
+    def received(self, writer, name, data):
         pass
 
     async def update(self):
