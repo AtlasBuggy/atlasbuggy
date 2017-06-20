@@ -4,7 +4,8 @@ according to properties defined in RobotPlot.
 """
 
 from atlasbuggy.plotters.baseplotter import BasePlotter
-from atlasbuggy.plotters import RobotPlot, RobotPlotCollection
+from atlasbuggy.plotters.plot import RobotPlot
+from atlasbuggy.plotters.collection import RobotPlotCollection
 from atlasbuggy.datastream import DataStream
 
 

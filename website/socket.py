@@ -63,7 +63,7 @@ class SocketServer(AsyncStream):
         self.logger.debug("Starting server on %s:%s" % (self.host, self.port))
         await asyncio.start_server(self.accept_client, host=self.host, port=self.port)
         while self.running():
-            self.update()
+            await self.update()
 
     def accept_client(self, client_reader, client_writer):
         task = asyncio.Task(self.handle_client(client_reader, client_writer, len(self.clients)))
@@ -72,7 +72,7 @@ class SocketServer(AsyncStream):
 
         def client_done(end_task):
             del self.client_tasks[end_task]
-            client_writer.stop()
+            client_writer.close()
             self.logger.debug("ending connection")
 
         task.add_done_callback(client_done)
@@ -103,12 +103,20 @@ class SocketServer(AsyncStream):
             # response = ("ECHO: %s\n" % (sdata))
             # client_writer.write(response.encode())
 
-    def write(self, client, line):
-        line += "\n"
+    def write(self, client, line, append_newline=True):
+        if type(line) == str:
+            if append_newline:
+                line += "\n"
+            line = line.encode()
+        elif type(line) == bytes:
+            if append_newline:
+                line += b'\n'
+        else:
+            raise ValueError("line must be bytes or str:" % line)
         if type(client) == str:  # arg is remote name
-            self.client_writers[client].write(line.encode())
+            self.client_writers[client].write(line)
         else:  # arg is writer
-            client.write(line.encode())
+            client.write(line)
 
     def received(self, writer, data):
         pass

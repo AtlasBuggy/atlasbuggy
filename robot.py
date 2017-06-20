@@ -14,8 +14,15 @@ class Robot:
         self.setup_fn = setup_fn
         self.stop_fn = close_fn
 
-        self.loop_started = False
+        self.coroutines_started = False
 
+        if event_loop is None:
+            self.loop = asyncio.get_event_loop()
+        else:
+            self.loop = event_loop
+        self.coroutine = None
+
+        self.logger = logging.getLogger(self.__class__.__name__)
         self.log_info = dict(
             file_name=None,
             directory=None,
@@ -26,15 +33,12 @@ class Robot:
         )
         self.log_info.update(log_options)
         self.init_logger()
-        self.logger = logging.getLogger(self.__class__.__name__)
-
         DataStream._log_info = self.log_info
 
-        if event_loop is None:
-            self.loop = asyncio.get_event_loop()
-        else:
-            self.loop = event_loop
-        self.coroutine = None
+        self.logger.debug(
+            "logger initialized: file_name: %(file_name)s, directory: %(directory)s, "
+            "write: %(write)s, log_level: %(log_level)s" % self.log_info
+        )
 
     def init_logger(self):
         if self.log_info["file_name"] is None:
@@ -56,26 +60,47 @@ class Robot:
             formatter = logging.Formatter(self.log_info["format"])
             self.log_info["file_handle"].setFormatter(formatter)
 
+        self.logger.setLevel(logging.DEBUG)
+        
+        print_handle = logging.StreamHandler()
+        print_handle.setLevel(self.log_info["log_level"])
+
+        formatter = logging.Formatter(self.log_info["format"])
+        print_handle.setFormatter(formatter)
+        self.logger.addHandler(print_handle)
+
+        if self.log_info["write"]:
+            self.logger.addHandler(DataStream._log_info["file_handle"])
+
     def run(self, *streams):
         for stream in streams:
             if stream.enabled:
                 self.streams.append(stream)
 
+        self.logger.debug("Active streams: %s" % str(self.streams))
+
         try:
             if len(self.streams) > 0:
-                self.coroutine, threads = self.get_loops()
+                self.coroutine, thread_streams = self.get_loops()
 
+                self.logger.debug("Starting streams, threads have started")
                 for stream in self.streams:
                     stream._start()
 
+                self.logger.debug("Calling setup_fn")
                 if self.setup_fn is not None:
                     self.setup_fn(self)
 
+                self.logger.debug("Starting coroutine")
                 self.loop.run_until_complete(self.coroutine)
-                self.loop_started = True
+                self.coroutines_started = True
+                self.logger.debug("Coroutines complete")
 
-                for thread in threads:
-                    thread.join()
+                for thread_stream in thread_streams:
+                    self.logger.debug("Joining thread stream: %s" % thread_stream)
+                    thread_stream.join()
+
+                self.logger.debug("Robot has finished")
             else:
                 logging.warning("No streams to run!")
         except BaseException:
@@ -84,15 +109,21 @@ class Robot:
         self.stop()
 
     def stop(self):
+        self.logger.debug("Calling stop")
         if self.stop_fn is not None:
             self.stop_fn(self)
+
+        self.logger.debug("Exit event set")
         self.exit()
 
-        if self.loop_started:
+        self.logger.debug("Canceling coroutines")
+        if self.coroutines_started:
             if self.coroutine is not None:
                 self.coroutine.cancel()
             self.loop.close()
+        self.logger.debug("Coroutines canceled")
 
+        self.logger.debug("Calling post stop methods")
         for stream in self.streams:
             stream.stopped()
 

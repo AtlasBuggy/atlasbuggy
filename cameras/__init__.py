@@ -25,6 +25,7 @@ class CameraStream(ThreadedStream):
 
         self.paused = False
         self.recorder = None
+        self.frame_updated = False
 
         super(CameraStream, self).__init__(enabled, name, log_level)
 

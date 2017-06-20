@@ -84,29 +84,29 @@ class DataStream:
         """
         If LogParser is given to Robot and this stream is given to LogParser, it will give any matching log messages it
         finds in a log file. This includes error messages
-        
-        :param log_level: type of log message 
-        :param message: string found in the log file 
+
+        :param log_level: type of log message
+        :param message: string found in the log file
         :param line_info: a dictionary of information discovered. Keys in the dictionary:
             timestamp, year, month, day, hour, minute, second, millisecond,
             name - name of the stream that produced the message,
-            message, linenumber, filename, loglevel  
-        :return: 
+            message, linenumber, filename, loglevel
+        :return:
         """
         pass
 
     def take(self):
         """
         Callback for give
-        
+
         Usage:
         new_stream = SomeStream()
         other_stream = OtherStream()
-        
+
         new_stream.give(identifying_string=other_stream)  # new_stream's take is called
-        
+
         Example (overwrite this method and put this code in):
-        
+
         self.other_stream = self.streams["identifying_string"]
         :return:
         """
@@ -123,7 +123,7 @@ class DataStream:
     def running():
         """
         Check if stream is running. Use this in your while loops in your run methods:
-        
+
         while self.running():
             ...
         :return:
@@ -243,7 +243,8 @@ class ThreadedStream(DataStream):
         self.logger.debug("thread is now daemon")
 
     def join(self):
-        self.thread.join()
+        if not self.thread.daemon:
+            self.thread.join()
 
     def _init(self):
         """

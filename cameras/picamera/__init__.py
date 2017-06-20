@@ -39,6 +39,7 @@ class PiCamera(CameraStream):
                     raw_capture.truncate(0)
                     self.num_frames += 1
                     # self.recorder.record(self.frame)
+                    self.frame_updated = True
 
                 self.poll_for_fps()
                 self.log_frame()
@@ -51,8 +52,10 @@ class PiCamera(CameraStream):
                     return
 
     def get_bytes_frame(self):
-        with self.frame_lock:
-            self.bytes_frame = self.numpy_to_bytes(self.frame)
+        if self.frame_updated:
+            with self.frame_lock:
+                self.bytes_frame = self.numpy_to_bytes(self.frame)
+                self.frame_updated = False
         return self.bytes_frame
 
     def stop(self):
