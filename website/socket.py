@@ -43,6 +43,7 @@ class SocketClient(AsyncStream):
 
     def write_eof(self):
         self.writer.write_eof()
+        self.exit()
 
     def received(self, data):
         pass
