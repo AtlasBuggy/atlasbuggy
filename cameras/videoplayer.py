@@ -21,6 +21,8 @@ class VideoPlayer(CameraStream):
         self.directory = directory
 
         self.full_path = os.path.join(self.directory, self.file_name)
+        if not os.path.isfile(self.full_path):
+            raise FileNotFoundError("Video File '%s' not found" % self.full_path)
 
         super(VideoPlayer, self).__init__(enabled, file_name, log_level)
 
@@ -122,6 +124,7 @@ class VideoPlayer(CameraStream):
                 self.frame = cv2.resize(
                     self.frame, (self.resize_width, self.resize_height), interpolation=cv2.INTER_NEAREST
                 )
+            self.frame_updated = True
 
     def run(self):
         while self.running():

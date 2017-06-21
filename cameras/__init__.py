@@ -40,8 +40,11 @@ class CameraStream(ThreadedStream):
             return self.frame
 
     def get_bytes_frame(self):
-        with self.frame_lock:
-            return self.bytes_frame
+        if self.frame_updated:
+            with self.frame_lock:
+                self.bytes_frame = self.numpy_to_bytes(self.frame)
+                self.frame_updated = False
+        return self.bytes_frame
 
     def poll_for_fps(self):
         if self.prev_t is None:

@@ -18,23 +18,23 @@ class SocketClient(AsyncStream):
 
         self.write(self.name + "\n")
         while self.running():
-            if self.timeout is not None:
-                data = await asyncio.wait_for(self.read(), timeout=self.timeout) #self.read_without_timeout()
-            else:
-                data = await self.read()  # self.read_with_timeout()
-
-            self.received(data)
-
-            if data is None or len(data) == 0:
-                self.logger.warning("socket received nothing")
-                return
-
-            self.update()
+            await self.update()
 
         self.logger.debug("Disconnected from %s %d" % (self.host, self.port))
 
-    def read(self):
-        return self.reader.readline()
+    async def read(self, n=-1):
+        if self.timeout is not None:
+            data = await asyncio.wait_for(self.reader.read(n), timeout=self.timeout)
+        else:
+            data = await self.reader.read(n)
+
+        if data is None or len(data) == 0:
+            self.logger.warning("socket received nothing")
+            self.exit()
+        return data
+
+    async def update(self):
+        self.read()
 
     def write(self, data):
         if self.writer is None:
@@ -45,9 +45,6 @@ class SocketClient(AsyncStream):
     def write_eof(self):
         self.writer.write_eof()
         self.exit()
-
-    def received(self, data):
-        pass
 
 
 class SocketServer(AsyncStream):
@@ -65,8 +62,10 @@ class SocketServer(AsyncStream):
         await asyncio.start_server(self.accept_client, host=self.host, port=self.port)
         while self.running():
             await self.update()
+        self.logger.debug("socket server exiting")
 
     def accept_client(self, client_reader, client_writer):
+        self.logger.debug("Receiving client: %s, %s" % (client_reader, client_writer))
         task = asyncio.Task(self.handle_client(client_reader, client_writer))
 
         def client_done(end_task):
@@ -88,18 +87,22 @@ class SocketServer(AsyncStream):
         self.client_writers[client_name] = client_writer
         self.logger.debug("'%s' has connected" % client_name)
 
-        while True:
-            if self.timeout is None:
-                data = await client_reader.readline()
-            else:
-                data = await asyncio.wait_for(client_reader.readline(), timeout=self.timeout)
+        try:
+            while True:
+                if self.timeout is None:
+                    data = await client_reader.readline()
+                else:
+                    data = await asyncio.wait_for(client_reader.readline(), timeout=self.timeout)
 
-            if data is None or len(data) == 0:
-                self.logger.debug("Received no data")
-                return client_name
+                if data is None or len(data) == 0:
+                    self.logger.debug("Received no data")
+                    return client_name
 
-            sdata = data.decode().rstrip()
-            self.received(client_writer, client_name, sdata)
+                sdata = data.decode().rstrip()
+                self.received(client_writer, client_name, sdata)
+        except ConnectionResetError as error:
+            self.logger.exception(error)
+            return client_name
 
     def write(self, client, line, append_newline=True):
         if type(line) == str:
@@ -110,11 +113,16 @@ class SocketServer(AsyncStream):
             if append_newline:
                 line += b'\n'
         else:
-            raise ValueError("line must be bytes or str:" % line)
-        if type(client) == str:  # arg is remote name
-            self.client_writers[client].write(line)
-        else:  # arg is writer
-            client.write(line)
+            raise ValueError("line must be bytes or str: %s" % line)
+
+        if type(client) == str:  # arg is remote name, otherwise arg is writer
+            client = self.client_writers[client]
+
+        client.write(line)
+
+    def write_all(self, line, append_newline=True):
+        for client in self.client_writers.values():
+            self.write(client, line, append_newline)
 
     def received(self, writer, name, data):
         pass

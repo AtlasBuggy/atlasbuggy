@@ -20,7 +20,7 @@ class CameraViewerWithTrackbar(CameraViewer):
         self.take_video_player()
 
     def take_video_player(self):
-        self.video_player = self.streams["video"]
+        self.video_player = self.streams["video_player"]
 
         self.num_frames = self.video_player.num_frames
         self.slider_ticks = int(self.video_player.capture.get(cv2.CAP_PROP_FRAME_WIDTH) // 3)

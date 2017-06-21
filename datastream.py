@@ -272,8 +272,8 @@ class AsyncStream(DataStream):
         try:
             await self.run()
         except BaseException:
-            self.stop()  # in threads, stop is called inside the thread instead to avoid race conditions
-            self.logger.debug("catching exception in threaded loop")
+            self.stop()
+            self.logger.debug("catching exception in async loop")
             self.exit()
             raise
 
