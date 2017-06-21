@@ -1,6 +1,9 @@
 import os
 import cv2
 import time
+import asyncio
+from threading import Lock
+# from atlasbuggy.datastream import AsyncStream
 from atlasbuggy.cameras import CameraStream
 from atlasbuggy.serial.clock import Clock
 
@@ -22,8 +25,13 @@ class VideoPlayer(CameraStream):
         super(VideoPlayer, self).__init__(enabled, file_name, log_level)
 
         self.capture = cv2.VideoCapture(self.full_path)
+        self.frame_lock = Lock()
+        self.paused = False
+        self.frame = None
 
         self.fps = self.capture.get(cv2.CAP_PROP_FPS)
+        self.delay = 1 / self.fps
+        self.clock = Clock(self.fps)
         self.num_frames = int(self.capture.get(cv2.CAP_PROP_FRAME_COUNT))
         if self.num_frames <= 0:
             raise FileNotFoundError("Video failed to load... No frames found!")
@@ -33,8 +41,6 @@ class VideoPlayer(CameraStream):
         self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
         self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
         self.resize_frame = False
-
-        self.camera_viewer = None
 
         if width is None:
             self.resize_width = self.width
@@ -51,46 +57,57 @@ class VideoPlayer(CameraStream):
         self.current_frame = 0
         self.next_frame = 1
 
+        self.next_frame_lock = Lock()
+
         self.frame_skip = frame_skip
         self.loop_video = loop_video
 
         if start_frame > 0:
             self.set_frame(start_frame)
 
-        self.clock = Clock(self.fps)
-
-    def start(self):
-        self.clock.start()
-
-    def link_viewer(self, viewer):
-        self.camera_viewer = viewer
-
     def current_pos(self):
-        return int(self.capture.get(cv2.CAP_PROP_POS_FRAMES))
+        # return self.current_frame
+        with self.frame_lock:
+            return int(self.capture.get(cv2.CAP_PROP_POS_FRAMES))
 
     def current_time(self):
         return self.current_pos() * self.length_sec / self.num_frames
 
     def set_frame(self, position):
-        self.next_frame = position
+        with self.frame_lock:
+            self.next_frame = position
+            self.frame = None
+
+    def get_frame(self):
+        with self.frame_lock:
+            return self.frame
+        #     if self.frame is not None:
+        #         frame = self.frame.copy()
+        #     else:
+        #         frame = None
+        #
+        # return frame
 
     def _set_frame(self, position):
-        if position >= self.num_frames:
-            position = self.num_frames
         if position >= 0:
+            if position >= self.num_frames:
+                position = self.num_frames
+
             self.capture.set(cv2.CAP_PROP_POS_FRAMES, int(position))
 
     def _get_frame(self):
+        if self.paused:
+            return
         if self.frame_skip > 0:
             self._set_frame(self.current_pos() + self.frame_skip)
 
-        if self.next_frame - self.current_frame != 1:
-            self._set_frame(self.next_frame)
-
-        self.current_frame = self.next_frame
-        self.next_frame += 1
-
         with self.frame_lock:
+            if self.next_frame - self.current_frame != 1:
+                self._set_frame(self.next_frame)
+
+            self.current_frame = self.next_frame
+            self.next_frame += 1
+
             success, self.frame = self.capture.read()
 
             if not success or self.frame is None:
@@ -106,12 +123,9 @@ class VideoPlayer(CameraStream):
                     self.frame, (self.resize_width, self.resize_height), interpolation=cv2.INTER_NEAREST
                 )
 
-        if self.camera_viewer is not None and self.camera_viewer.enable_slider and self.camera_viewer.enabled:
-            slider_pos = int(self.current_frame * self.camera_viewer.slider_ticks / self.num_frames)
-            cv2.setTrackbarPos(self.camera_viewer.slider_name, self.name, slider_pos)
-
     def run(self):
         while self.running():
             self._get_frame()
             self.update()
+            # await asyncio.sleep(self.delay)
             self.clock.update()

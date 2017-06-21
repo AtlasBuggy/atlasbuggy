@@ -143,8 +143,20 @@ class BasePlotter:
             self.update_legend()
 
     def update_legend(self):
+        # draw_legend = True
+        # if len(self.robot_plots) == 0:
+        #     draw_legend = False
+        # else:
+        #     for plot in self.robot_plots:
+        #         if isinstance(plot, RobotPlotCollection):
+        #             if len(plot.plots) == 0:
+        #                 draw_legend = False
+        # if draw_legend:
+
+        # tried to make legend warning go away. Not calling this at all causes weird things to happen
         if len(self.robot_plots) > 0:
             self.axes[list(self.axes.keys())[0]].legend(**self.legend_args)
+
 
     def _get_name(self, arg):
         """

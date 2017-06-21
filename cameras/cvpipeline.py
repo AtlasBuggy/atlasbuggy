@@ -10,7 +10,6 @@ class CvPipeline(ThreadedStream):
 
         self.frame = None
         self.bytes_frame = None
-        self.frame_lock = Lock()
 
         self.generate_bytes = generate_bytes
         self.output_queue = Queue()

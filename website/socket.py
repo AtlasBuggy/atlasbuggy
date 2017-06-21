@@ -3,7 +3,7 @@ from atlasbuggy.datastream import AsyncStream
 
 
 class SocketClient(AsyncStream):
-    def __init__(self, name, host, port=5001, enabled=True, log_level=None, timeout=None):
+    def __init__(self, name, host, port=5001, enabled=True, log_level=None, timeout=10):
         super(SocketClient, self).__init__(enabled, name, log_level)
         self.host = host
         self.port = port
@@ -19,21 +19,22 @@ class SocketClient(AsyncStream):
         self.write(self.name + "\n")
         while self.running():
             if self.timeout is not None:
-                data = await asyncio.wait_for(self.read(), timeout=self.timeout)
+                data = await asyncio.wait_for(self.read(), timeout=self.timeout) #self.read_without_timeout()
             else:
-                data = await self.read()
+                data = await self.read()  # self.read_with_timeout()
 
             self.received(data)
 
             if data is None or len(data) == 0:
                 self.logger.warning("socket received nothing")
                 return
-        # self.debug_print("Disconnecting from %s %d", self.host, self.port)
-        # self.writer.close()
+
+            self.update()
+
         self.logger.debug("Disconnected from %s %d" % (self.host, self.port))
 
-    async def read(self):
-        await self.reader.readline()
+    def read(self):
+        return self.reader.readline()
 
     def write(self, data):
         if self.writer is None:
