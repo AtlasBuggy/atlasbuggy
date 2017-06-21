@@ -1,6 +1,6 @@
 import cv2
-import time
-from atlasbuggy.cameras.cameraviewer import CameraViewer
+
+from atlasbuggy.cameras.viewer.__init__ import CameraViewer
 
 
 class CameraViewerWithTrackbar(CameraViewer):

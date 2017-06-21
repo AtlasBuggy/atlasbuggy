@@ -11,7 +11,7 @@ class PygameStream(AsyncStream):
     pygame_exit_event = Event()
 
     def __init__(self, enabled, log_level=None, width=None, height=None, fps=None, name=None, display_flags=0, display_depth=0):
-        super(PygameStream, self).__init__(enabled, log_level, name)
+        super(PygameStream, self).__init__(enabled, name, log_level)
 
         self.fps = fps
         self.width = width
@@ -24,9 +24,8 @@ class PygameStream(AsyncStream):
         self.display_size = (width, height)
 
         if self.width is None or self.height is None or self.fps is None:
-            platform = get_platform()
-            if platform != "mac":
-                os.environ["SDL_VIDEODRIVER"] = "dummy"
+            # turn off the pygame display. Required if using opencv with QT
+            os.environ["SDL_VIDEODRIVER"] = "dummy"
             self.display = "dummy"
         else:
             self.display = pygame.display.set_mode(self.display_size, display_flags, display_depth)

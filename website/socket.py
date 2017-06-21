@@ -13,7 +13,8 @@ class SocketClient(AsyncStream):
         self.writer = None
 
     async def run(self):
-        self.reader, self.writer = await asyncio.open_connection(self.host, self.port)
+        self.logger.debug("Awaiting connection")
+        self.reader, self.writer = await asyncio.open_connection(self.host, self.port, loop=self.asyncio_loop)
         self.logger.debug("Connection opened with %s:%s" % (self.host, self.port))
 
         self.write(self.name + "\n")
@@ -34,7 +35,7 @@ class SocketClient(AsyncStream):
         return data
 
     async def update(self):
-        self.read()
+        await self.read()
 
     def write(self, data):
         if self.writer is None:

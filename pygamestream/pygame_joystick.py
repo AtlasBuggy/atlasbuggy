@@ -56,6 +56,7 @@ class BuggyJoystick(PygameStream):
         # search for all available joysticks and initialize them
         joysticks = [pygame.joystick.Joystick(x) for x in
                      range(pygame.joystick.get_count())]
+        self.logger.debug("Joysticks found: %s" % joysticks)
         if len(joysticks) == 0:
             raise JoysticksNotFoundError("No joysticks found!")
 
@@ -63,6 +64,8 @@ class BuggyJoystick(PygameStream):
             joy.init()
             # print(joy.get_name(), joy.get_id(), joy.get_init(),
             #       joy.get_numaxes())
+
+        self.logger.debug("All joysticks initialized")
 
     @staticmethod
     def create_mapping(list_mapping):
@@ -90,6 +93,7 @@ class BuggyJoystick(PygameStream):
 
         :return: False if pygame signals the QUIT event
         """
+        self.logger.debug("Waiting 1 second...")
         await asyncio.sleep(1)
 
         while True:

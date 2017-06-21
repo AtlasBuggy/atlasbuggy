@@ -38,8 +38,6 @@ class CameraViewer(AsyncStream):
         self.key_codes.update(new_key_codes)
 
     async def run(self):
-        if not self.enabled:
-            return
         while self.running():
             self.show_frame()
             self.update()

@@ -19,6 +19,9 @@ class DataStream:
             log_level = logging.INFO
 
         self.name = name
+        if type(self.name) != str:
+            raise ValueError("Name isn't a string: %s" % self.name)
+
         self.enabled = enabled
 
         self.timestamp = None  # current time since epoch
@@ -222,7 +225,7 @@ class DataStream:
         return self.name
 
     def __repr__(self):
-        return "<%s, enabled=%s>" % (self.__class__.__name__, self.enabled)
+        return "%s()" % self.__class__.__name__
 
 
 class ThreadedStream(DataStream):
