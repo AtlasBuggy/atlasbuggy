@@ -28,7 +28,7 @@ class Robot:
             directory=None,
             write=False,
             log_level=logging.CRITICAL,
-            format="[%(name)s @ %(filename)s:%(lineno)d][%(levelname)s] %(asctime)s: %(message)s",
+            format="[%(name)s, v%(version)s @ %(filename)s:%(lineno)d][%(levelname)s] %(asctime)s: %(message)s",
             file_handle=None
         )
         self.log_info.update(log_options)

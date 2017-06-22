@@ -8,7 +8,7 @@ class DataStream:
     _exited = Event()  # signal to exit
     _log_info = {}
 
-    def __init__(self, enabled, name=None, log_level=None):
+    def __init__(self, enabled, name=None, log_level=None, version="1.0"):
         """
         Initialization. No streams have started yet.
         :param enabled: True or False
@@ -22,6 +22,7 @@ class DataStream:
         self.name = name
         if type(self.name) != str:
             raise ValueError("Name isn't a string: %s" % self.name)
+        self.version = version
 
         self.enabled = enabled
 
@@ -61,6 +62,11 @@ class DataStream:
         # add file logging if Robot has enabled it
         if DataStream._log_info["file_handle"] is not None:
             self.logger.addHandler(DataStream._log_info["file_handle"])
+
+        stream_filter = logging.Filter()
+        stream_filter.filter = self.log_filter
+
+        self.logger.addFilter(stream_filter)
 
     def dt(self, current_time=None, use_current_time=True):
         """
@@ -127,6 +133,10 @@ class DataStream:
         :return:
         """
         pass
+
+    def log_filter(self, record):
+        record.version = self.version
+        return True
 
     def take(self):
         """
