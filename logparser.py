@@ -8,7 +8,7 @@ from atlasbuggy.datastream import AsyncStream
 
 
 class LogParser(AsyncStream):
-    def __init__(self, file_name, directory="", enabled=True, name=None, log_level=None, fps=None):
+    def __init__(self, file_name, directory="", enabled=True, name=None, log_level=None):
         # regex string code. Logs follow a certain format. Parse out these pieces of info.
         self.pattern = re.compile(
             r"(?P<name>[a-zA-Z0-9]*) @ "
@@ -36,6 +36,8 @@ class LogParser(AsyncStream):
         self.line_number = 0
         self.line = ""
 
+        self.prev_time = None
+
         # decompress the log file
         if self.enabled:
             with open(self.full_path, 'rb') as log_file:
@@ -49,12 +51,6 @@ class LogParser(AsyncStream):
             year=0, month=0, day=0, hour=0, minute=0, second=0, millisecond=0, timestamp=0,
             message="",
         )
-
-        # How fast the log parser should run at
-        if fps is None:
-            self.delay = 0.0
-        else:
-            self.delay = 1 / fps
 
     async def run(self):
         # find all matches in the log
@@ -79,15 +75,19 @@ class LogParser(AsyncStream):
             self.line = (line[-1] + line[:-1]).strip("\n")
             self.line_info["message"] = self.line_info["message"][:-1].strip("\n")
 
-            # make timestamp from unix epoch
-            self.line_info["timestamp"] = time.mktime(datetime.datetime(
+            if self.prev_time is not None:
+                self.prev_time = self.line_info["timestamp"]
+
+            current_date = datetime.datetime(
                 self.line_info["year"],
                 self.line_info["month"],
                 self.line_info["day"],
                 self.line_info["hour"],
                 self.line_info["minute"],
                 self.line_info["second"],
-                self.line_info["millisecond"]).timetuple())
+                self.line_info["millisecond"])
+            # make timestamp from unix epoch
+            self.line_info["timestamp"] = time.mktime(current_date.timetuple()) + current_date.microsecond / 1e6
 
             # notify stream if its name is found in the log
             if self.line_info["name"] in stream_names:
@@ -96,8 +96,17 @@ class LogParser(AsyncStream):
 
             await self.update()
 
+            self.prev_time = self.line_info["timestamp"]
+
+    def time_diff(self):
+        if self.prev_time is None:
+            return 0.0
+        else:
+            return self.line_info["timestamp"] - self.prev_time
+
     async def update(self):
-        await asyncio.sleep(self.delay)
+        self.logger.debug(self.line)
+        await asyncio.sleep(0.0)
 
 
 if __name__ == "__main__":
@@ -112,7 +121,7 @@ if __name__ == "__main__":
         async def update(self):
             print("\t'%s'" % self.line)
             # print(self.line_info)
-            await asyncio.sleep(self.delay)
+            await asyncio.sleep(0.0)
 
 
     def parse_file(file_name, directory):

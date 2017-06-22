@@ -7,7 +7,7 @@ from atlasbuggy.serial.clock import Clock
 
 
 class VideoPlayer(CameraStream):
-    def __init__(self, file_name, directory, width=None, height=None, enabled=True, log_level=None, frame_skip=0,
+    def __init__(self, file_name, directory="", width=None, height=None, enabled=True, log_level=None, frame_skip=0,
                  loop_video=False, start_frame=0):
 
         if file_name is None:

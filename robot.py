@@ -7,6 +7,8 @@ from atlasbuggy.datastream import DataStream, AsyncStream, ThreadedStream
 
 
 class Robot:
+    version = "1.0"
+
     def __init__(self, setup_fn=None, loop_fn=None, close_fn=None, event_loop=None, **log_options):
         self.streams = []
 
@@ -68,6 +70,15 @@ class Robot:
         formatter = logging.Formatter(self.log_info["format"])
         print_handle.setFormatter(formatter)
         self.logger.addHandler(print_handle)
+
+        stream_filter = logging.Filter()
+        stream_filter.filter = self.log_filter
+
+        self.logger.addFilter(stream_filter)
+
+    def log_filter(self, record):
+        record.version = self.version
+        return True
 
     def run(self, *streams):
         for stream in streams:

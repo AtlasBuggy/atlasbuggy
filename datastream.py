@@ -92,8 +92,11 @@ class DataStream:
         :return:
         """
         self.streams = streams
-        self.take()
         self.logger.debug("receiving streams:" + str([str(stream) for stream in streams.values()]))
+        if self.enabled:
+            self.take()
+        else:
+            self.logger.debug("stream disabled, not calling self.take()")
 
     def subscribe(self, **streams):
         self.subscriber_stream_mapping = streams
