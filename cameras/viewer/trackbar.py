@@ -11,26 +11,26 @@ class CameraViewerWithTrackbar(CameraViewer):
         self.slider_ticks = 0
         self.num_frames = 0
 
-        self.video_player = None
+        self.capture = None
 
         self.paused = False
         self.frame = None
 
     def take(self):
-        self.take_video_player()
+        self.take_capture()
 
-    def take_video_player(self):
-        self.video_player = self.streams["video_player"]
+    def take_capture(self):
+        self.capture = self.streams["capture"]
 
-        self.num_frames = self.video_player.num_frames
-        self.slider_ticks = int(self.video_player.capture.get(cv2.CAP_PROP_FRAME_WIDTH) // 3)
+        self.num_frames = self.capture.num_frames
+        self.slider_ticks = int(self.capture.capture.get(cv2.CAP_PROP_FRAME_WIDTH) // 3)
 
         if self.slider_ticks > self.num_frames:
             self.slider_ticks = self.num_frames
 
         cv2.createTrackbar(self.slider_name, self.name, 0, self.slider_ticks, self._on_slider)
 
-        self.delay = 1 / self.video_player.fps
+        self.delay = 1 / self.capture.fps
 
     def _on_slider(self, slider_index):
         slider_frame_num = int(slider_index * self.num_frames / self.slider_ticks)
@@ -43,14 +43,28 @@ class CameraViewerWithTrackbar(CameraViewer):
         pass
 
     def set_frame(self, frame_num):
-        self.video_player.set_frame(frame_num)
+        self.capture.set_frame(frame_num)
 
     def get_frame(self):
         self.update_slider_pos()
-        return self.video_player.get_frame()
+        return self.check_feed_for_frames()
+
+    def check_feed_for_frames(self):
+        frame = None
+        if self.capture.post_frames:
+            output = None
+            while not self.check_feed(self.capture).empty():
+                output = self.check_feed(self.capture).get()
+
+            if output is not None:
+                if self.capture.post_bytes:
+                    frame, bytes_frame = output
+                else:
+                    frame = output[0]
+        return frame
 
     def current_frame_num(self):
-        return self.video_player.current_pos()
+        return self.capture.current_pos()
 
     def update_slider_pos(self):
         slider_pos = int(self.current_frame_num() * self.slider_ticks / self.num_frames)
@@ -81,4 +95,4 @@ class CameraViewerWithTrackbar(CameraViewer):
             self.exit()
         elif key == ' ':
             self.paused = not self.paused
-            self.video_player.paused = self.paused
+            self.capture.paused = self.paused

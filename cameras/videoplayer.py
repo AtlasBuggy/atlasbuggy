@@ -1,9 +1,7 @@
 import os
 import cv2
 import time
-import asyncio
 from threading import Lock
-# from atlasbuggy.datastream import AsyncStream
 from atlasbuggy.cameras import CameraStream
 from atlasbuggy.serial.clock import Clock
 
@@ -29,7 +27,6 @@ class VideoPlayer(CameraStream):
         self.capture = cv2.VideoCapture(self.full_path)
         self.frame_lock = Lock()
         self.paused = False
-        self.frame = None
 
         self.fps = self.capture.get(cv2.CAP_PROP_FPS)
         self.delay = 1 / self.fps
@@ -68,7 +65,6 @@ class VideoPlayer(CameraStream):
             self.set_frame(start_frame)
 
     def current_pos(self):
-        # return self.current_frame
         with self.frame_lock:
             return int(self.capture.get(cv2.CAP_PROP_POS_FRAMES))
 
@@ -79,16 +75,6 @@ class VideoPlayer(CameraStream):
         with self.frame_lock:
             self.next_frame = position
             self.frame = None
-
-    def get_frame(self):
-        with self.frame_lock:
-            return self.frame
-        #     if self.frame is not None:
-        #         frame = self.frame.copy()
-        #     else:
-        #         frame = None
-        #
-        # return frame
 
     def _set_frame(self, position):
         if position >= 0:
@@ -124,11 +110,23 @@ class VideoPlayer(CameraStream):
                 self.frame = cv2.resize(
                     self.frame, (self.resize_width, self.resize_height), interpolation=cv2.INTER_NEAREST
                 )
-            self.frame_updated = True
+
+            if self.post_bytes:
+                self.bytes_frame = self.numpy_to_bytes(self.frame)
+            self.post_to_feed(self.frame)
+
+    def post_to_sub(self, feed, frame):
+        data = []
+        if self.post_bytes:
+            data.append(self.bytes_frame)
+        if self.post_frames:
+            data.append(frame.copy())
+
+        if len(data) > 0:
+            feed.put(data)
 
     def run(self):
         while self.running():
             self._get_frame()
             self.update()
-            # await asyncio.sleep(self.delay)
             self.clock.update()

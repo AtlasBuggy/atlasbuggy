@@ -1,10 +1,10 @@
 import os
 import cv2
 from atlasbuggy import get_platform
-from atlasbuggy.cameras import VideoStream
+from atlasbuggy.cameras import RecordingStream
 
 
-class CvVideoRecorder(VideoStream):
+class CvVideoRecorder(RecordingStream):
     def __init__(self, file_name=None, directory=None, enabled=True, log_level=None):
         super(CvVideoRecorder, self).__init__(file_name, directory, enabled, log_level)
         self.width = None

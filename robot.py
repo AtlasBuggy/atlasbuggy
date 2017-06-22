@@ -52,6 +52,7 @@ class Robot:
         if self.log_info["write"] and self.log_info["directory"] and not os.path.isdir(
                 self.log_info["directory"]):
             os.makedirs(self.log_info["directory"])
+        self.logger.setLevel(logging.DEBUG)
 
         if self.log_info["write"]:
             self.log_info["file_handle"] = logging.FileHandler(
@@ -59,18 +60,14 @@ class Robot:
             self.log_info["file_handle"].setLevel(logging.DEBUG)
             formatter = logging.Formatter(self.log_info["format"])
             self.log_info["file_handle"].setFormatter(formatter)
+            self.logger.addHandler(self.log_info["file_handle"])
 
-        self.logger.setLevel(logging.DEBUG)
-        
         print_handle = logging.StreamHandler()
         print_handle.setLevel(self.log_info["log_level"])
 
         formatter = logging.Formatter(self.log_info["format"])
         print_handle.setFormatter(formatter)
         self.logger.addHandler(print_handle)
-
-        if self.log_info["write"]:
-            self.logger.addHandler(DataStream._log_info["file_handle"])
 
     def run(self, *streams):
         for stream in streams:
@@ -107,6 +104,7 @@ class Robot:
             self.stop()
             raise
         self.stop()
+        self.logger.debug("applying regex end character:\n[")
 
     def stop(self):
         self.logger.debug("Calling stop")
@@ -127,7 +125,6 @@ class Robot:
         for stream in self.streams:
             stream.stopped()
 
-        self.logger.debug("applying regex end character\n[")
         self.compress_log()
 
     def compress_log(self):

@@ -25,7 +25,9 @@ class CameraStream(ThreadedStream):
 
         self.paused = False
         self.recorder = None
-        self.frame_updated = False
+
+        self.post_frames = True
+        self.post_bytes = False
 
         super(CameraStream, self).__init__(enabled, name, log_level)
 
@@ -34,17 +36,6 @@ class CameraStream(ThreadedStream):
 
     def log_frame(self):
         self.logger.debug("frame #%s" % self.num_frames)
-
-    def get_frame(self):
-        with self.frame_lock:
-            return self.frame
-
-    def get_bytes_frame(self):
-        if self.frame_updated:
-            with self.frame_lock:
-                self.bytes_frame = self.numpy_to_bytes(self.frame)
-                self.frame_updated = False
-        return self.bytes_frame
 
     def poll_for_fps(self):
         if self.prev_t is None:
@@ -66,7 +57,7 @@ class CameraStream(ThreadedStream):
         return cv2.imencode(".jpg", frame)[1].tostring()
 
 
-class VideoStream(DataStream):
+class RecordingStream(DataStream):
     def __init__(self, file_name, directory, enabled, log_level):
         if file_name is None:
             file_name = time.strftime("%H;%M;%S.avi")
@@ -79,7 +70,7 @@ class VideoStream(DataStream):
         self.directory = directory
 
         self.full_path = os.path.join(self.directory, self.file_name)
-        super(VideoStream, self).__init__(
+        super(RecordingStream, self).__init__(
             enabled, file_name, log_level
         )
 

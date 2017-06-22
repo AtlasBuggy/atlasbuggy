@@ -1,7 +1,7 @@
 import os
 import time
 from subprocess import Popen, PIPE, DEVNULL
-from atlasbuggy.cameras import VideoStream
+from atlasbuggy.cameras import RecordingStream
 
 
 class H264toMP4converter:
@@ -33,7 +33,7 @@ class H264toMP4converter:
         return self.output is None
 
 
-class PiVideoRecorder(VideoStream):
+class PiVideoRecorder(RecordingStream):
     def __init__(self, file_name=None, directory=None, enabled=True, log_level=None, **recorder_options):
         super(PiVideoRecorder, self).__init__(file_name, directory, enabled, log_level)
         self.options = recorder_options

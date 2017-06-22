@@ -1,5 +1,6 @@
 import time
 import logging
+from queue import Queue
 from threading import Thread, Event
 
 
@@ -31,6 +32,11 @@ class DataStream:
         self._has_stopped = Event()  # self._stop flag
 
         self.streams = {}  # other streams this one has access to. (Call the give method)
+
+        self.subscriptions = {}
+        self.subscribers = []
+        self.subscriber_name_mapping = {}
+        self.subscriber_stream_mapping = {}
 
         # instance of logging. Use this instance to print debug statement and log
         self.logger = logging.getLogger(self.name)
@@ -82,6 +88,30 @@ class DataStream:
         self.streams = streams
         self.take()
         self.logger.debug("receiving streams:" + str([str(stream) for stream in streams.values()]))
+
+    def subscribe(self, **streams):
+        self.subscriber_stream_mapping = streams
+        for name, stream in streams.items():
+            feed = Queue()
+            self.subscriber_name_mapping[stream] = name
+            self.subscriptions[name] = feed
+            stream.subscribers.append(feed)
+
+        self.logger.debug("subscribing to streams:" + str([str(stream) for stream in streams.values()]))
+
+    def check_feed(self, subscription):
+        if isinstance(subscription, DataStream):
+            name = self.subscriber_name_mapping[subscription]
+        else:
+            name = subscription
+        return self.subscriptions[name]
+
+    def post_to_feed(self, data):
+        for feed in self.subscribers:
+            self.post_to_sub(feed, data)
+
+    def post_to_sub(self, feed, data):
+        feed.put(data)
 
     def receive_log(self, log_level, message, line_info):
         """
@@ -167,15 +197,16 @@ class DataStream:
         """
 
         try:
+            self.logger.debug("calling run")
             self.run()
         except BaseException:
-            self.stop()  # in threads, stop is called inside the thread instead to avoid race conditions
+            self._stop()  # in threads, stop is called inside the thread instead to avoid race conditions
             self.logger.debug("catching exception in threaded loop")
             self.exit()
             raise
 
         self.logger.debug("run finished")
-        self.stop()
+        self._stop()
         self.exit()
 
     def run(self):
@@ -235,7 +266,7 @@ class ThreadedStream(DataStream):
         """
         super(ThreadedStream, self).__init__(enabled, name, log_level)
 
-        self.thread = Thread(target=self.run)
+        self.thread = Thread(target=self._run)
         self.thread.daemon = False
 
     def set_to_daemon(self):
@@ -275,13 +306,13 @@ class AsyncStream(DataStream):
         try:
             await self.run()
         except BaseException:
-            self.stop()
+            self._stop()
             self.logger.debug("catching exception in async loop")
             self.exit()
             raise
 
         self.logger.debug("run finished")
-        self.stop()
+        self._stop()
         self.exit()
 
     async def run(self):

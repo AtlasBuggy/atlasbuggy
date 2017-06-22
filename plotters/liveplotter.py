@@ -99,7 +99,7 @@ class LivePlotter(BasePlotter, AsyncStream):
         while self.running():
             if self.is_closed:
                 self.exit()
-                return
+                continue
 
             if not self.enabled:
                 continue
@@ -109,50 +109,52 @@ class LivePlotter(BasePlotter, AsyncStream):
                 await asyncio.sleep(0.05)
                 continue
 
-            for plot in self.robot_plots:
-                if isinstance(plot, RobotPlot):
-                    self.lines[plot.name].set_xdata(plot.data[0])
-                    self.lines[plot.name].set_ydata(plot.data[1])
-                    if not plot.flat:
-                        self.lines[plot.name].set_3d_properties(plot.data[2])
-
-                    if len(plot.changed_properties) > 0:
-                        self.lines[plot.name].set(**plot.changed_properties)
-                        plot.changed_properties = {}
-
-                elif isinstance(plot, RobotPlotCollection):
-                    for subplot in plot.plots:
-                        # print(subplot.name, subplot.data[0][-1], subplot.data[1][-1])
-                        self.lines[plot.name][subplot.name].set_xdata(subplot.data[0])
-                        self.lines[plot.name][subplot.name].set_ydata(subplot.data[1])
-                        if not plot.flat:
-                            self.lines[plot.name][subplot.name].set_3d_properties(subplot.data[2])
-
-                        if len(subplot.changed_properties) > 0:
-                            self.lines[plot.name][subplot.name].set(**subplot.changed_properties)
-                            subplot.changed_properties = {}
-
-                if self.active_window_resizing and plot.window_resizing:
-                    if self.default_resize_behavior:
-                        self.axes[plot.name].relim()
-                        self.axes[plot.name].autoscale_view()
-                    else:
-                        if plot.flat:
-                            self.axes[plot.name].set_xlim(plot.x_range)
-                            self.axes[plot.name].set_ylim(plot.y_range)
-                        else:
-                            self.axes[plot.name].set_xlim3d(plot.x_range)
-                            self.axes[plot.name].set_ylim3d(plot.y_range)
-                            self.axes[plot.name].set_zlim3d(plot.z_range)
-
             try:
-                self.fig.canvas.draw()
-                self.plt.pause(0.005)  # can't be less than ~0.005
+                self.draw()
                 await asyncio.sleep(0.005)
 
             except BaseException as error:
-                traceback.print_exc()
+                self.logger.exception(error)
                 self.exit()
+
+    def draw(self):
+        for plot in self.robot_plots:
+            if isinstance(plot, RobotPlot):
+                self.lines[plot.name].set_xdata(plot.data[0])
+                self.lines[plot.name].set_ydata(plot.data[1])
+                if not plot.flat:
+                    self.lines[plot.name].set_3d_properties(plot.data[2])
+
+                if len(plot.changed_properties) > 0:
+                    self.lines[plot.name].set(**plot.changed_properties)
+                    plot.changed_properties = {}
+
+            elif isinstance(plot, RobotPlotCollection):
+                for subplot in plot.plots:
+                    # print(subplot.name, subplot.data[0][-1], subplot.data[1][-1])
+                    self.lines[plot.name][subplot.name].set_xdata(subplot.data[0])
+                    self.lines[plot.name][subplot.name].set_ydata(subplot.data[1])
+                    if not plot.flat:
+                        self.lines[plot.name][subplot.name].set_3d_properties(subplot.data[2])
+
+                    if len(subplot.changed_properties) > 0:
+                        self.lines[plot.name][subplot.name].set(**subplot.changed_properties)
+                        subplot.changed_properties = {}
+
+            if self.active_window_resizing and plot.window_resizing:
+                if self.default_resize_behavior:
+                    self.axes[plot.name].relim()
+                    self.axes[plot.name].autoscale_view()
+                else:
+                    if plot.flat:
+                        self.axes[plot.name].set_xlim(plot.x_range)
+                        self.axes[plot.name].set_ylim(plot.y_range)
+                    else:
+                        self.axes[plot.name].set_xlim3d(plot.x_range)
+                        self.axes[plot.name].set_ylim3d(plot.y_range)
+                        self.axes[plot.name].set_zlim3d(plot.z_range)
+        self.fig.canvas.draw()
+        self.plt.pause(0.005)  # can't be less than ~0.005
 
     def pause(self):
         self.is_paused = True
@@ -177,7 +179,7 @@ class LivePlotter(BasePlotter, AsyncStream):
         Close the plot safely
         """
         self.logger.debug("Closing live plotter")
-        if self.enabled and not self.is_closed:
+        if not self.is_closed:
             self.is_closed = True
             self.plt.ioff()
             self.plt.gcf()
@@ -187,4 +189,4 @@ class LivePlotter(BasePlotter, AsyncStream):
         if self.close_when_finished:
             self.plt.close('all')
         else:
-            self.plot()
+            self.plt.show()
