@@ -113,9 +113,9 @@ class VideoPlayer(CameraStream):
 
             if self.post_bytes:
                 self.bytes_frame = self.numpy_to_bytes(self.frame)
-            self.post_to_feed(self.frame)
+            self.post_all(self.frame)
 
-    def post_to_sub(self, feed, frame):
+    def post_single(self, feed, frame):
         data = []
         if self.post_bytes:
             data.append(self.bytes_frame)

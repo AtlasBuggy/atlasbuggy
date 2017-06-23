@@ -99,28 +99,37 @@ class DataStream:
             self.logger.debug("stream disabled, not calling self.take()")
 
     def subscribe(self, **streams):
-        self.subscriber_stream_mapping = streams
+        self.subscriber_stream_mapping = streams  # key: user name, value: stream
         for name, stream in streams.items():
             feed = Queue()
-            self.subscriber_name_mapping[stream] = name
+            self.subscriber_name_mapping[stream] = name  # key: stream, value: name
+
+            # subscriptions are queues referenced by string. (Use get_feed to reference by stream pointer)
             self.subscriptions[name] = feed
-            stream.subscribers.append(feed)
+
+            # update the content creator's subscriber list. Give them a self reference, a feed queue,
+            # and the name they're under
+            stream.subscribers.append((name, self, feed))
 
         self.logger.debug("subscribing to streams:" + str([str(stream) for stream in streams.values()]))
 
-    def check_feed(self, subscription):
+    def get_feed(self, subscription):
         if isinstance(subscription, DataStream):
             name = self.subscriber_name_mapping[subscription]
         else:
             name = subscription
         return self.subscriptions[name]
 
-    def post_to_feed(self, data):
-        for feed in self.subscribers:
-            self.post_to_sub(feed, data)
+    def post_all(self, data):
+        for name, stream, feed in self.subscribers:
+            self.post_single(feed, data)  # update the subscriber's queue
+            stream.receive_post(name)  # notify the subscriber they have been updated
 
-    def post_to_sub(self, feed, data):
+    def post_single(self, feed, data):
         feed.put(data)
+
+    def receive_post(self, name):
+        pass
 
     def receive_log(self, log_level, message, line_info):
         """
@@ -273,11 +282,11 @@ class DataStream:
 
 
 class ThreadedStream(DataStream):
-    def __init__(self, enabled, name=None, log_level=None):
+    def __init__(self, enabled, name=None, log_level=None, version="1.0"):
         """
         Initialization for threaded stream
         """
-        super(ThreadedStream, self).__init__(enabled, name, log_level)
+        super(ThreadedStream, self).__init__(enabled, name, log_level, version)
 
         self.thread = Thread(target=self._run)
         self.thread.daemon = False
@@ -301,11 +310,11 @@ class ThreadedStream(DataStream):
 
 
 class AsyncStream(DataStream):
-    def __init__(self, enabled, name=None, log_level=None):
+    def __init__(self, enabled, name=None, log_level=None, version="1.0"):
         """
         Initialization for asynchronous stream
         """
-        super(AsyncStream, self).__init__(enabled, name, log_level)
+        super(AsyncStream, self).__init__(enabled, name, log_level, version)
 
         self.asyncio_loop = None
         self.task = None

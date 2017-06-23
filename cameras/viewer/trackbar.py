@@ -53,8 +53,8 @@ class CameraViewerWithTrackbar(CameraViewer):
         frame = None
         if self.capture.post_frames:
             output = None
-            while not self.check_feed(self.capture).empty():
-                output = self.check_feed(self.capture).get()
+            while not self.get_feed(self.capture).empty():
+                output = self.get_feed(self.capture).get()
 
             if output is not None:
                 if self.capture.post_bytes:

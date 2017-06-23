@@ -43,26 +43,7 @@ class Robot:
         )
 
     def init_logger(self):
-        if self.log_info["file_name"] is None:
-            self.log_info["file_name"] = time.strftime("%H;%M;%S.log")
-            if self.log_info["directory"] is None:
-                # only use default if both directory and file_name are None.
-                # Assume file_name has the full path if directory is None
-                self.log_info["directory"] = time.strftime("logs/%Y_%b_%d")
-
-        # make directory if writing a log, if directory is not None or empty, and if the directory doesn't exist
-        if self.log_info["write"] and self.log_info["directory"] and not os.path.isdir(
-                self.log_info["directory"]):
-            os.makedirs(self.log_info["directory"])
         self.logger.setLevel(logging.DEBUG)
-
-        if self.log_info["write"]:
-            self.log_info["file_handle"] = logging.FileHandler(
-                os.path.join(self.log_info["directory"], self.log_info["file_name"]), "w+")
-            self.log_info["file_handle"].setLevel(logging.DEBUG)
-            formatter = logging.Formatter(self.log_info["format"])
-            self.log_info["file_handle"].setFormatter(formatter)
-            self.logger.addHandler(self.log_info["file_handle"])
 
         print_handle = logging.StreamHandler()
         print_handle.setLevel(self.log_info["log_level"])
@@ -75,6 +56,28 @@ class Robot:
         stream_filter.filter = self.log_filter
 
         self.logger.addFilter(stream_filter)
+
+        if self.log_info["file_name"] is None:
+            self.log_info["file_name"] = time.strftime("%H;%M;%S.log")
+            if self.log_info["directory"] is None:
+                # only use default if both directory and file_name are None.
+                # Assume file_name has the full path if directory is None
+                self.log_info["directory"] = time.strftime("logs/%Y_%b_%d")
+
+        # make directory if writing a log, if directory is not None or empty, and if the directory doesn't exist
+        if self.log_info["write"] and self.log_info["directory"] and not os.path.isdir(
+                self.log_info["directory"]):
+            os.makedirs(self.log_info["directory"])
+            self.logger.debug("Creating log directory: %s" % self.log_info["directory"])
+
+        if self.log_info["write"]:
+            log_path = os.path.join(self.log_info["directory"], self.log_info["file_name"])
+            self.log_info["file_handle"] = logging.FileHandler(log_path, "w+")
+            self.log_info["file_handle"].setLevel(logging.DEBUG)
+            self.log_info["file_handle"].setFormatter(formatter)
+            self.logger.addHandler(self.log_info["file_handle"])
+
+            self.logger.debug("Logging to: %s" % log_path)
 
     def log_filter(self, record):
         record.version = self.version
@@ -111,7 +114,9 @@ class Robot:
                 self.logger.debug("Robot has finished")
             else:
                 logging.warning("No streams to run!")
-        except BaseException:
+        except BaseException as error:
+            self.logger.debug("Catching exception")
+            self.logger.exception(error)
             self.stop()
             raise
         self.stop()

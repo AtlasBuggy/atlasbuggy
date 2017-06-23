@@ -58,7 +58,7 @@ class CameraStream(ThreadedStream):
 
 
 class RecordingStream(DataStream):
-    def __init__(self, file_name, directory, enabled, log_level):
+    def __init__(self, file_name, directory, enabled, log_level, version):
         if file_name is None:
             file_name = time.strftime("%H;%M;%S.avi")
             if directory is None:
@@ -71,15 +71,17 @@ class RecordingStream(DataStream):
 
         self.full_path = os.path.join(self.directory, self.file_name)
         super(RecordingStream, self).__init__(
-            enabled, file_name, log_level
+            enabled, file_name, log_level, version
         )
 
         self.capture = None
         self.is_recording = False
 
     def make_dirs(self):
-        if not os.path.isdir(self.directory):
+        if self.directory is not None and len(self.directory) > 0 and not os.path.isdir(self.directory):
             os.makedirs(self.directory)
+        else:
+            self.logger.debug("Not making directory: '%s'" % self.directory)
 
     def take(self):
         self.capture = self.streams["capture"]

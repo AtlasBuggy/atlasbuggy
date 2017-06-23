@@ -21,7 +21,6 @@ class CommandLine(AsyncStream):
         while self.running():
             print("\r%s" % self.prompt_text, end="")
             data = await self.queue.get()
-            await asyncio.sleep(0.01)
             try:
                 self.handle_input(data.strip('\n'))
             except BaseException as error:

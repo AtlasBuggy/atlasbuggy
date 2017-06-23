@@ -15,8 +15,8 @@ class CvPipeline(ThreadedStream):
     def run(self):
         while self.running():
             if self.capture.post_frames:
-                while not self.check_feed(self.capture).empty():
-                    output = self.check_feed(self.capture).get()
+                while not self.get_feed(self.capture).empty():
+                    output = self.get_feed(self.capture).get()
                     if self.capture.post_bytes:
                         frame, bytes_frame = output
                     else:
@@ -35,9 +35,9 @@ class CvPipeline(ThreadedStream):
         else:
             bytes_frame = None
 
-        self.post_to_feed((frame, bytes_frame))
+        self.post_all((frame, bytes_frame))
 
-    def post_to_sub(self, feed, data):
+    def post_single(self, feed, data):
         frame, bytes_frame = data
         if bytes_frame is not None:
             feed.put((frame.copy(), bytes_frame))
