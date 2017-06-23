@@ -156,11 +156,12 @@ class Robot:
         for stream in self.streams:
             if not isinstance(stream, DataStream):
                 raise RuntimeError("Found an object that isn't a stream!", repr(stream))
+
             if isinstance(stream, AsyncStream):
-                stream.asyncio_loop = self.loop
                 task = stream._run()
                 tasks.append(task)
                 stream.task = task
+                stream.asyncio_loop = self.loop
 
             elif isinstance(stream, ThreadedStream):
                 threads.append(stream)

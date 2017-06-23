@@ -9,62 +9,79 @@ from atlasbuggy.clock import Clock
 
 
 class VideoPlayer(CameraStream):
-    def __init__(self, file_name, directory="", width=None, height=None, enabled=True, log_level=None, frame_skip=0,
-                 loop_video=False, start_frame=0):
+    loaded_videos = {}
 
-        if file_name is None:
-            file_name = time.strftime("%H;%M;%S.avi")
-        if directory is None:
-            directory = time.strftime("videos/%Y_%b_%d")
+    def __init__(self, enabled=True, log_level=None, **load_video_args):
+        super(VideoPlayer, self).__init__(enabled, None, log_level)
 
-        self.file_name = file_name
-        self.directory = directory
+        if "file_name" in load_video_args and load_video_args["file_name"] is not None:
+            self.load_video(**load_video_args)
 
-        self.full_path = os.path.join(self.directory, self.file_name)
-        if not os.path.isfile(self.full_path):
-            raise FileNotFoundError("Video File '%s' not found" % self.full_path)
+    def load_video(self, file_name, directory="", width=None, height=None, frame_skip=0,
+                   loop_video=False, start_frame=0, post_bytes=False):
+        with self.frame_lock:
+            self.release_capture()
 
-        super(VideoPlayer, self).__init__(enabled, file_name, log_level)
+            if file_name is None:
+                file_name = time.strftime("%H;%M;%S.avi")
+            if directory is None:
+                directory = time.strftime("videos/%Y_%b_%d")
 
-        self.capture = cv2.VideoCapture(self.full_path)
-        self.frame_lock = Lock()
-        self.paused = False
+            self.file_name = file_name
+            self.directory = directory
 
-        self.fps = self.capture.get(cv2.CAP_PROP_FPS)
-        self.delay = 1 / self.fps
-        self.clock = Clock(self.fps)
-        self.num_frames = int(self.capture.get(cv2.CAP_PROP_FRAME_COUNT))
-        if self.num_frames <= 0:
-            raise FileNotFoundError("Video failed to load... No frames found!")
+            self.full_path = os.path.join(self.directory, self.file_name)
+            if not os.path.isfile(self.full_path):
+                raise FileNotFoundError("Video File '%s' not found" % self.full_path)
 
-        self.length_sec = self.num_frames / self.fps
+            if self.full_path in VideoPlayer.loaded_videos:
+                self.capture = VideoPlayer.loaded_videos[self.full_path]
 
-        self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-        self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
-        self.resize_frame = False
+                self.set_frame(start_frame)
+            else:
+                self.capture = cv2.VideoCapture(self.full_path)
+                VideoPlayer.loaded_videos[self.full_path] = self.capture
 
-        if width is None:
-            self.resize_width = self.width
-        else:
-            self.resize_width = width
-            self.resize_frame = True
+                if start_frame > 0:
+                    self.set_frame(start_frame)
 
-        if height is None:
-            self.resize_height = self.height
-        else:
-            self.resize_height = height
-            self.resize_frame = True
+            self.frame_lock = Lock()
+            self.paused = False
 
-        self.current_frame = 0
-        self.next_frame = 1
+            self.post_bytes = post_bytes
 
-        self.next_frame_lock = Lock()
+            self.fps = self.capture.get(cv2.CAP_PROP_FPS)
+            self.delay = 1 / self.fps
+            self.clock = Clock(self.fps)
+            self.num_frames = int(self.capture.get(cv2.CAP_PROP_FRAME_COUNT))
+            if self.num_frames <= 0:
+                raise FileNotFoundError("Video failed to load... No frames found!")
 
-        self.frame_skip = frame_skip
-        self.loop_video = loop_video
+            self.length_sec = self.num_frames / self.fps
 
-        if start_frame > 0:
-            self.set_frame(start_frame)
+            self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
+            self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
+            self.resize_frame = False
+
+            if width is None:
+                self.resize_width = self.width
+            else:
+                self.resize_width = width
+                self.resize_frame = True
+
+            if height is None:
+                self.resize_height = self.height
+            else:
+                self.resize_height = height
+                self.resize_frame = True
+
+            self.current_frame = 0
+            self.next_frame = 1
+
+            self.next_frame_lock = Lock()
+
+            self.frame_skip = frame_skip
+            self.loop_video = loop_video
 
     def current_pos(self):
         with self.frame_lock:
@@ -119,10 +136,10 @@ class VideoPlayer(CameraStream):
 
     def post_single(self, feed, frame):
         data = []
-        if self.post_bytes:
-            data.append(self.bytes_frame)
         if self.post_frames:
             data.append(frame.copy())
+        if self.post_bytes:
+            data.append(self.bytes_frame)
 
         if len(data) > 0:
             feed.put(data)
@@ -132,3 +149,10 @@ class VideoPlayer(CameraStream):
             self._get_frame()
             self.update()
             self.clock.update()
+
+    def stop(self):
+        self.release_capture()
+
+    def release_capture(self):
+        if self.capture is not None:
+            self.capture.release()

@@ -6,7 +6,7 @@ from atlasbuggy.datastream import ThreadedStream
 
 class Website(ThreadedStream):
     def __init__(self, template_folder, static_folder, flask_params=None, app_params=None, enabled=True, log_level=None,
-                 name=None, use_index=True, host='0.0.0.0', port=5000):
+                 name=None, use_index=True, host='0.0.0.0', port=5000, version="1.0"):
         if flask_params is None:
             flask_params = {}
 
@@ -28,9 +28,10 @@ class Website(ThreadedStream):
         else:
             self.app_params = {}
 
-        super(Website, self).__init__(enabled, name, log_level)
+        super(Website, self).__init__(enabled, name, log_level, version)
 
         self.flask_logger.setLevel(self.log_level)
+
         self.set_to_daemon()
 
     def index(self):
@@ -46,4 +47,10 @@ class Website(ThreadedStream):
         return render_template('index.html')
 
     def run(self):
-        self.app.run(host=self.host, port=self.port, debug=False, threaded=True, **self.app_params)
+        self.logger.debug("Running website on %s:%s" % (self.host, self.port))
+        try:
+            self.app.run(host=self.host, port=self.port, debug=False, threaded=True, **self.app_params)
+        except BaseException as error:
+            self.logger.debug("Website stopped running...")
+            self.logger.exception(error)
+            raise

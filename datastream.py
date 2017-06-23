@@ -1,6 +1,8 @@
 import time
+# import asyncio
 import logging
 from queue import Queue
+import janus
 from threading import Thread, Event
 
 
@@ -26,18 +28,22 @@ class DataStream:
 
         self.enabled = enabled
 
-        self.timestamp = None  # current time since epoch
+        self.asyncio_loop = None
+
+        self.stow_timestamp = None  # current time since epoch
         self.start_time = None  # stream start time. Can be set externally
 
         self._has_started = Event()  # self._start flag
         self._has_stopped = Event()  # self._stop flag
 
         self.streams = {}  # other streams this one has access to. (Call the give method)
+        self._required_streams = []
 
         self.subscriptions = {}
         self.subscribers = []
-        self.subscriber_name_mapping = {}
-        self.subscriber_stream_mapping = {}
+        self._subscriber_name_mapping = {}
+        self._subscriber_stream_mapping = {}
+        self._required_subscriptions = []
 
         # instance of logging. Use this instance to print debug statement and log
         self.logger = logging.getLogger(self.name)
@@ -78,12 +84,12 @@ class DataStream:
         # use this method to update the stream's time
         if current_time is None and use_current_time:
             current_time = time.time()
-        self.timestamp = current_time
+        self.stow_timestamp = current_time
 
-        if self.start_time is None or self.timestamp is None:
+        if self.start_time is None or self.stow_timestamp is None:
             return 0.0
         else:
-            return self.timestamp - self.start_time
+            return self.stow_timestamp - self.start_time
 
     def give(self, **streams):
         """
@@ -93,29 +99,24 @@ class DataStream:
         """
         self.streams = streams
         self.logger.debug("receiving streams:" + str([str(stream) for stream in streams.values()]))
+
+        self._check_required_streams()
+
         if self.enabled:
             self.take()
         else:
             self.logger.debug("stream disabled, not calling self.take()")
 
     def subscribe(self, **streams):
-        self.subscriber_stream_mapping = streams  # key: user name, value: stream
-        for name, stream in streams.items():
-            feed = Queue()
-            self.subscriber_name_mapping[stream] = name  # key: stream, value: name
+        self._subscriber_stream_mapping = streams  # key: some name, value: stream
 
-            # subscriptions are queues referenced by string. (Use get_feed to reference by stream pointer)
-            self.subscriptions[name] = feed
-
-            # update the content creator's subscriber list. Give them a self reference, a feed queue,
-            # and the name they're under
-            stream.subscribers.append((name, self, feed))
+        self._check_required_subscriptions()
 
         self.logger.debug("subscribing to streams:" + str([str(stream) for stream in streams.values()]))
 
     def get_feed(self, subscription):
         if isinstance(subscription, DataStream):
-            name = self.subscriber_name_mapping[subscription]
+            name = self._subscriber_name_mapping[subscription]
         else:
             name = subscription
         return self.subscriptions[name]
@@ -130,6 +131,55 @@ class DataStream:
 
     def receive_post(self, name):
         pass
+
+    def require_subscription(self, string_name, class_instance=None):
+        self._required_subscriptions.append((string_name, class_instance))
+        return string_name
+
+    def require_stream(self, string_name, class_instance=None):
+        self._required_streams.append((string_name, class_instance))
+        return string_name
+
+    def _check_required_subscriptions(self):
+        for name, stream in self._subscriber_stream_mapping.items():
+            feed = Queue()
+            self._subscriber_name_mapping[stream] = name  # key: stream, value: name
+
+            # subscriptions are queues referenced by string. (Use get_feed to reference by stream pointer)
+            self.subscriptions[name] = feed
+
+            # update the content creator's subscriber list. Give them a self reference, a feed queue,
+            # and the name they're under
+            stream.subscribers.append((name, self, feed))
+
+        # check subscriptions
+        for required_name, required_class in self._required_subscriptions:
+            found = False
+            for name, stream in self._subscriber_stream_mapping.items():
+                if required_name == name:
+                    if required_class is None or type(stream) == required_class:
+                        found = True
+            if not found:
+                raise ValueError(
+                    "Couldn't find required subscriptions. "
+                    "Make sure to call <instance of %s>.subscribe(%s=%s())" % (
+                        self.name, required_name, "SomeStream" if required_class is None else required_class.__name__)
+                )
+
+    def _check_required_streams(self):
+        # check given streams
+        for required_name, required_class in self._required_streams:
+            found = False
+            for name, stream in self.streams.items():
+                if required_name == name:
+                    if required_class is None or type(stream) == required_class:
+                        found = True
+            if not found:
+                raise ValueError(
+                    "Couldn't find required streams. "
+                    "Make sure to call <instance of %s>.give(%s=%s())" % (
+                        self.name, required_name, "SomeStream" if required_class is None else required_class.__name__)
+                )
 
     def receive_log(self, log_level, message, line_info):
         """
@@ -274,6 +324,13 @@ class DataStream:
         """
         DataStream._exited.set()
 
+    def version(self):
+        return self.parse_version(self.version)
+
+    @staticmethod
+    def parse_version(version_string):
+        return tuple(map(int, (version_string.split("."))))
+
     def __str__(self):
         return self.name
 
@@ -299,8 +356,7 @@ class ThreadedStream(DataStream):
         self.logger.debug("thread is now daemon")
 
     def join(self):
-        if not self.thread.daemon:
-            self.thread.join()
+        self.thread.join()
 
     def _init(self):
         """
@@ -316,7 +372,6 @@ class AsyncStream(DataStream):
         """
         super(AsyncStream, self).__init__(enabled, name, log_level, version)
 
-        self.asyncio_loop = None
         self.task = None
         self.coroutine = None
 
