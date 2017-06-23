@@ -1,9 +1,11 @@
 import os
-import cv2
 import time
 from threading import Lock
+
+import cv2
+
 from atlasbuggy.cameras import CameraStream
-from atlasbuggy.serial.clock import Clock
+from atlasbuggy.clock import Clock
 
 
 class VideoPlayer(CameraStream):

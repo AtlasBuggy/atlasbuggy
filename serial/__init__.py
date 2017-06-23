@@ -1,13 +1,14 @@
-import re
 import asyncio
+import re
 import threading
 import time
 import traceback
 
 import serial.tools.list_ports
 
+from atlasbuggy.clock import Clock
+from atlasbuggy.serial.events import CommandPause, RecurringEvent
 from atlasbuggy.datastream import AsyncStream
-from atlasbuggy.serial.clock import Clock, CommandPause, RecurringEvent
 from atlasbuggy.serial.errors import *
 from atlasbuggy.serial.object import SerialObject
 from atlasbuggy.serial.port import SerialPort
