@@ -34,8 +34,8 @@ class H264toMP4converter:
 
 
 class PiVideoRecorder(RecordingStream):
-    def __init__(self, file_name=None, directory=None, enabled=True, log_level=None, **recorder_options):
-        super(PiVideoRecorder, self).__init__(file_name, directory, enabled, log_level)
+    def __init__(self, file_name=None, directory=None, enabled=True, log_level=None, version="1.0", **recorder_options):
+        super(PiVideoRecorder, self).__init__(file_name, directory, enabled, log_level, version)
         self.options = recorder_options
 
         self.default_file_type = ".h264"

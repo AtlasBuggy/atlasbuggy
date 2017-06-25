@@ -88,7 +88,7 @@ class DataStream:
         subscription.stream.subscribers.append(subscription)
         self.logger.debug("'%s' %s '%s'" % (self, subscription.description, subscription.stream))
 
-    def receive_subscriptions(self, subscriptions):
+    def take(self, subscriptions):
         pass
 
     def require_subscription(self, tag, subscription_class=None, stream_class=None):
@@ -194,7 +194,7 @@ class DataStream:
                 self.logger.debug("stream not enabled")
                 return
 
-            self.receive_subscriptions(self.subscriptions)
+            self.take(self.subscriptions)
             self._check_subscriptions()
             self.logger.debug("starting")
             self._has_started.set()

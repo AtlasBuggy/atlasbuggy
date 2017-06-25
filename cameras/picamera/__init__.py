@@ -38,9 +38,8 @@ class PiCamera(CameraStream):
                 with self.frame_lock:
                     self.frame = frame.array
                     raw_capture.truncate(0)
-                    self.num_frames += 1
                     # self.recorder.record(self.frame)
-                    self.frame_updated = True
+                    self.post(self.frame)
 
                 self.poll_for_fps()
                 self.log_frame()
@@ -49,8 +48,6 @@ class PiCamera(CameraStream):
                     time.sleep(0.1)
 
                 if not self.running():
-                    if self.recorder is not None:
-                        self.recorder.stop_recording()
                     return
 
     def stop(self):

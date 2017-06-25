@@ -2,7 +2,8 @@ import os
 import cv2
 import time
 import numpy as np
-from atlasbuggy.datastream import DataStream, ThreadedStream
+from atlasbuggy import DataStream, ThreadedStream
+from atlasbuggy.subscriptions import Feed
 from threading import Lock
 
 
@@ -26,16 +27,13 @@ class CameraStream(ThreadedStream):
         self.paused = False
         self.recorder = None
 
-        self.post_frames = True
-        self.post_bytes = False
-
         super(CameraStream, self).__init__(enabled, name, log_level)
 
         self.recorder_tag = "recorder"
 
-    def take(self):
-        if self.recorder_tag in self.streams:
-            self.recorder = self.streams[self.recorder_tag]
+    def take(self, subscriptions):
+        if self.recorder_tag in subscriptions:
+            self.recorder = subscriptions[self.recorder_tag].stream
 
     def log_frame(self):
         self.logger.debug("frame #%s" % self.num_frames)
@@ -80,16 +78,11 @@ class RecordingStream(DataStream):
         self.capture = None
         self.is_recording = False
 
-        self.capture_tag = self.require_stream("capture")
-
     def make_dirs(self):
         if self.directory is not None and len(self.directory) > 0 and not os.path.isdir(self.directory):
             os.makedirs(self.directory)
         else:
             self.logger.debug("Not making directory: '%s'" % self.directory)
-
-    def take(self):
-        self.capture = self.streams[self.capture_tag]
 
     def start_recording(self):
         pass
