@@ -108,8 +108,11 @@ class Robot:
                 self.logger.debug("Coroutines complete")
 
                 for thread_stream in thread_streams:
-                    self.logger.debug("Joining thread stream: %s" % thread_stream)
-                    thread_stream.join()
+                    if not thread_stream.has_stopped():
+                        self.logger.debug("Joining threaded stream: %s" % thread_stream)
+                        thread_stream.join()
+                    else:
+                        self.logger.debug("Threaded stream '%s' is already stopped" % thread_stream)
 
                 self.logger.debug("Robot has finished")
             else:

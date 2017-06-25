@@ -30,7 +30,8 @@ class PiCamera(CameraStream):
             self.capture.start_preview()
             time.sleep(2)
 
-            self.recorder.start_recording()
+            if self.recorder is not None:
+                self.recorder.start_recording()
 
             raw_capture = PiRGBArray(self.capture, size=self.capture.resolution)
             for frame in self.capture.capture_continuous(raw_capture, format="bgr", use_video_port=True):
@@ -48,9 +49,11 @@ class PiCamera(CameraStream):
                     time.sleep(0.1)
 
                 if not self.running():
-                    self.recorder.stop_recording()
+                    if self.recorder is not None:
+                        self.recorder.stop_recording()
                     return
 
     def stop(self):
         # self.capture.stop_preview()  # picamera complains when this is called while recording
-        self.recorder.stop_recording()
+        if self.recorder is not None:
+            self.recorder.stop_recording()

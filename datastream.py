@@ -2,7 +2,6 @@ import time
 # import asyncio
 import logging
 from queue import Queue
-import janus
 from threading import Thread, Event
 
 
@@ -43,6 +42,7 @@ class DataStream:
         self.subscribers = []
         self._subscriber_name_mapping = {}
         self._subscriber_stream_mapping = {}
+        self._subscriber_feed_enabled = {}
         self._required_subscriptions = []
 
         # instance of logging. Use this instance to print debug statement and log
@@ -107,12 +107,39 @@ class DataStream:
         else:
             self.logger.debug("stream disabled, not calling self.take()")
 
+    def take(self):
+        """
+        Callback for give
+
+        Usage:
+        new_stream = SomeStream()
+        other_stream = OtherStream()
+
+        new_stream.give(identifying_string=other_stream)  # new_stream's take is called
+
+        Example (overwrite this method and put this code in):
+
+        self.other_stream = self.streams["identifying_string"]
+        :return:
+        """
+        pass
+
     def subscribe(self, **streams):
         self._subscriber_stream_mapping = streams  # key: some name, value: stream
+        for name in self._subscriber_name_mapping:
+            self._subscriber_feed_enabled[name] = True
 
         self._check_required_subscriptions()
 
+        if self.enabled:
+            self.subscribe_callback()
+        else:
+            self.logger.debug("stream disabled, not calling self.take()")
+
         self.logger.debug("subscribing to streams:" + str([str(stream) for stream in streams.values()]))
+
+    def subscribe_callback(self):
+        pass
 
     def get_feed(self, subscription):
         if isinstance(subscription, DataStream):
@@ -181,6 +208,28 @@ class DataStream:
                         self.name, required_name, "SomeStream" if required_class is None else required_class.__name__)
                 )
 
+    def disable_feed(self, subscription=None):
+        if subscription is None:  # disable all
+            for name in self._subscriber_feed_enabled:
+                self._subscriber_feed_enabled[name] = False
+        else:
+            if isinstance(subscription, DataStream):
+                name = self._subscriber_name_mapping[subscription]
+            else:
+                name = subscription
+            self._subscriber_feed_enabled[name] = False
+
+    def enable_feed(self, subscription=None):
+        if subscription is None:  # enable all
+            for name in self._subscriber_feed_enabled:
+                self._subscriber_feed_enabled[name] = True
+        else:
+            if isinstance(subscription, DataStream):
+                name = self._subscriber_name_mapping[subscription]
+            else:
+                name = subscription
+            self._subscriber_feed_enabled[name] = True
+
     def receive_log(self, log_level, message, line_info):
         """
         If LogParser is given to Robot and this stream is given to LogParser, it will give any matching log messages it
@@ -199,23 +248,6 @@ class DataStream:
     def log_filter(self, record):
         record.version = self.version
         return True
-
-    def take(self):
-        """
-        Callback for give
-
-        Usage:
-        new_stream = SomeStream()
-        other_stream = OtherStream()
-
-        new_stream.give(identifying_string=other_stream)  # new_stream's take is called
-
-        Example (overwrite this method and put this code in):
-
-        self.other_stream = self.streams["identifying_string"]
-        :return:
-        """
-        pass
 
     def start(self):
         """
@@ -262,6 +294,9 @@ class DataStream:
             self.start_time = self.time_started()
             self.start()
             self._init()
+
+    def has_started(self):
+        return self._has_started.is_set()
 
     def _run(self):
         """
@@ -310,6 +345,9 @@ class DataStream:
         Stop behavior of the stream
         """
         pass
+
+    def has_stopped(self):
+        return self._has_stopped.is_set()
 
     def stopped(self):
         """

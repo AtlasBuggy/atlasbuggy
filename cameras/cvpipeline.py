@@ -8,15 +8,22 @@ class CvPipeline(ThreadedStream):
 
         self.capture = None
         self.post_bytes = post_bytes
+        self.capture_feed = None
 
     def take(self):
         self.capture = self.streams["capture"]
 
+    def start(self):
+        self.capture_feed = self.get_feed(self.capture)
+
     def run(self):
         while self.running():
             if self.capture.post_frames:
-                while not self.get_feed(self.capture).empty():
-                    output = self.get_feed(self.capture).get()
+
+                while not self.capture_feed.empty():
+                    output = self.capture_feed.get()
+                    while self.capture_feed.qsize() > 5:
+                        output = self.capture_feed.get()
                     if self.capture.post_bytes:
                         frame, bytes_frame = output
                     else:

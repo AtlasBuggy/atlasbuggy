@@ -1,6 +1,6 @@
 import cv2
 
-from atlasbuggy.cameras.viewer.__init__ import CameraViewer
+from atlasbuggy.cameras.viewer import CameraViewer
 
 
 class CameraViewerWithTrackbar(CameraViewer):
@@ -16,11 +16,14 @@ class CameraViewerWithTrackbar(CameraViewer):
         self.paused = False
         self.frame = None
 
+        self.capture_tag = self.require_stream("capture")
+        self.require_subscription(self.capture_tag)
+
     def take(self):
         self.take_capture()
 
     def take_capture(self):
-        self.capture = self.streams["capture"]
+        self.capture = self.streams[self.capture_tag]
 
         self.num_frames = self.capture.num_frames
         self.slider_ticks = int(self.capture.capture.get(cv2.CAP_PROP_FRAME_WIDTH) // 3)

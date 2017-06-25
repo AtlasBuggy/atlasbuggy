@@ -31,8 +31,11 @@ class CameraStream(ThreadedStream):
 
         super(CameraStream, self).__init__(enabled, name, log_level)
 
+        self.recorder_tag = "recorder"
+
     def take(self):
-        self.recorder = self.streams["recorder"]
+        if self.recorder_tag in self.streams:
+            self.recorder = self.streams[self.recorder_tag]
 
     def log_frame(self):
         self.logger.debug("frame #%s" % self.num_frames)
@@ -77,6 +80,8 @@ class RecordingStream(DataStream):
         self.capture = None
         self.is_recording = False
 
+        self.capture_tag = self.require_stream("capture")
+
     def make_dirs(self):
         if self.directory is not None and len(self.directory) > 0 and not os.path.isdir(self.directory):
             os.makedirs(self.directory)
@@ -84,7 +89,7 @@ class RecordingStream(DataStream):
             self.logger.debug("Not making directory: '%s'" % self.directory)
 
     def take(self):
-        self.capture = self.streams["capture"]
+        self.capture = self.streams[self.capture_tag]
 
     def start_recording(self):
         pass
