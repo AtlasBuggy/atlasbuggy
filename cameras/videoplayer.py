@@ -130,19 +130,10 @@ class VideoPlayer(CameraStream):
                     self.frame, (self.resize_width, self.resize_height), interpolation=cv2.INTER_NEAREST
                 )
 
-            if self.post_bytes:
-                self.bytes_frame = self.numpy_to_bytes(self.frame)
-            self.post_all(self.frame)
+            self.post(self.frame)
 
-    def post_single(self, feed, frame):
-        data = []
-        if self.post_frames:
-            data.append(frame.copy())
-        if self.post_bytes:
-            data.append(self.bytes_frame)
-
-        if len(data) > 0:
-            feed.put(data)
+    def post_behavior(self, data):
+        return data.copy()
 
     def run(self):
         while self.running():
