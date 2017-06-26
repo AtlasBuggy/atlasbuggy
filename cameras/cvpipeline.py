@@ -3,10 +3,8 @@ from atlasbuggy.subscriptions import Update
 
 
 class CvPipeline(ThreadedStream):
-    def __init__(self, enabled, log_level, name=None, post_bytes=False,):
+    def __init__(self, enabled, log_level, name=None, ):
         super(CvPipeline, self).__init__(enabled, name, log_level)
-
-        self.post_bytes = post_bytes
 
         self.capture = None
         self.capture_feed = None
@@ -23,21 +21,13 @@ class CvPipeline(ThreadedStream):
                 self.update_pipeline(self.capture_feed.get())
 
     def update_pipeline(self, frame):
-        output = self.pipeline(frame)
-        if type(output) != tuple:
-            frame = output
-        else:
-            frame = output[0]
-
-        if self.post_bytes:
-            bytes_frame = self.capture.numpy_to_bytes(frame)
-        else:
-            bytes_frame = None
-
-        self.post((frame, bytes_frame))
+        self.post(self.pipeline(frame))
 
     def post_behavior(self, data):
-        return data[0].copy(), data[1]
+        if type(data) != tuple:
+            return data.copy()
+        else:
+            return data[0].copy(), data[1:]
 
     def pipeline(self, frame):
         raise NotImplementedError("Please override this method.")

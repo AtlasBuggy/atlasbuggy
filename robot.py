@@ -108,7 +108,7 @@ class Robot:
                 self.logger.debug("Coroutines complete")
 
                 for thread_stream in thread_streams:
-                    if not thread_stream.has_stopped():
+                    if not thread_stream.has_stopped() and DataStream.running():
                         self.logger.debug("Joining threaded stream: %s" % thread_stream)
                         thread_stream.join()
                     else:
@@ -123,7 +123,7 @@ class Robot:
             self.stop()
             raise
         self.stop()
-        self.logger.debug("applying regex end character:\n[")
+        self.logger.debug("finished")
 
     def stop(self):
         self.logger.debug("Calling stop")

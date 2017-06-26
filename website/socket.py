@@ -75,6 +75,8 @@ class SocketServer(AsyncStream):
             client_writer.close()
             self.logger.debug("ending connection")
 
+            self.client_connected(closed_client_name)
+
         task.add_done_callback(client_done)
 
     async def handle_client(self, client_reader, client_writer):
@@ -87,6 +89,8 @@ class SocketServer(AsyncStream):
 
         self.client_writers[client_name] = client_writer
         self.logger.debug("'%s' has connected" % client_name)
+
+        self.client_connected(client_name)
 
         try:
             while True:
@@ -104,6 +108,12 @@ class SocketServer(AsyncStream):
         except ConnectionResetError as error:
             self.logger.exception(error)
             return client_name
+
+    def client_connected(self, name):
+        pass
+
+    def client_disconnected(self):
+        pass
 
     def write(self, client, line, append_newline=True):
         if type(line) == str:

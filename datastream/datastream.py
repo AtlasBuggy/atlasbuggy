@@ -111,12 +111,14 @@ class DataStream:
                 if subscription_class is not None or stream_class is not None:
                     message += "This streams requires "
                     if subscription_class is not None:
-                        message += "a subscription of type '%s' " % subscription_class.__name__
+                        message += "a subscription of type '%s'" % subscription_class.__name__
 
                     if stream_class is not None:
                         if subscription_class is not None:
-                            message += "and "
+                            message += " and "
                         message += "a stream of type '%s'. " % stream_class.__name__
+                    else:
+                        message += ". "
 
                 if satisfied == 1:
                     message += "Tags don't match!"
