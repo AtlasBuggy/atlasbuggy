@@ -95,6 +95,7 @@ class DataStream:
         self._required_subscriptions[tag] = (subscription_class, stream_class)
 
     def _check_subscriptions(self):
+        self.logger.debug("Checking subscriptions")
         for tag, (subscription_class, stream_class) in self._required_subscriptions.items():
             satisfied = 0
             if tag not in self.subscriptions:
@@ -134,8 +135,14 @@ class DataStream:
             if subscription.enabled:
                 subscription.post(self.post_behavior(data))
 
+                if subscription.callback is not None:
+                    subscription.callback(subscription.tag)
+
     def post_behavior(self, data):
         return data
+
+    def receive_post(self, tag):
+        pass
 
     def receive_log(self, log_level, message, line_info):
         """
@@ -216,8 +223,8 @@ class DataStream:
             self.logger.debug("calling run")
             self.run()
         except BaseException:
-            self._stop()  # in threads, stop is called inside the thread instead to avoid race conditions
             self.logger.debug("catching exception in threaded loop")
+            self._stop()  # in threads, stop is called inside the thread instead to avoid race conditions
             self.exit()
             raise
 

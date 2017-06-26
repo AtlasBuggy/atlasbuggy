@@ -109,7 +109,10 @@ class Robot:
 
                 for thread_stream in thread_streams:
                     if not thread_stream.has_stopped() and DataStream.running():
-                        self.logger.debug("Joining threaded stream: %s" % thread_stream)
+                        self.logger.debug(
+                            "Joining threaded stream: %s. Thread has stopped: %s. Event event thrown: %s" % (
+                                thread_stream, thread_stream.has_stopped(), not DataStream.running())
+                        )
                         thread_stream.join()
                     else:
                         self.logger.debug("Threaded stream '%s' is already stopped" % thread_stream)

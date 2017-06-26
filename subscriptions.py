@@ -3,11 +3,12 @@ from threading import Lock
 
 
 class Subscription:
-    def __init__(self, tag, stream, enabled=True):
+    def __init__(self, tag, stream, callback=None, enabled=True):
         self.tag = tag
         self.stream = stream
         self.enabled = enabled
         self.description = "subscribing to"
+        self.callback = callback
 
     def post(self, data):
         pass
@@ -17,8 +18,8 @@ class Subscription:
 
 
 class Feed(Subscription):
-    def __init__(self, tag, stream, enabled=True):
-        super(Feed, self).__init__(tag, stream, enabled)
+    def __init__(self, tag, stream, callback=None, enabled=True):
+        super(Feed, self).__init__(tag, stream, callback, enabled)
         self.queue = Queue()
 
         self.description = "receiving feed from"
@@ -31,8 +32,8 @@ class Feed(Subscription):
 
 
 class Update(Subscription):
-    def __init__(self, tag, stream, enabled=True):
-        super(Update, self).__init__(tag, stream, enabled)
+    def __init__(self, tag, stream, callback=None, enabled=True):
+        super(Update, self).__init__(tag, stream, callback, enabled)
         self.queue = _SingletonQueue()
         self.description = "receiving updates from"
 

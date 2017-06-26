@@ -16,9 +16,11 @@ class VideoPlayer(CameraStream):
 
         if "file_name" in load_video_args and load_video_args["file_name"] is not None:
             self.load_video(**load_video_args)
+        else:
+            self.paused = True
 
     def load_video(self, file_name, directory="", width=None, height=None, frame_skip=0,
-                   loop_video=False, start_frame=0, post_bytes=False):
+                   loop_video=False, start_frame=0):
         with self.frame_lock:
             self.release_capture()
 
@@ -47,8 +49,6 @@ class VideoPlayer(CameraStream):
 
             self.frame_lock = Lock()
             self.paused = False
-
-            self.post_bytes = post_bytes
 
             self.fps = self.capture.get(cv2.CAP_PROP_FPS)
             self.delay = 1 / self.fps
@@ -83,6 +83,12 @@ class VideoPlayer(CameraStream):
             self.frame_skip = frame_skip
             self.loop_video = loop_video
 
+            self.logger.debug(
+                "Video loaded: width = %s, height = %s, resize_width = %s, resize_height = %s, fps = %s" % (
+                    self.width, self.height, self.resize_width, self.resize_height, self.fps
+                )
+            )
+
     def current_pos(self):
         with self.frame_lock:
             return int(self.capture.get(cv2.CAP_PROP_POS_FRAMES))
@@ -116,10 +122,13 @@ class VideoPlayer(CameraStream):
             self.next_frame += 1
 
             success, self.frame = self.capture.read()
-
             if not success or self.frame is None:
                 if self.loop_video:
-                    self.set_frame(0)
+                    self.logger.debug("Looping video")
+                    self.next_frame = 0
+                    self.frame = None
+                    self._set_frame(self.next_frame)
+
                     while success is False or self.frame is None:
                         success, self.frame = self.capture.read()
                 else:
@@ -131,6 +140,7 @@ class VideoPlayer(CameraStream):
                 )
 
             self.post(self.frame)
+        self.clock.update()
 
     def post_behavior(self, data):
         return data.copy()
@@ -139,7 +149,6 @@ class VideoPlayer(CameraStream):
         while self.running():
             self._get_frame()
             self.update()
-            self.clock.update()
 
     def stop(self):
         self.release_capture()

@@ -77,6 +77,8 @@ class RecordingStream(DataStream):
 
         self.capture = None
         self.is_recording = False
+        self.fps = 30.0
+        self.num_frames = 0
 
     def make_dirs(self):
         if self.directory is not None and len(self.directory) > 0 and not os.path.isdir(self.directory):
