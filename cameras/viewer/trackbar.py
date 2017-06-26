@@ -1,6 +1,7 @@
 import cv2
 
 from atlasbuggy.cameras.viewer import CameraViewer
+from atlasbuggy.subscriptions import Update
 
 
 class CameraViewerWithTrackbar(CameraViewer):
@@ -11,19 +12,21 @@ class CameraViewerWithTrackbar(CameraViewer):
         self.slider_ticks = 0
         self.num_frames = 0
 
-        self.capture = None
-
         self.paused = False
         self.frame = None
 
         self.capture_tag = "capture"
-        self.require_subscription(self.capture_tag)
+        self.require_subscription(self.capture_tag, Update)
+
+        self.capture = None
+        self.capture_feed = None
 
     def take(self, subscriptions):
         self.take_capture(subscriptions)
 
     def take_capture(self, subscriptions):
         self.capture = subscriptions[self.capture_tag].stream
+        self.capture_feed = subscriptions[self.capture_tag].queue
 
         self.num_frames = self.capture.num_frames
         self.slider_ticks = int(self.capture.capture.get(cv2.CAP_PROP_FRAME_WIDTH) // 3)
@@ -50,21 +53,10 @@ class CameraViewerWithTrackbar(CameraViewer):
 
     def get_frame(self):
         self.update_slider_pos()
-        return self.check_feed_for_frames()
-
-    def check_feed_for_frames(self):
-        frame = None
-        if self.capture.post_frames:
-            output = None
-            while not self.get_feed(self.capture).empty():
-                output = self.get_feed(self.capture).get()
-
-            if output is not None:
-                if self.capture.post_bytes:
-                    frame, bytes_frame = output
-                else:
-                    frame = output[0]
-        return frame
+        if self.capture_feed.empty():
+            return None
+        else:
+            return self.capture_feed.get()
 
     def current_frame_num(self):
         return self.capture.current_pos()
