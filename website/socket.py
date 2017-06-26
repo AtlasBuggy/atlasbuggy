@@ -3,7 +3,7 @@ from atlasbuggy.datastream import AsyncStream
 
 
 class SocketClient(AsyncStream):
-    def __init__(self, name, host, port=5001, enabled=True, log_level=None, timeout=10):
+    def __init__(self, name, host, port=5001, enabled=True, log_level=None, timeout=1):
         super(SocketClient, self).__init__(enabled, name, log_level)
         self.host = host
         self.port = port
@@ -43,13 +43,13 @@ class SocketClient(AsyncStream):
         data += "\n"
         self.writer.write(data.encode())
 
-    def write_eof(self):
+    def stop(self):
         self.writer.write_eof()
         self.exit()
 
 
 class SocketServer(AsyncStream):
-    def __init__(self, enabled=True, log_level=None, name=None, host='0.0.0.0', port=5001, timeout=None):
+    def __init__(self, enabled=True, log_level=None, name=None, host='0.0.0.0', port=5001, timeout=1):
         super(SocketServer, self).__init__(enabled, name, log_level)
 
         self.host = host
@@ -93,7 +93,7 @@ class SocketServer(AsyncStream):
         self.client_connected(client_name)
 
         try:
-            while True:
+            while self.running():
                 if self.timeout is None:
                     data = await client_reader.readline()
                 else:
