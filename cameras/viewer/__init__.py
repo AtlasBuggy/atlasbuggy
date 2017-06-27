@@ -40,7 +40,6 @@ class CameraViewer(AsyncStream):
     async def run(self):
         while self.running():
             self.show_frame()
-            self.update()
             await asyncio.sleep(self.delay)
 
     def get_frame(self):
@@ -69,7 +68,7 @@ class CameraViewer(AsyncStream):
         if not self.enabled:
             return 255
         key = cv2.waitKey(delay)
-        if key != 255:
+        if key > -1:
             if key in self.key_codes:
                 self.key = self.key_codes[key]
             elif 0 <= key < 0x100:

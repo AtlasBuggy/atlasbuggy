@@ -101,7 +101,9 @@ class DataStream:
             if tag not in self.subscriptions:
                 satisfied = 1
 
-            if subscription_class is not None and type(self.subscriptions[tag]) != subscription_class:
+            if subscription_class is not None and \
+                            tag in self.subscriptions and \
+                            type(self.subscriptions[tag]) != subscription_class:
                 satisfied = 2
 
             if stream_class is not None and type(self.subscriptions[tag].stream) != stream_class:

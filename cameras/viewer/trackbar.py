@@ -36,7 +36,7 @@ class CameraViewerWithTrackbar(CameraViewer):
 
         cv2.createTrackbar(self.slider_name, self.name, 0, self.slider_ticks, self._on_slider)
 
-        self.delay = 1 / self.capture.fps
+        self.delay = 0.5 / self.capture.fps
 
     def _on_slider(self, slider_index):
         slider_frame_num = int(slider_index * self.num_frames / self.slider_ticks)
@@ -56,7 +56,12 @@ class CameraViewerWithTrackbar(CameraViewer):
         if self.capture_feed.empty():
             return None
         else:
-            return self.capture_feed.get()
+            frame = self.capture_feed.get()
+            self.draw(frame)
+            return frame
+
+    def draw(self, frame):
+        pass
 
     def current_frame_num(self):
         return self.capture.current_pos()

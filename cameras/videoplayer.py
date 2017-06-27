@@ -22,7 +22,6 @@ class VideoPlayer(CameraStream):
     def load_video(self, file_name, directory="", width=None, height=None, frame_skip=0,
                    loop_video=False, start_frame=0):
         with self.frame_lock:
-            self.release_capture()
 
             if file_name is None:
                 file_name = time.strftime("%H;%M;%S.avi")
@@ -33,19 +32,25 @@ class VideoPlayer(CameraStream):
             self.directory = directory
 
             self.full_path = os.path.join(self.directory, self.file_name)
+            print(self.full_path)
             if not os.path.isfile(self.full_path):
                 raise FileNotFoundError("Video File '%s' not found" % self.full_path)
 
             if self.full_path in VideoPlayer.loaded_videos:
-                self.capture = VideoPlayer.loaded_videos[self.full_path]
+                if self.capture == VideoPlayer.loaded_videos[self.full_path]:
+                    self.reset_video()
+                    return
 
-                self.set_frame(start_frame)
+                self.release_capture()
+                self.capture = VideoPlayer.loaded_videos[self.full_path]
+                self.reset_video()
             else:
+                self.release_capture()
                 self.capture = cv2.VideoCapture(self.full_path)
                 VideoPlayer.loaded_videos[self.full_path] = self.capture
 
                 if start_frame > 0:
-                    self.set_frame(start_frame)
+                    self.reset_video(start_frame)
 
             self.frame_lock = Lock()
             self.paused = False
@@ -108,6 +113,11 @@ class VideoPlayer(CameraStream):
 
             self.capture.set(cv2.CAP_PROP_POS_FRAMES, int(position))
 
+    def reset_video(self, position=0):
+        self.next_frame = position
+        self.frame = None
+        self._set_frame(self.next_frame)
+
     def _get_frame(self):
         if self.paused:
             return
@@ -125,9 +135,7 @@ class VideoPlayer(CameraStream):
             if not success or self.frame is None:
                 if self.loop_video:
                     self.logger.debug("Looping video")
-                    self.next_frame = 0
-                    self.frame = None
-                    self._set_frame(self.next_frame)
+                    self.reset_video()
 
                     while success is False or self.frame is None:
                         success, self.frame = self.capture.read()
