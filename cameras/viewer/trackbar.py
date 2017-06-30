@@ -99,7 +99,7 @@ class CameraViewerWithTrackbar(CameraViewer):
         else:
             self.pause()
 
-    def key_callback(self, key):
+    def key_down(self, key):
         if key == 'q':
             self.exit()
         elif key == ' ':

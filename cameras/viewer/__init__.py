@@ -79,11 +79,9 @@ class CameraViewer(AsyncStream):
             else:
                 print(("Unrecognized key: " + str(key)))
 
-            self.key_callback(self.key)
-        else:
-            self.key = key
+            self.key_down(self.key)
 
-    def key_callback(self, key):
+    def key_down(self, key):
         if key == 'q':
             self.exit()
 

@@ -155,6 +155,7 @@ class VideoPlayer(CameraStream):
     def run(self):
         while self.running():
             self._get_frame()
+            time.sleep(self.delay)
             self.update()
 
     def stop(self):
