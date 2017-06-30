@@ -12,7 +12,6 @@ class CameraViewerWithTrackbar(CameraViewer):
         self.slider_ticks = 0
         self.num_frames = 0
 
-        self.paused = False
         self.frame = None
 
         self.capture_tag = "capture"
@@ -27,7 +26,9 @@ class CameraViewerWithTrackbar(CameraViewer):
     def take_capture(self, subscriptions):
         self.capture = subscriptions[self.capture_tag].stream
         self.capture_feed = subscriptions[self.capture_tag].queue
+        self.initialize_trackbar()
 
+    def initialize_trackbar(self):
         self.num_frames = self.capture.num_frames
         self.slider_ticks = int(self.capture.capture.get(cv2.CAP_PROP_FRAME_WIDTH) // 3)
 
@@ -79,20 +80,27 @@ class CameraViewerWithTrackbar(CameraViewer):
         """
         self.key_pressed()
 
-        if self.paused:
-            frame = self.frame
-        else:
-            frame = self.get_frame()
-            self.frame = frame
+        frame = self.get_frame()
 
         if frame is None:
             return
 
         cv2.imshow(self.name, frame)
 
+    def pause(self):
+        self.capture.paused = True
+
+    def unpause(self):
+        self.capture.paused = False
+
+    def toggle_pause(self):
+        if self.capture.paused:
+            self.unpause()
+        else:
+            self.pause()
+
     def key_callback(self, key):
         if key == 'q':
             self.exit()
         elif key == ' ':
-            self.paused = not self.paused
-            self.capture.paused = self.paused
+            self.toggle_pause()

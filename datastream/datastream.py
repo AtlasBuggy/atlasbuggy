@@ -172,6 +172,9 @@ class DataStream:
         """
         pass
 
+    def started(self):
+        pass
+
     @staticmethod
     def running():
         """
@@ -222,6 +225,7 @@ class DataStream:
         """
 
         try:
+            self.started()
             self.logger.debug("calling run")
             self.run()
         except BaseException:

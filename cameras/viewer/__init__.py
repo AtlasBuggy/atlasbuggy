@@ -40,7 +40,10 @@ class CameraViewer(AsyncStream):
     async def run(self):
         while self.running():
             self.show_frame()
-            await asyncio.sleep(self.delay)
+            await self.update()
+
+    async def update(self):
+        await asyncio.sleep(self.delay)
 
     def get_frame(self):
         raise NotImplementedError("Please overwrite this method")

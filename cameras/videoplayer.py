@@ -32,7 +32,6 @@ class VideoPlayer(CameraStream):
             self.directory = directory
 
             self.full_path = os.path.join(self.directory, self.file_name)
-            print(self.full_path)
             if not os.path.isfile(self.full_path):
                 raise FileNotFoundError("Video File '%s' not found" % self.full_path)
 
@@ -104,7 +103,6 @@ class VideoPlayer(CameraStream):
     def set_frame(self, position):
         with self.frame_lock:
             self.next_frame = position
-            self.frame = None
 
     def _set_frame(self, position):
         if position >= 0:
@@ -120,7 +118,8 @@ class VideoPlayer(CameraStream):
 
     def _get_frame(self):
         if self.paused:
-            return
+            self.set_frame(self.next_frame - 1)
+
         if self.frame_skip > 0:
             self._set_frame(self.current_pos() + self.frame_skip)
 

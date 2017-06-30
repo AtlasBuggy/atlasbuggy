@@ -17,6 +17,7 @@ class AsyncStream(DataStream):
         """
 
         try:
+            self.started()
             await self.run()
         except BaseException:
             self._stop()
