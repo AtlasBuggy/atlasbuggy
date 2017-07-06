@@ -118,7 +118,7 @@ class VideoPlayer(CameraStream):
 
     def _get_frame(self):
         if self.paused:
-            self.set_frame(self.next_frame - 1)
+            self.set_frame(self.next_frame - 1 - self.frame_skip)  # keep the video in place
 
         if self.frame_skip > 0:
             self._set_frame(self.current_pos() + self.frame_skip)
@@ -128,7 +128,7 @@ class VideoPlayer(CameraStream):
                 self._set_frame(self.next_frame)
 
             self.current_frame = self.next_frame
-            self.next_frame += 1
+            self.next_frame += self.frame_skip + 1
 
             success, self.frame = self.capture.read()
             if not success or self.frame is None:

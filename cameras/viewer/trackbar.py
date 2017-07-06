@@ -5,8 +5,8 @@ from atlasbuggy.subscriptions import Update
 
 
 class CameraViewerWithTrackbar(CameraViewer):
-    def __init__(self, enabled=True, log_level=None, name=None):
-        super(CameraViewerWithTrackbar, self).__init__(enabled, log_level, name)
+    def __init__(self, enabled=True, log_level=None, name=None, version="1.0"):
+        super(CameraViewerWithTrackbar, self).__init__(enabled, log_level, name, version)
 
         self.slider_name = "frame:"
         self.slider_ticks = 0
@@ -67,8 +67,10 @@ class CameraViewerWithTrackbar(CameraViewer):
     def current_frame_num(self):
         return self.capture.current_pos()
 
-    def update_slider_pos(self):
-        slider_pos = int(self.current_frame_num() * self.slider_ticks / self.num_frames)
+    def update_slider_pos(self, position=None):
+        if position is None:
+            position = self.current_frame_num()
+        slider_pos = int(position * self.slider_ticks / self.num_frames)
         cv2.setTrackbarPos(self.slider_name, self.name, slider_pos)
 
     def show_frame(self):

@@ -5,9 +5,9 @@ from atlasbuggy import get_platform
 
 
 class CameraViewer(AsyncStream):
-    def __init__(self, enabled=True, log_level=None, name=None):
+    def __init__(self, enabled=True, log_level=None, name=None, version="1.0"):
 
-        super(CameraViewer, self).__init__(enabled, name, log_level)
+        super(CameraViewer, self).__init__(enabled, name, log_level, version)
 
         if self.enabled:
             cv2.namedWindow(self.name)
