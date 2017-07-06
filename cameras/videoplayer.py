@@ -115,6 +115,7 @@ class VideoPlayer(CameraStream):
         self.next_frame = position
         self.frame = None
         self._set_frame(self.next_frame)
+        self.reset_callback()
 
     def _get_frame(self):
         if self.paused:
@@ -148,6 +149,9 @@ class VideoPlayer(CameraStream):
 
             self.post(self.frame)
         self.clock.update()
+
+    def reset_callback(self):
+        pass
 
     def post_behavior(self, data):
         return data.copy()

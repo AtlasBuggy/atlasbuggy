@@ -58,7 +58,7 @@ class CameraViewerWithTrackbar(CameraViewer):
             return None
         else:
             frame = self.capture_feed.get()
-            self.draw(frame)
+            frame = self.draw(frame)
             return frame
 
     def draw(self, frame):
