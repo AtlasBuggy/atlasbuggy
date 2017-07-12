@@ -1,5 +1,4 @@
 from atlasbuggy import ThreadedStream
-from atlasbuggy.subscriptions import Update
 
 
 class CvPipeline(ThreadedStream):
@@ -9,7 +8,7 @@ class CvPipeline(ThreadedStream):
         self.capture = None
         self.capture_feed = None
         self.capture_tag = "capture"
-        self.require_subscription(self.capture_tag, Update)
+        self.require_subscription(self.capture_tag)
 
     def take(self, subscriptions):
         self.capture = self.subscriptions[self.capture_tag].stream

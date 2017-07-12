@@ -41,7 +41,7 @@ class CameraViewerWithTrackbar(CameraViewer):
 
     def _on_slider(self, slider_index):
         slider_frame_num = int(slider_index * self.num_frames / self.slider_ticks)
-        if abs(slider_frame_num - self.current_frame_num()) > 5:
+        if abs(slider_frame_num - self.current_frame_num()) > 3:
             self.set_frame(slider_frame_num)
 
             self.on_slider(slider_index)
@@ -52,17 +52,20 @@ class CameraViewerWithTrackbar(CameraViewer):
     def set_frame(self, frame_num):
         self.capture.set_frame(frame_num)
 
+    def get_frame_from_feed(self):
+        return self.capture_feed.get()
+
     def get_frame(self):
         self.update_slider_pos()
         if self.capture_feed.empty():
             return None
         else:
-            frame = self.capture_feed.get()
+            frame = self.get_frame_from_feed()
             frame = self.draw(frame)
             return frame
 
     def draw(self, frame):
-        pass
+        return frame
 
     def current_frame_num(self):
         return self.capture.current_pos()
@@ -100,6 +103,9 @@ class CameraViewerWithTrackbar(CameraViewer):
             self.unpause()
         else:
             self.pause()
+
+    def is_paused(self):
+        return self.capture.paused
 
     def key_down(self, key):
         if key == 'q':

@@ -8,6 +8,9 @@ from atlasbuggy.datastream import AsyncStream
 
 
 class LogParser(AsyncStream):
+    """
+    Parse a log file to simulate how the robot behaved that day
+    """
     def __init__(self, file_name, directory="", enabled=True, name=None, log_level=None):
         # regex string code. Logs follow a certain format. Parse out these pieces of info.
         self.pattern = re.compile(
@@ -71,13 +74,17 @@ class LogParser(AsyncStream):
                 # if line_info["year"] is of type int, convert the match to an int and assign the value to line_info
                 self.line_info[line_key] = type(self.line_info[line_key])(line_value)
 
+            # a quirk of the way I'm parsing with regex. Move the last character of the message to the beginning and
+            # remove trailing newlines
             line = match.group()
             self.line = (line[-1] + line[:-1]).strip("\n")
             self.line_info["message"] = self.line_info["message"][:-1].strip("\n")
 
-            if self.prev_time is not None:
-                self.prev_time = self.line_info["timestamp"]
+            # under scrutiny, not sure what this was for
+            # if self.prev_time is not None:
+            #     self.prev_time = self.line_info["timestamp"]
 
+            # create a unix timestamp using the date
             current_date = datetime.datetime(
                 self.line_info["year"],
                 self.line_info["month"],
@@ -86,6 +93,7 @@ class LogParser(AsyncStream):
                 self.line_info["minute"],
                 self.line_info["second"],
                 self.line_info["millisecond"])
+
             # make timestamp from unix epoch
             self.line_info["timestamp"] = time.mktime(current_date.timetuple()) + current_date.microsecond / 1e6
 
@@ -94,11 +102,16 @@ class LogParser(AsyncStream):
                 stream = stream_names[self.line_info["name"]]
                 stream.receive_log(self.line_info["loglevel"], self.line_info["message"], self.line_info)
 
+            # call subclass's update
             await self.update()
 
             self.prev_time = self.line_info["timestamp"]
 
     def time_diff(self):
+        """
+        Get time since the last log message
+        :return: 0.0 if no log messages have been received yet
+        """
         if self.prev_time is None:
             return 0.0
         else:
