@@ -1,6 +1,6 @@
 import cv2
 
-from atlasbuggy.cameras.viewer import CameraViewer
+from atlasbuggy.cameras.viewer.viewer import CameraViewer
 from atlasbuggy.subscriptions import Update
 
 
@@ -15,7 +15,7 @@ class CameraViewerWithTrackbar(CameraViewer):
         self.frame = None
 
         self.capture_tag = "capture"
-        self.require_subscription(self.capture_tag, Update)
+        self.require_subscription(self.capture_tag)
 
         self.capture = None
         self.capture_feed = None
