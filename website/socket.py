@@ -18,7 +18,7 @@ class SocketClient(AsyncStream):
         self.logger.debug("Connection opened with %s:%s" % (self.host, self.port))
 
         self.write(self.name + "\n")
-        while self.running():
+        while self.is_running():
             await self.update()
 
         self.logger.debug("Disconnected from %s %d" % (self.host, self.port))
@@ -61,7 +61,7 @@ class SocketServer(AsyncStream):
     async def run(self):
         self.logger.debug("Starting server on %s:%s" % (self.host, self.port))
         await asyncio.start_server(self.accept_client, host=self.host, port=self.port)
-        while self.running():
+        while self.is_running():
             await self.update()
         self.logger.debug("socket server exiting")
 
@@ -93,7 +93,7 @@ class SocketServer(AsyncStream):
         self.client_connected(client_name)
 
         try:
-            while self.running():
+            while self.is_running():
                 if self.timeout is None:
                     data = await client_reader.readline()
                 else:

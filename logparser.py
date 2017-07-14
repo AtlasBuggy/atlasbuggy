@@ -11,7 +11,7 @@ class LogParser(AsyncStream):
     """
     Parse a log file to simulate how the robot behaved that day
     """
-    def __init__(self, file_name, directory="", enabled=True, name=None, log_level=None):
+    def __init__(self, file_name, directory="", enabled=True, name=None, log_level=None, update_rate=0.0):
         # regex string code. Logs follow a certain format. Parse out these pieces of info.
         self.pattern = re.compile(
             r"(?P<name>[a-zA-Z0-9]*) @ "
@@ -35,11 +35,14 @@ class LogParser(AsyncStream):
         self.directory = directory
         self.full_path = os.path.join(self.directory, self.file_name)
 
+        self.streams = {}
+
         # current line of the log we're on
         self.line_number = 0
         self.line = ""
 
         self.prev_time = None
+        self.update_rate = update_rate
 
         # decompress the log file
         if self.enabled:
@@ -55,17 +58,16 @@ class LogParser(AsyncStream):
             message="",
         )
 
+    def look_for(self, *streams):
+        for stream in streams:
+            self.streams[stream.name] = stream
+
     async def run(self):
         # find all matches in the log
         matches = re.finditer(self.pattern, self.content)
 
-        # index streams by their names instead of the key word they were assigned in self.give
-        stream_names = {}
-        for stream in self.streams.values():
-            stream_names[stream.name] = stream
-
         for match_num, match in enumerate(matches):
-            if not self.running():
+            if not self.is_running():
                 break
             self.line_number = match_num
 
@@ -98,8 +100,8 @@ class LogParser(AsyncStream):
             self.line_info["timestamp"] = time.mktime(current_date.timetuple()) + current_date.microsecond / 1e6
 
             # notify stream if its name is found in the log
-            if self.line_info["name"] in stream_names:
-                stream = stream_names[self.line_info["name"]]
+            if self.line_info["name"] in self.streams:
+                stream = self.streams[self.line_info["name"]]
                 stream.receive_log(self.line_info["loglevel"], self.line_info["message"], self.line_info)
 
             # call subclass's update
@@ -118,8 +120,7 @@ class LogParser(AsyncStream):
             return self.line_info["timestamp"] - self.prev_time
 
     async def update(self):
-        self.logger.debug(self.line)
-        await asyncio.sleep(0.0)
+        await asyncio.sleep(self.update_rate)
 
 
 if __name__ == "__main__":

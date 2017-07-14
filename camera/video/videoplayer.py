@@ -4,15 +4,27 @@ from threading import Lock
 
 import cv2
 
-from atlasbuggy.cameras import CameraStream
+from atlasbuggy import ThreadedStream
 from atlasbuggy.clock import Clock
 
 
-class VideoPlayer(CameraStream):
+class VideoPlayer(ThreadedStream):
     loaded_videos = {}
 
     def __init__(self, enabled=True, log_level=None, **load_video_args):
         super(VideoPlayer, self).__init__(enabled, None, log_level)
+
+        self.capture = None
+        self.width = None
+        self.height = None
+        self.fps = None
+        self.length_sec = 0.0
+
+        self.frame = None
+        self.num_frames = 0
+        self.frame_lock = Lock()
+
+        self.paused = False
 
         if "file_name" in load_video_args and load_video_args["file_name"] is not None:
             self.load_video(**load_video_args)
@@ -93,12 +105,13 @@ class VideoPlayer(CameraStream):
                 )
             )
 
-    def current_pos(self):
+    @property
+    def current_frame_num(self):
         with self.frame_lock:
             return int(self.capture.get(cv2.CAP_PROP_POS_FRAMES))
 
     def current_time(self):
-        return self.current_pos() * self.length_sec / self.num_frames
+        return self.current_frame_num * self.length_sec / self.num_frames
 
     def set_frame(self, position):
         with self.frame_lock:
@@ -111,6 +124,9 @@ class VideoPlayer(CameraStream):
 
             self.capture.set(cv2.CAP_PROP_POS_FRAMES, int(position))
 
+    def set_pause(self, state):
+        self.paused = state
+
     def reset_video(self, position=0):
         self.next_frame = position
         self.frame = None
@@ -122,7 +138,7 @@ class VideoPlayer(CameraStream):
             self.set_frame(self.next_frame - 1 - self.frame_skip)  # keep the video in place
 
         if self.frame_skip > 0:
-            self._set_frame(self.current_pos() + self.frame_skip)
+            self._set_frame(self.current_frame_num + self.frame_skip)
 
         with self.frame_lock:
             if self.next_frame - self.current_frame != 1:
@@ -147,17 +163,17 @@ class VideoPlayer(CameraStream):
                     self.frame, (self.resize_width, self.resize_height), interpolation=cv2.INTER_NEAREST
                 )
 
-            self.post(self.frame)
+        self.post(self.frame)
         self.clock.update()
 
     def reset_callback(self):
         pass
 
-    def post_behavior(self, data):
+    def default_post_service(self, data):
         return data.copy()
 
     def run(self):
-        while self.running():
+        while self.is_running():
             self._get_frame()
             time.sleep(self.delay)
             self.update()

@@ -5,10 +5,10 @@ import cv2
 from atlasbuggy import AsyncStream, get_platform
 
 
-class CameraViewer(AsyncStream):
-    def __init__(self, enabled=True, log_level=None, name=None, version="1.0"):
+class BaseViewer(AsyncStream):
+    def __init__(self, enabled=True, log_level=None, name=None):
 
-        super(CameraViewer, self).__init__(enabled, name, log_level, version)
+        super(BaseViewer, self).__init__(enabled, name, log_level)
 
         if self.enabled:
             cv2.namedWindow(self.name)
@@ -39,7 +39,7 @@ class CameraViewer(AsyncStream):
         self.key_codes.update(new_key_codes)
 
     async def run(self):
-        while self.running():
+        while self.is_running():
             self.show_frame()
             await self.update()
 
@@ -52,10 +52,7 @@ class CameraViewer(AsyncStream):
     def set_frame(self, frame_num):
         pass
 
-    def current_frame_num(self):
-        pass
-
-    def show_frame(self):
+    async def show_frame(self):
         """
         Display the frame in the Capture's window using cv2.imshow
         """

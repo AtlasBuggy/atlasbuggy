@@ -4,11 +4,11 @@ from atlasbuggy.datastream import DataStream
 
 
 class ThreadedStream(DataStream):
-    def __init__(self, enabled, name=None, log_level=None, version="1.0"):
+    def __init__(self, enabled, name=None, log_level=None):
         """
         Initialization for threaded stream
         """
-        super(ThreadedStream, self).__init__(enabled, name, log_level, version)
+        super(ThreadedStream, self).__init__(enabled, name, log_level)
 
         self.thread = Thread(target=self._run)
         self.thread.daemon = False
@@ -28,3 +28,11 @@ class ThreadedStream(DataStream):
         Start the thread
         """
         self.thread.start()
+
+    def post(self, data, service="default"):
+        if service in self.subscribers:
+            for subscription in self.subscribers[service]:
+                if subscription.enabled:
+                    assert service == subscription.service
+                    post_fn = self.subscription_services[service]
+                    subscription.sync_post(post_fn(data))

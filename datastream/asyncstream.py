@@ -1,12 +1,13 @@
+import asyncio
 from atlasbuggy.datastream import DataStream
 
 
 class AsyncStream(DataStream):
-    def __init__(self, enabled, name=None, log_level=None, version="1.0"):
+    def __init__(self, enabled, name=None, log_level=None):
         """
         Initialization for asynchronous stream
         """
-        super(AsyncStream, self).__init__(enabled, name, log_level, version)
+        super(AsyncStream, self).__init__(enabled, name, log_level)
 
         self.task = None
         self.coroutine = None
@@ -34,3 +35,11 @@ class AsyncStream(DataStream):
         Added async tag since this method will be asynchronous
         """
         pass
+
+    async def post(self, data, service="default"):
+        if service in self.subscribers:
+            for subscription in self.subscribers[service]:
+                if subscription.enabled:
+                    assert service == subscription.service
+                    post_fn = self.subscription_services[service]
+                    await subscription.async_post(post_fn(data))

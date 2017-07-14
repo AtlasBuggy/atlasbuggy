@@ -46,7 +46,7 @@ class PygameStream(AsyncStream):
         pass
 
     async def run(self):
-        while self.running():
+        while self.is_running():
             pygame.event.pump()
 
             for event in pygame.event.get():

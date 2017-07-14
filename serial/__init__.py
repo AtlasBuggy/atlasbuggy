@@ -246,7 +246,7 @@ class SerialStream(AsyncStream):
 
     async def run(self):
         self.logger.debug("SerialStream is running")
-        while self.running():
+        while self.is_running():
             for port in self.ports.values():
                 self.check_port_packets(port)
 

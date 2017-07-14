@@ -97,7 +97,7 @@ class LivePlotter(BasePlotter, AsyncStream):
         :return: True or False if the plotting operation was successful
         """
 
-        while self.running():
+        while self.is_running():
             if self.is_closed:
                 self.exit()
                 continue

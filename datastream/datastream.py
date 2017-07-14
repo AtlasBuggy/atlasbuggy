@@ -7,7 +7,7 @@ class DataStream:
     _exited = Event()  # signal to exit
     _log_info = {}
 
-    def __init__(self, enabled, name=None, log_level=None, version="1.0"):
+    def __init__(self, enabled, name=None, log_level=None):
         """
         Initialization. No streams have started yet.
         :param enabled: True or False
@@ -21,7 +21,6 @@ class DataStream:
         self.name = name
         if type(self.name) != str:
             raise ValueError("Name isn't a string: %s" % self.name)
-        self.version = version
 
         self.enabled = enabled
 
@@ -34,8 +33,11 @@ class DataStream:
         self._has_stopped = Event()  # self._stop flag
 
         self.subscriptions = {}
-        self.subscribers = []
+        self.subscribers = {}
         self._required_subscriptions = {}
+        self.subscription_services = {
+            "default": self.default_post_service
+        }
 
         # instance of logging. Use this instance to print debug statement and log
         self.logger = logging.getLogger(self.name)
@@ -85,34 +87,68 @@ class DataStream:
 
     def subscribe(self, subscription):
         self.subscriptions[subscription.tag] = subscription
-        subscription.stream.subscribers.append(subscription)
-        self.logger.debug("'%s' %s '%s'" % (self, subscription.description, subscription.stream))
+        subscription.set_consumer(self)
+
+        # consumer is adding a request for a service from the producer
+        producer = subscription.producer_stream
+        if subscription.service in subscription.producer_stream.subscribers:
+            producer.subscribers[subscription.service].append(subscription)
+        else:
+            producer.subscribers[subscription.service] = [subscription]
+
+        self.logger.debug("'%s' %s '%s'" % (self, subscription.description, subscription.producer_stream))
 
     def take(self, subscriptions):
         pass
 
-    def require_subscription(self, tag, subscription_class=None, stream_class=None):
-        self._required_subscriptions[tag] = (subscription_class, stream_class)
+    def require_subscription(self, tag, subscription_class=None, stream_class=None, service=None, required_attributes=None):
+        if required_attributes is not None:
+            assert type(required_attributes) == tuple
+        self._required_subscriptions[tag] = (subscription_class, stream_class, service, required_attributes)
 
     def _check_subscriptions(self):
         self.logger.debug("Checking subscriptions")
-        for tag, (subscription_class, stream_class) in self._required_subscriptions.items():
-            satisfied = 0
+
+        # check if all required subscriptions have been satisfied
+        for tag, (subscription_class, stream_class, service, required_attributes) in self._required_subscriptions.items():
+            satisfied = True
+            message = ""
+            producer_stream = self.subscriptions[tag].producer_stream
             if tag not in self.subscriptions:
-                satisfied = 1
+                message += "Tags don't match! "
+                satisfied = False
 
             if subscription_class is not None and \
                             tag in self.subscriptions and \
                             type(self.subscriptions[tag]) != subscription_class:
-                satisfied = 2
+                message += "Subcription classes don't match! "
+                satisfied = False
 
-            if stream_class is not None and type(self.subscriptions[tag].stream) != stream_class:
-                satisfied = 3
+            if stream_class is not None and type(producer_stream) != stream_class:
+                message += "Stream classes don't match! "
+                satisfied = False
 
-            if satisfied != 0:
-                message = ""
+            if service is not None and service not in producer_stream.subscription_services:
+                message += "Service '%s' not offered by producer stream '%s'! " % (
+                    service, producer_stream.name)
+                satisfied = False
+
+            if required_attributes is not None:
+                missing_attributes = []
+                for attribute_name in required_attributes:
+                    if not hasattr(producer_stream, attribute_name):
+                        missing_attributes.append(attribute_name)
+
+                if len(missing_attributes) > 0:
+                    message += "%s doesn't have the required attributes: %s" % (producer_stream.name, missing_attributes)
+                    satisfied = False
+
+            if not satisfied:
                 if subscription_class is not None or stream_class is not None:
-                    message += "This streams requires "
+                    message += "\n%s requires the following subscription:\n" \
+                               "\tsubscription type: '%s'\n\ttag: '%s'\n\tproducer class: '%s'\n\tservice tag: '%s'" % (
+                                   self.name, subscription_class.__name__, tag, stream_class.__name__, service
+                               )
                     if subscription_class is not None:
                         message += "a subscription of type '%s'" % subscription_class.__name__
 
@@ -123,28 +159,33 @@ class DataStream:
                     else:
                         message += ". "
 
-                if satisfied == 1:
-                    message += "Tags don't match!"
-                elif satisfied == 2:
-                    message += "Subcription classes don't match!"
-                elif satisfied == 3:
-                    message += "Stream classes don't match!"
+                raise ValueError("Required subscription not found! " + message)
 
-                raise ValueError("Required subscription '%s' not found! " + message)
+        non_existent_services = []
+        for requested_service, subscriptions in self.subscribers.items():
+            if requested_service not in self.subscription_services.keys():
+                for subscription in subscriptions:
+                    non_existent_services.append((subscription.consumer_stream.name, requested_service))
+        if len(non_existent_services) > 0:
+            raise ValueError("The following services were requested from '%s' that don't exist:\n\t%s" % (
+                self.name, str(["%s: %s" % (name, service) for name, service in non_existent_services])[1:-1]))
 
-    def post(self, data):
-        for subscription in self.subscribers:
-            if subscription.enabled:
-                subscription.post(self.post_behavior(data))
+        if len(self.subscribers) > 0:
+            unused_services = list(self.subscription_services.keys() - self.subscribers.keys())
+            if len(unused_services) > 0:
+                self.logger.warning("The following subscription services are not being consumed: %s" % unused_services)
 
-                if subscription.callback is not None:
-                    subscription.callback(subscription.tag)
+    def post(self, data, service="default"):
+        pass
 
-    def post_behavior(self, data):
+    def default_post_service(self, data):
         return data
 
-    def receive_post(self, tag):
-        pass
+    def add_service(self, service_tag, post_fn=None):
+        if post_fn is None:
+            post_fn = self.default_post_service
+        assert callable(post_fn)
+        self.subscription_services[service_tag] = post_fn
 
     def receive_log(self, log_level, message, line_info):
         """
@@ -162,7 +203,6 @@ class DataStream:
         pass
 
     def log_filter(self, record):
-        record.version = self.version
         return True
 
     def start(self):
@@ -176,11 +216,11 @@ class DataStream:
         pass
 
     @staticmethod
-    def running():
+    def is_running():
         """
         Check if stream is running. Use this in your while loops in your run methods:
 
-        while self.running():
+        while self.is_running():
             ...
         :return:
         """
@@ -208,11 +248,11 @@ class DataStream:
                 self.logger.debug("stream not enabled")
                 return
 
-            self.take(self.subscriptions)
             self._check_subscriptions()
             self.logger.debug("starting")
             self._has_started.set()
             self.start_time = self.time_started()
+            self.take(self.subscriptions)
             self.start()
             self._init()
 
@@ -228,6 +268,7 @@ class DataStream:
             self.started()
             self.logger.debug("calling run")
             self.run()
+            self.logger.info("%s signalled to exit" % self.name)
         except BaseException:
             self.logger.debug("catching exception in threaded loop")
             self._stop()  # in threads, stop is called inside the thread instead to avoid race conditions
@@ -283,9 +324,6 @@ class DataStream:
         Signal for all streams to exit
         """
         DataStream._exited.set()
-
-    def version(self):
-        return self.parse_version(self.version)
 
     @staticmethod
     def parse_version(version_string):

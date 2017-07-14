@@ -1,10 +1,13 @@
 import cv2
+import time
+import numpy as np
+from threading import Lock
+
 from atlasbuggy import get_platform
-from atlasbuggy.cameras import CameraStream
-from atlasbuggy.cameras.cvcamera.cvvideo import CvVideoRecorder
+from atlasbuggy import ThreadedStream
 
 
-class CvCamera(CameraStream):
+class CameraStream(ThreadedStream):
     captures = {}
     used_captures = set()
     min_cap_num = 0
@@ -12,13 +15,27 @@ class CvCamera(CameraStream):
 
     def __init__(self, width=None, height=None, capture_number=None,
                  enabled=True, log_level=None, name=None, skip_count=0):
-        super(CvCamera, self).__init__(enabled, name, log_level)
+        super(CameraStream, self).__init__(enabled, name, log_level)
 
         self.capture_number = capture_number
+        self.capture = None
 
         self.width = width
         self.height = height
         self.resize_frame = False
+
+        self.fps = None
+        self.length_sec = 0.0
+
+        self.fps_sum = 0.0
+        self.fps_avg = 30.0
+        self.prev_t = None
+
+        self.frame = None
+        self.num_frames = 0
+        self.frame_lock = Lock()
+
+        self.paused = False
 
         self.skip_count = skip_count
 
@@ -57,7 +74,7 @@ class CvCamera(CameraStream):
             self.capture = self.load_capture(self.capture_number)
             success, frame = self.capture.read()
             if not success:
-                raise FileNotFoundError("Camera %s failed to load!" % self.capture_number)
+                raise FileNotFoundError("CameraStream %s failed to load!" % self.capture_number)
             height, width = frame.shape[0:2]
 
         if self.height is not None:
@@ -75,7 +92,6 @@ class CvCamera(CameraStream):
             self.width = width
 
         self.fps = self.capture.get(cv2.CAP_PROP_FPS)
-        self.recorder.start_recording(self)
 
     def launch_selector(self):
         selector_window_name = "Select camera for: " + self.name
@@ -85,10 +101,10 @@ class CvCamera(CameraStream):
         width = None
         height = None
 
-        while current_num in CvCamera.used_captures:
+        while current_num in CameraStream.used_captures:
             current_num += 1
 
-            if CvCamera.max_cap_num is not None and current_num > CvCamera.max_cap_num:
+            if CameraStream.max_cap_num is not None and current_num > CameraStream.max_cap_num:
                 return "No cameras left!", height, width
 
             try:
@@ -97,7 +113,7 @@ class CvCamera(CameraStream):
                 if not success:
                     raise cv2.error
             except cv2.error:
-                CvCamera.max_cap_num = current_num - 1
+                CameraStream.max_cap_num = current_num - 1
                 current_capture.release()
                 return "No cameras left!", height, width
 
@@ -108,23 +124,23 @@ class CvCamera(CameraStream):
 
             if key == "left":
                 current_num -= 1
-                if current_num < CvCamera.min_cap_num:
-                    current_num = CvCamera.min_cap_num
-                    self.logger.warning("Camera failed to load! Camera number lower limit:", current_num)
+                if current_num < CameraStream.min_cap_num:
+                    current_num = CameraStream.min_cap_num
+                    self.logger.warning("CameraStream failed to load! CameraStream number lower limit:", current_num)
                     continue
-                while current_num in CvCamera.used_captures:
+                while current_num in CameraStream.used_captures:
                     current_num -= 1
 
                 current_capture = self.load_capture(current_num)
 
             elif key == "right":
                 current_num += 1
-                if CvCamera.max_cap_num is not None and current_num > CvCamera.max_cap_num:
-                    self.logger.warning("Camera failed to load! Camera number upper limit:", current_num)
-                    current_num = CvCamera.max_cap_num
+                if CameraStream.max_cap_num is not None and current_num > CameraStream.max_cap_num:
+                    self.logger.warning("CameraStream failed to load! CameraStream number upper limit:", current_num)
+                    current_num = CameraStream.max_cap_num
                     continue
 
-                while current_num in CvCamera.used_captures:
+                while current_num in CameraStream.used_captures:
                     current_num += 1
 
                 try:
@@ -132,17 +148,17 @@ class CvCamera(CameraStream):
                     success, frame = current_capture.read()
                     cv2.imshow(selector_window_name, frame)
                 except cv2.error:
-                    self.logger.warning("Camera failed to load! Camera number upper limit:", current_num)
-                    if current_num in CvCamera.captures:
+                    self.logger.warning("CameraStream failed to load! CameraStream number upper limit:", current_num)
+                    if current_num in CameraStream.captures:
                         current_capture.release()
-                        del CvCamera.captures[current_num]
+                        del CameraStream.captures[current_num]
                     current_num -= 1
-                    CvCamera.max_cap_num = current_num
+                    CameraStream.max_cap_num = current_num
                     current_capture = self.load_capture(current_num)
 
             elif key == "\n" or key == "\r":
                 selected_capture = current_capture
-                CvCamera.used_captures.add(current_num)
+                CameraStream.used_captures.add(current_num)
                 self.logger.info("Using capture #%s for %s" % (current_num, self.name))
 
             elif key == 'q':
@@ -156,10 +172,10 @@ class CvCamera(CameraStream):
         return selected_capture, height, width
 
     def load_capture(self, arg):
-        if arg not in CvCamera.captures:
+        if arg not in CameraStream.captures:
             self.logger.info("Loading capture '%s'" % arg)
-            CvCamera.captures[arg] = cv2.VideoCapture(arg)
-        return CvCamera.captures[arg]
+            CameraStream.captures[arg] = cv2.VideoCapture(arg)
+        return CameraStream.captures[arg]
 
     def key_pressed(self, delay=1):
         if not self.enabled:
@@ -178,7 +194,7 @@ class CvCamera(CameraStream):
         return self.key
 
     def run(self):
-        while self.running():
+        while self.is_running():
             with self.frame_lock:
                 success, self.frame = self.capture.read()
 
@@ -191,20 +207,40 @@ class CvCamera(CameraStream):
 
             self.log_frame()
             self.poll_for_fps()
-            self.recorder.record(self.frame)
+            self.post(self.frame)
 
-        self.recorder.stop_recording()
+            self.fps = self.fps_avg
 
-    def get_bytes_frame(self):
-        with self.frame_lock:
-            self.bytes_frame = self.numpy_to_bytes(self.frame)
-        return self.bytes_frame
+    def poll_for_fps(self):
+        if self.prev_t is None:
+            self.prev_t = time.time()
+            return 0.0
+
+        self.length_sec = time.time() - self.start_time
+        self.num_frames += 1
+        if self.num_frames > 25:
+            self.fps_sum += 1 / (time.time() - self.prev_t)
+            self.fps_avg = self.fps_sum / self.num_frames
+        self.prev_t = time.time()
+
+    def default_post_service(self, frame):
+        return frame.copy()
+
+    def log_frame(self):
+        self.logger.debug("frame #%s" % self.num_frames)
 
     def update(self):
         pass
 
     def stop(self):
-        for cap_name, capture in CvCamera.captures.items():
+        for cap_name, capture in CameraStream.captures.items():
             capture.release()
-        self.recorder.stop_recording()
-        CvCamera.captures = {}
+        CameraStream.captures = {}
+
+    @staticmethod
+    def bytes_to_numpy(frame):
+        return cv2.imdecode(np.fromstring(frame, dtype=np.uint8), 1)
+
+    @staticmethod
+    def numpy_to_bytes(frame):
+        return cv2.imencode(".jpg", frame)[1].tostring()

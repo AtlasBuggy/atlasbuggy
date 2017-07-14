@@ -10,7 +10,6 @@ class Robot:
     """
     Manages all streams associated with the robot, log initialization, and exception handling
     """
-    version = "1.0"
 
     def __init__(self, setup_fn=None, loop_fn=None, stop_fn=None, event_loop=None, **log_options):
         """
@@ -45,7 +44,7 @@ class Robot:
             write=False,
             log_level=logging.CRITICAL,
             # TODO: Make flexible formats
-            format="[%(name)s, v%(version)s @ %(filename)s:%(lineno)d][%(levelname)s] %(asctime)s: %(message)s",
+            format="[%(name)s @ %(filename)s:%(lineno)d][%(levelname)s] %(asctime)s: %(message)s",
             file_handle=None
         )
 
@@ -102,7 +101,6 @@ class Robot:
             self.logger.debug("Logging to: %s" % log_path)
 
     def log_filter(self, record):
-        record.version = self.version
         return True
 
     def run(self, *streams):
@@ -141,10 +139,10 @@ class Robot:
 
                 # if all coroutines finish, wait for threads to finish if they are still running
                 for thread_stream in thread_streams:
-                    if not thread_stream.has_stopped() and DataStream.running():
+                    if not thread_stream.has_stopped() and DataStream.is_running():
                         self.logger.debug(
                             "Joining threaded stream: %s. Thread has stopped: %s. Event event thrown: %s" % (
-                                thread_stream, thread_stream.has_stopped(), not DataStream.running())
+                                thread_stream, thread_stream.has_stopped(), not DataStream.is_running())
                         )
                         thread_stream.join()
                     else:

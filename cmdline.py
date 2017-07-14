@@ -18,7 +18,7 @@ class CommandLine(AsyncStream):
         asyncio.async(self.queue.put(data))
 
     async def run(self):
-        while self.running():
+        while self.is_running():
             print("\r%s" % self.prompt_text, end="")
             data = await self.queue.get()
             try:
