@@ -35,13 +35,26 @@ class H264toMP4converter:
 
 class PiVideoRecorder(RecordingStream):
     def __init__(self, file_name=None, directory=None, enabled=True, log_level=None, version="1.0", **recorder_options):
+        self.default_file_type = ".h264"
+        self.default_length = len(self.default_file_type)
+
         super(PiVideoRecorder, self).__init__(file_name, directory, enabled, log_level, version)
         self.options = recorder_options
 
-        self.default_file_type = ".h264"
-        self.default_length = len(self.default_file_type)
-        if self.file_name.endswith(".mp4"):
+    def set_path(self, file_name=None, directory=None):
+        if file_name is None:
+            file_name = time.strftime("%H;%M;%S.mp4")
+            if directory is None:
+                # only use default if both directory and file_name are None.
+                # Assume file_name has the full path if directory is None
+                directory = time.strftime("videos/%Y_%b_%d")
+
+        self.file_name = file_name
+        self.directory = directory
+
+        if not self.file_name.endswith(self.default_file_type):
             self.file_name += self.default_file_type
+
         self.full_path = os.path.join(self.directory, self.file_name)
 
     def start_recording(self):
@@ -49,12 +62,12 @@ class PiVideoRecorder(RecordingStream):
             self.make_dirs()
             if not self.is_recording:
                 self.logger.debug("Recording video on '%s'" % self.full_path)
-                self.capture.capture.start_recording(self.full_path, **self.options)
+                self.capture.start_recording(self.full_path, **self.options)
                 self.is_recording = True
 
     def stop_recording(self):
         if self.enabled and self.is_recording:
-            # self.capture.stop_recording()
+            self.capture.stop_recording()
             self.is_recording = False
 
             if self.file_name.endswith(self.default_file_type):
