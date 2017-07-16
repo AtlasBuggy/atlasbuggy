@@ -11,7 +11,7 @@ from atlasbuggy.clock import Clock
 class VideoPlayer(ThreadedStream):
     loaded_videos = {}
 
-    def __init__(self, enabled=True, log_level=None, **load_video_args):
+    def __init__(self, enabled=True, log_level=None, post_while_paused=False, **load_video_args):
         super(VideoPlayer, self).__init__(enabled, None, log_level)
 
         self.capture = None
@@ -25,6 +25,7 @@ class VideoPlayer(ThreadedStream):
         self.frame_lock = Lock()
 
         self.paused = False
+        self.post_while_paused = post_while_paused
 
         if "file_name" in load_video_args and load_video_args["file_name"] is not None:
             self.load_video(**load_video_args)
@@ -135,7 +136,10 @@ class VideoPlayer(ThreadedStream):
 
     def _get_frame(self):
         if self.paused:
-            self.set_frame(self.next_frame - 1 - self.frame_skip)  # keep the video in place
+            if self.post_while_paused:
+                self.set_frame(self.next_frame - 1 - self.frame_skip)  # keep the video in place
+            else:
+                return
 
         if self.frame_skip > 0:
             self._set_frame(self.current_frame_num + self.frame_skip)

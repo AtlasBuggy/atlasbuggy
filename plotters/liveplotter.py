@@ -110,6 +110,8 @@ class LivePlotter(BasePlotter, AsyncStream):
                 await asyncio.sleep(LivePlotter.pause_time * 10)
                 continue
 
+            await self.update()
+
             for plot in self.robot_plots:
                 if isinstance(plot, RobotPlot):
                     self.lines[plot.name].set_xdata(plot.data[0])

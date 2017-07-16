@@ -5,7 +5,7 @@ from atlasbuggy.subscriptions import Update
 
 
 class CameraViewer(BaseViewer):
-    def __init__(self, enabled=True, log_level=None, name=None, enable_trackbar=True):
+    def __init__(self, enabled=True, log_level=None, name=None, enable_trackbar=True, draw_while_paused=False):
         super(CameraViewer, self).__init__(enabled, log_level, name)
 
         self.slider_name = "frame:"
@@ -25,6 +25,7 @@ class CameraViewer(BaseViewer):
         self.require_subscription(self.capture_tag, Update, required_attributes=required_attributes)
 
         self.trackbar_enabled = enable_trackbar
+        self.draw_while_paused = draw_while_paused
 
     def take(self, subscriptions):
         self.take_capture(subscriptions)
@@ -89,14 +90,15 @@ class CameraViewer(BaseViewer):
         """
         self.key_pressed()
 
-        frame = self.get_frame()
-        self.current_frame_num = self.capture.current_frame_num
-        self.update_slider_pos()
+        if not self.capture.paused or self.draw_while_paused:
+            frame = self.get_frame()
+            self.current_frame_num = self.capture.current_frame_num
+            self.update_slider_pos()
 
-        if frame is None:
-            return
+            if frame is None:
+                return
 
-        cv2.imshow(self.name, frame)
+            cv2.imshow(self.name, frame)
 
     def pause(self):
         self.capture.paused = True

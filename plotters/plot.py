@@ -120,6 +120,14 @@ class RobotPlot:
                 self._update_range(min(values[axis_num]), axis_num)
                 self._update_range(max(values[axis_num]), axis_num)
 
+    def extend(self, xs, ys, zs=None):
+        if zs is None:
+            for x, y in zip(xs, ys):
+                self.append(x, y)
+        else:
+            for x, y, z in zip(xs, ys, zs):
+                self.append(x, y, z)
+
     def append(self, x, y, z=None):
         """
         Append new values to the plot if it is enabled
