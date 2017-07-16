@@ -145,19 +145,20 @@ class DataStream:
 
             if not satisfied:
                 if subscription_class is not None or stream_class is not None:
+                    if subscription_class is None:
+                        subscription_class_requirement = "any"
+                    else:
+                        subscription_class_requirement = subscription_class.__name__
+
+                    if stream_class is None:
+                        stream_class_requirement = "any"
+                    else:
+                        stream_class_requirement = stream_class.__name__
+
                     message += "\n%s requires the following subscription:\n" \
                                "\tsubscription type: '%s'\n\ttag: '%s'\n\tproducer class: '%s'\n\tservice tag: '%s'" % (
-                                   self.name, subscription_class.__name__, tag, stream_class.__name__, service
+                                   self.name, subscription_class_requirement, tag, stream_class_requirement, service
                                )
-                    if subscription_class is not None:
-                        message += "a subscription of type '%s'" % subscription_class.__name__
-
-                    if stream_class is not None:
-                        if subscription_class is not None:
-                            message += " and "
-                        message += "a stream of type '%s'. " % stream_class.__name__
-                    else:
-                        message += ". "
 
                 raise ValueError("Required subscription not found! " + message)
 
