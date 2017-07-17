@@ -30,6 +30,7 @@ class RobotPlot:
         self.name = plot_name
         self.flat = flat
         self.enabled = enabled
+        self.update_flag = False
         self.max_length = max_length
         self.skip_count = skip_count
         self.skip_counter = 0
@@ -96,6 +97,8 @@ class RobotPlot:
         if self.skip_count > 0 and self.skip_counter % self.skip_count != 0:
             return
 
+        self.update_flag = True
+        
         # Collect values into a list for convenience
         if self.flat:
             assert len(xs) == len(ys)
@@ -139,15 +142,23 @@ class RobotPlot:
         """
         if not self.enabled:
             return
-
+        
         self.skip_counter += 1
         if self.skip_count > 0 and self.skip_counter % self.skip_count != 0:
             return
 
+        self.update_flag = True
         self._append_x(x)
         self._append_y(y)
         if not self.flat:
             self._append_z(z)
+
+    def has_updated(self):
+        if self.update_flag:
+            self.update_flag = False
+            return True
+        else:
+            return False
 
     def _update_range(self, value, axis_num):
         """

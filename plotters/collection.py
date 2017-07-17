@@ -54,6 +54,12 @@ class RobotPlotCollection:
             return min(ranges, key=lambda range: range[0])[0], \
                    max(ranges, key=lambda range: range[1])[1]
 
+    def has_updated(self):
+        for plot in self.plots:
+            if plot.has_updated():
+                return True
+        return False
+
     @property
     def x_range(self):
         return self.get_range(0)
