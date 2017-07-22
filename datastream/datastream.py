@@ -113,7 +113,6 @@ class DataStream:
         for tag, (subscription_class, stream_class, service, required_attributes) in self._required_subscriptions.items():
             satisfied = True
             message = ""
-            producer_stream = self.subscriptions[tag].producer_stream
             if tag not in self.subscriptions:
                 message += "Tags don't match! "
                 satisfied = False
@@ -123,6 +122,8 @@ class DataStream:
                             type(self.subscriptions[tag]) != subscription_class:
                 message += "Subcription classes don't match! "
                 satisfied = False
+
+            producer_stream = self.subscriptions[tag].producer_stream
 
             if stream_class is not None and type(producer_stream) != stream_class:
                 message += "Stream classes don't match! "

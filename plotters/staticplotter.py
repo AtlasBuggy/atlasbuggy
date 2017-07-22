@@ -53,7 +53,7 @@ class StaticPlotter(BasePlotter, DataStream):
         for plot in self.robot_plots:
             self._create_lines(plot)
 
-    def plot(self):
+    def plot(self, show=True):
         """
         To be called in a simulator's close function after all data has been compiled.
         Call show once after all plots are done
@@ -89,7 +89,8 @@ class StaticPlotter(BasePlotter, DataStream):
                     self.axes[plot.name].set_ylim3d(plot.y_range)
                     self.axes[plot.name].set_zlim3d(plot.z_range)
 
-        self.plt.show()
+        if show:
+            self.plt.show()
 
     def stopped(self):
         self.plot()

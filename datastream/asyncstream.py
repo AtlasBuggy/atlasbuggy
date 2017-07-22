@@ -30,6 +30,9 @@ class AsyncStream(DataStream):
         self._stop()
         self.exit()
 
+    async def update(self):
+        return asyncio.sleep(0.0)
+
     async def run(self):
         """
         Added async tag since this method will be asynchronous

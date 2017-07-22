@@ -19,6 +19,7 @@ class Subscription:
         :param producer_stream: An instance of DataStream
         :param enabled: Disable or enable this subscription
         """
+        assert type(tag) == str, "tag must be a string: %s" % tag
         self.tag = tag
         self.producer_stream = producer_stream
         self.enabled = enabled

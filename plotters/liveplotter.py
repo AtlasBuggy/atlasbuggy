@@ -15,7 +15,7 @@ from atlasbuggy.plotters.collection import RobotPlotCollection
 
 class LivePlotter(BasePlotter, AsyncStream):
     initialized = False
-    pause_time = 0.005
+    pause_time = 0.01
 
     def __init__(self, num_columns, *robot_plots, enabled=True, name=None, log_level=None, draw_legend=True,
                  legend_args=None, lag_cap=0.005, skip_count=0, matplotlib_events=None, active_window_resizing=True,
@@ -151,15 +151,16 @@ class LivePlotter(BasePlotter, AsyncStream):
                                 self.axes[plot.name].set_ylim3d(plot.y_range)
                                 self.axes[plot.name].set_zlim3d(plot.z_range)
 
-            if has_updated:
-                try:
-                    self.fig.canvas.draw()
-                    self.plt.pause(LivePlotter.pause_time)  # can't be less than ~0.005
-
-                except BaseException as error:
-                    self.logger.exception(error)
-                    self.exit()
-                    raise
+            print(time.time(), has_updated)
+            # if has_updated:
+            #     try:
+            #         self.fig.canvas.draw()
+            #         self.plt.pause(LivePlotter.pause_time)  # can't be less than ~0.005
+            #
+            #     except BaseException as error:
+            #         self.logger.exception(error)
+            #         self.exit()
+            #         raise
             await asyncio.sleep(LivePlotter.pause_time)
 
 

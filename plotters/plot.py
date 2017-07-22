@@ -79,6 +79,7 @@ class RobotPlot:
         self.data = [[] for _ in range(2 if flat else 3)]
 
     def set_properties(self, **kwargs):
+        self.update_flag = True
         self.changed_properties = kwargs
 
     def update(self, xs, ys, zs=None):
