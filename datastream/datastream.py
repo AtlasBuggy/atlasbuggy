@@ -101,20 +101,36 @@ class DataStream:
     def take(self, subscriptions):
         pass
 
-    def require_subscription(self, tag, subscription_class=None, stream_class=None, service=None, required_attributes=None):
+    def require_subscription(self, tag, subscription_class=None, stream_class=None, service=None, required_attributes=None, is_suggestion=False):
         if required_attributes is not None:
             assert type(required_attributes) == tuple
-        self._required_subscriptions[tag] = (subscription_class, stream_class, service, required_attributes)
+        self._required_subscriptions[tag] = (subscription_class, stream_class, service, required_attributes, is_suggestion)
+
+    def is_subscribed(self, datastream):
+        if datastream is None:
+            return False
+
+        if not isinstance(datastream, DataStream):
+            raise ValueError("Supplied value isn't a data stream: %s" % str(datastream))
+
+        if datastream.enabled:
+            for subscription in self.subscriptions.values():
+                if subscription.producer_stream is datastream:
+                    return True
+
+        return False
 
     def _check_subscriptions(self):
         self.logger.debug("Checking subscriptions")
 
         # check if all required subscriptions have been satisfied
-        for tag, (subscription_class, stream_class, service, required_attributes) in self._required_subscriptions.items():
+        for tag, (subscription_class, stream_class, service, required_attributes, is_suggestion) in self._required_subscriptions.items():
             satisfied = True
             message = ""
             if tag not in self.subscriptions:
-                message += "Tags don't match! "
+                if is_suggestion:  # if subscription is a suggestion, don't check requirements if the subscription wasn't applied
+                    continue
+                message += "Tag not found! "
                 satisfied = False
 
             if subscription_class is not None and \
@@ -270,7 +286,7 @@ class DataStream:
             self.started()
             self.logger.debug("calling run")
             self.run()
-            self.logger.info("%s signalled to exit" % self.name)
+            self.logger.debug("%s exiting run" % self.name)
         except BaseException:
             self.logger.debug("catching exception in threaded loop")
             self._stop()  # in threads, stop is called inside the thread instead to avoid race conditions
