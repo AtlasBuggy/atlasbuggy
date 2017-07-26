@@ -12,6 +12,9 @@ class AsyncStream(DataStream):
         self.task = None
         self.coroutine = None
 
+    def _subscribed(self, subscription):
+        subscription.is_async = True
+
     async def _run(self):
         """
         Added async tag since this method will be asynchronous

@@ -109,7 +109,8 @@ class VideoPlayer(ThreadedStream):
     @property
     def current_frame_num(self):
         with self.frame_lock:
-            return int(self.capture.get(cv2.CAP_PROP_POS_FRAMES))
+            result = int(self.capture.get(cv2.CAP_PROP_POS_FRAMES))
+            return result
 
     def current_time(self):
         return self.current_frame_num * self.length_sec / self.num_frames

@@ -1,7 +1,6 @@
 import asyncio
 from .janus import Queue
 from threading import Lock
-from .datastream import AsyncStream
 
 
 class Subscription:
@@ -26,6 +25,7 @@ class Subscription:
         self.consumer_stream = None
         self.service = service
         self.description = "subscribing to"  # for debug printing
+        self.is_async = False
 
     def set_consumer(self, subscriber):
         self.consumer_stream = subscriber
@@ -67,7 +67,7 @@ class Feed(Subscription):
         self.queue = Queue(loop=consumer_stream.asyncio_loop)
 
     def get_feed(self):
-        if isinstance(self.consumer_stream, AsyncStream):
+        if self.is_async:
             return self.queue.async_q
         else:
             return self.queue.sync_q

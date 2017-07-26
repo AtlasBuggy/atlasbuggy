@@ -11,7 +11,8 @@ from ..plotters.collection import RobotPlotCollection
 class BasePlotter:
     fig_num = 0
 
-    def __init__(self, num_columns, legend_args, draw_legend, matplotlib_events, enabled, *robot_plots):
+    def __init__(self, num_columns, legend_args, draw_legend, matplotlib_events, enabled, fig_args, fig_kwargs,
+                 *robot_plots):
         """
         A plotter is one matplotlib figure. Having multiple robot plots creates subplots
         :param num_columns: Configure how the subplots are arranged
@@ -54,8 +55,11 @@ class BasePlotter:
 
         if self.enabled:
             self.open_matplotlib()  # launch the python app only if the plotter is used
-
-            self.fig = self.plt.figure(BasePlotter.fig_num)
+            if fig_args is None:
+                fig_args = tuple()
+            if fig_kwargs is None:
+                fig_kwargs = dict()
+            self.fig = self.plt.figure(BasePlotter.fig_num, *fig_args, **fig_kwargs)
             BasePlotter.fig_num += 1
 
             # link matplotlib events
@@ -156,7 +160,6 @@ class BasePlotter:
         # tried to make legend warning go away. Not calling this at all causes weird things to happen
         if len(self.robot_plots) > 0:
             self.axes[list(self.axes.keys())[0]].legend(**self.legend_args)
-
 
     def _get_name(self, arg):
         """

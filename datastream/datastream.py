@@ -1,6 +1,7 @@
 import logging
 import time
 from threading import Event
+from ..subscriptions import Subscription
 
 
 class DataStream:
@@ -87,8 +88,12 @@ class DataStream:
             return self.timestamp - self.start_time
 
     def subscribe(self, subscription):
+        if not isinstance(subscription, Subscription):
+            raise ValueError("subscriptions must be of type Subscription: %s" % subscription)
         self.subscriptions[subscription.tag] = subscription
         subscription.set_consumer(self)
+        
+        self._subscribed(subscription)
 
         # consumer is adding a request for a service from the producer
         producer = subscription.producer_stream
@@ -98,6 +103,13 @@ class DataStream:
             producer.subscribers[subscription.service] = [subscription]
 
         self.logger.debug("'%s' %s '%s'" % (self, subscription.description, subscription.producer_stream))
+
+    def _subscribed(self, subscription):
+        """
+        Internal post subscription behavior
+        :param subscription: Instance of Subscription class
+        """
+        pass
 
     def take(self, subscriptions):
         pass
@@ -109,21 +121,13 @@ class DataStream:
         self._required_subscriptions[tag] = (
             subscription_class, stream_class, service, required_attributes, is_suggestion)
 
-    def is_subscribed(self, datastream):
-        if datastream is None:
-            return False
+    def is_subscribed(self, tag):
+        return tag in self.subscriptions and \
+               self.subscriptions[tag].enabled and \
+               self.subscriptions[tag].producer_stream is not None and \
+               self.subscriptions[tag].producer_stream.enabled
 
-        if not isinstance(datastream, DataStream):
-            raise ValueError("Supplied value isn't a data stream: %s" % str(datastream))
-
-        if datastream.enabled:
-            for subscription in self.subscriptions.values():
-                if subscription.producer_stream is datastream:
-                    return True
-
-        return False
-
-    def _check_subscriptions(self):
+    def check_subscriptions(self):
         self.logger.debug("Checking subscriptions")
 
         # check if all required subscriptions have been satisfied
@@ -262,6 +266,7 @@ class DataStream:
         Internal extra startup behavior
         """
 
+
     def _start(self):
         """
         Wrapper for starting the stream
@@ -272,11 +277,14 @@ class DataStream:
                 self.logger.debug("stream not enabled")
                 return
 
-            self._check_subscriptions()
             self.logger.debug("starting")
             self._has_started.set()
             self.start_time = self.time_started()
+
+            self.check_subscriptions()
+            self.logger.debug("applying subscriptions: %s" % str(self.subscriptions))
             self.take(self.subscriptions)
+
             self.start()
             self._init()
 

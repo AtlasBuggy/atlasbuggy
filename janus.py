@@ -15,7 +15,7 @@ follows `asyncio queue design
 janus library is offered under Apache 2 license.
 
 janus was ripped from this repository: https://github.com/aio-libs/janus
-All credit for this module goes to great people at aio-libs
+All credit for this module goes to the great people at aio-libs
 """
 
 import asyncio

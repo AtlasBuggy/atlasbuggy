@@ -41,7 +41,7 @@ class Robot:
         self.log_info = dict(
             file_name=None,
             directory=None,
-            write=False,
+            write=True,
             log_level=logging.CRITICAL,
             format="[%(name)s @ %(filename)s:%(lineno)d][%(levelname)s] %(asctime)s: %(message)s",
             file_handle=None

@@ -12,11 +12,11 @@ class Pipeline(ThreadedStream):
         self.fps_sum = 0.0
         self.fps = 30.0
         self.prev_t = None
-        self.current_frame_num = 0
         self.num_frames = None
         self.length_sec = 0.0
         self.frame = None
         self.paused = False
+        self.processed_frame_counter = 0
 
         self.capture = None
         self.capture_feed = None
@@ -36,22 +36,32 @@ class Pipeline(ThreadedStream):
         self.capture_feed.enabled = not state
         self.paused = state
 
+    def set_frame(self, position):
+        self.capture.set_frame(position)
+
+    @property
+    def current_frame_num(self):
+        if self.capture is not None:
+            return self.capture.current_frame_num
+        else:
+            return 0
+
     def run(self):
         while self.is_running():
             if self.prev_t is None:
                 self.prev_t = time.time()
             self.length_sec = self.dt()
-            prev_num = self.current_frame_num
+            prev_num = self.processed_frame_counter
 
             while not self.capture_feed.empty():
-                self.current_frame_num += 1
+                self.processed_frame_counter += 1
                 self.frame = self.pipeline(self.capture_feed.get())
                 self.post(self.frame)
 
-            if self.current_frame_num != prev_num:
-                delta_num = self.current_frame_num - prev_num
+            if self.processed_frame_counter != prev_num:
+                delta_num = self.processed_frame_counter - prev_num
                 self.fps_sum += delta_num / (time.time() - self.prev_t)
-                self.fps = self.fps_sum / self.current_frame_num
+                self.fps = self.fps_sum / self.processed_frame_counter
                 self.prev_t = time.time()
 
     def default_post_service(self, data):

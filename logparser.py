@@ -35,7 +35,7 @@ class LogParser(AsyncStream):
         self.directory = directory
         self.full_path = os.path.join(self.directory, self.file_name)
 
-        self.streams = {}
+        self.logged_streams = {}
 
         # current line of the log we're on
         self.line_number = 0
@@ -58,9 +58,15 @@ class LogParser(AsyncStream):
             message="",
         )
 
-    def look_for(self, *streams):
-        for stream in streams:
-            self.streams[stream.name] = stream
+    def take(self, subscriptions):
+        for subscription in subscriptions.values():
+            stream = subscription.producer_stream
+            self.logged_streams[stream.name] = stream
+
+    def start(self):
+        for stream in self.logged_streams.values():
+            stream.check_subscriptions()
+            stream.take(stream.subscriptions)
 
     async def run(self):
         # find all matches in the log
@@ -100,8 +106,8 @@ class LogParser(AsyncStream):
             self.line_info["timestamp"] = time.mktime(current_date.timetuple()) + current_date.microsecond / 1e6
 
             # notify stream if its name is found in the log
-            if self.line_info["name"] in self.streams:
-                stream = self.streams[self.line_info["name"]]
+            if self.line_info["name"] in self.logged_streams:
+                stream = self.logged_streams[self.line_info["name"]]
                 stream.receive_log(self.line_info["loglevel"], self.line_info["message"], self.line_info)
 
             # call subclass's update

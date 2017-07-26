@@ -23,6 +23,9 @@ class ThreadedStream(DataStream):
     def join(self):
         self.thread.join()
 
+    def _subscribed(self, subscription):
+        subscription.is_async = False
+
     def _init(self):
         """
         Start the thread

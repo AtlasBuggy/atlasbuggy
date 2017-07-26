@@ -77,7 +77,7 @@ class CameraViewer(BaseViewer):
     def update_slider_pos(self, position=None):
         if self.trackbar_enabled:
             if position is None:
-                position = self.capture.current_frame_num
+                position = self.current_frame_num
             slider_pos = int(position * self.slider_ticks / self.capture.num_frames)
             cv2.setTrackbarPos(self.slider_name, self.name, slider_pos)
 
