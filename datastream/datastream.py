@@ -45,6 +45,7 @@ class DataStream:
         # make sure robot has instantiated the log info before this stream
         if len(DataStream._log_info) == 0:
             raise ValueError("Declare Robot before initializing any streams.")
+
         if DataStream._log_info["log_level"] < log_level:  # robot's log level takes priority over individual streams
             self.log_level = DataStream._log_info["log_level"]
         else:
@@ -101,10 +102,12 @@ class DataStream:
     def take(self, subscriptions):
         pass
 
-    def require_subscription(self, tag, subscription_class=None, stream_class=None, service=None, required_attributes=None, is_suggestion=False):
+    def require_subscription(self, tag, subscription_class=None, stream_class=None, service=None,
+                             required_attributes=None, is_suggestion=False):
         if required_attributes is not None:
             assert type(required_attributes) == tuple
-        self._required_subscriptions[tag] = (subscription_class, stream_class, service, required_attributes, is_suggestion)
+        self._required_subscriptions[tag] = (
+            subscription_class, stream_class, service, required_attributes, is_suggestion)
 
     def is_subscribed(self, datastream):
         if datastream is None:
@@ -124,11 +127,13 @@ class DataStream:
         self.logger.debug("Checking subscriptions")
 
         # check if all required subscriptions have been satisfied
-        for tag, (subscription_class, stream_class, service, required_attributes, is_suggestion) in self._required_subscriptions.items():
+        for tag, (subscription_class, stream_class, service, required_attributes,
+                  is_suggestion) in self._required_subscriptions.items():
             satisfied = True
             message = ""
             if tag not in self.subscriptions:
-                if is_suggestion:  # if subscription is a suggestion, don't check requirements if the subscription wasn't applied
+                # if subscription is a suggestion, don't check requirements if the subscription wasn't applied
+                if is_suggestion:
                     continue
                 message += "Tag not found! "
                 satisfied = False
@@ -157,7 +162,8 @@ class DataStream:
                         missing_attributes.append(attribute_name)
 
                 if len(missing_attributes) > 0:
-                    message += "%s doesn't have the required attributes: %s" % (producer_stream.name, missing_attributes)
+                    message += "%s doesn't have the required attributes: %s" % (
+                        producer_stream.name, missing_attributes)
                     satisfied = False
 
             if not satisfied:

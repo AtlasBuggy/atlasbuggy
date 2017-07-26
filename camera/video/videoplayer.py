@@ -4,8 +4,8 @@ from threading import Lock
 
 import cv2
 
-from atlasbuggy import ThreadedStream
-from atlasbuggy.clock import Clock
+from ...clock import Clock
+from ...datastream import ThreadedStream
 
 
 class VideoPlayer(ThreadedStream):

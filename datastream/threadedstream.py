@@ -1,6 +1,6 @@
 from threading import Thread
 
-from atlasbuggy.datastream import DataStream
+from ..datastream import DataStream
 
 
 class ThreadedStream(DataStream):

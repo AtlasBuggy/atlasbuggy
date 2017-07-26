@@ -1,7 +1,7 @@
 import asyncio
-from atlasbuggy.janus import Queue
+from .janus import Queue
 from threading import Lock
-from atlasbuggy import AsyncStream
+from .datastream import AsyncStream
 
 
 class Subscription:

@@ -4,8 +4,8 @@ The base class shared by liveplotter and staticplotter. Contains properties shar
 
 import matplotlib.gridspec as gridspec
 import numpy as np
-from atlasbuggy.plotters.plot import RobotPlot
-from atlasbuggy.plotters.collection import RobotPlotCollection
+from ..plotters.plot import RobotPlot
+from ..plotters.collection import RobotPlotCollection
 
 
 class BasePlotter:

@@ -2,7 +2,8 @@ import asyncio
 
 import cv2
 
-from atlasbuggy import AsyncStream, get_platform
+from ... import get_platform
+from ...datastream import AsyncStream
 
 
 class BaseViewer(AsyncStream):

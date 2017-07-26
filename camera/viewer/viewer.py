@@ -1,7 +1,7 @@
 import cv2
 
-from atlasbuggy.camera.viewer.base import BaseViewer
-from atlasbuggy.subscriptions import Update
+from .base import BaseViewer
+from ...subscriptions import Update
 
 
 class CameraViewer(BaseViewer):

@@ -1,5 +1,6 @@
 import time
 
+
 class RecurringEvent:
     def __init__(self, repeat_time, current_time, function, args, include_event):
         self.repeat_time = repeat_time

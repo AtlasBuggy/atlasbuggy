@@ -9,12 +9,12 @@ import time
 import traceback
 from multiprocessing import Event, Lock, Process, Queue, Value
 
-import serial
 import serial.tools.list_ports
 from serial.serialutil import SerialException
 
-from atlasbuggy.clock import Clock
-from atlasbuggy.serial.errors import *
+import serial
+from ..clock import Clock
+from ..serial.errors import *
 
 
 class SerialPort(Process):

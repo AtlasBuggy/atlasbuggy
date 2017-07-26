@@ -1,6 +1,6 @@
 import time
-from atlasbuggy import ThreadedStream
-from atlasbuggy.subscriptions import Update
+from ..datastream import ThreadedStream
+from ..subscriptions import Update
 
 
 class Pipeline(ThreadedStream):

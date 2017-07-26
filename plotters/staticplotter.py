@@ -3,10 +3,10 @@ Contains the static plotter class. This class plots data retrieved from a log fi
 according to properties defined in RobotPlot.
 """
 
-from atlasbuggy.plotters.baseplotter import BasePlotter
-from atlasbuggy.plotters.plot import RobotPlot
-from atlasbuggy.plotters.collection import RobotPlotCollection
-from atlasbuggy.datastream import DataStream
+from ..plotters.baseplotter import BasePlotter
+from ..plotters.plot import RobotPlot
+from ..plotters.collection import RobotPlotCollection
+from ..datastream import DataStream
 
 
 class StaticPlotter(BasePlotter, DataStream):

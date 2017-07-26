@@ -1,5 +1,5 @@
 import asyncio
-from atlasbuggy.datastream import DataStream
+from ..datastream import DataStream
 
 
 class AsyncStream(DataStream):

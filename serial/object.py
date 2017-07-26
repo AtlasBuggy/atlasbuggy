@@ -6,7 +6,7 @@ also defined on the microcontroller.
 
 from multiprocessing import Queue
 
-from atlasbuggy.serial.events import CommandPause
+from ..serial.events import CommandPause
 
 
 class SerialObject:

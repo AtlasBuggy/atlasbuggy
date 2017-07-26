@@ -6,11 +6,11 @@ according to properties defined in RobotPlot.
 import asyncio
 import time
 
-from atlasbuggy.plotters.baseplotter import BasePlotter
-from atlasbuggy.plotters.plot import RobotPlot
+from ..plotters.baseplotter import BasePlotter
+from ..plotters.plot import RobotPlot
 
-from atlasbuggy.datastream import AsyncStream
-from atlasbuggy.plotters.collection import RobotPlotCollection
+from ..datastream import AsyncStream
+from ..plotters.collection import RobotPlotCollection
 
 
 class LivePlotter(BasePlotter, AsyncStream):

@@ -2,9 +2,9 @@ import os
 import cv2
 import time
 import asyncio
-from atlasbuggy import get_platform
-from atlasbuggy import AsyncStream
-from atlasbuggy.subscriptions import Feed
+from ... import get_platform
+from ...datastream import AsyncStream
+from ...subscriptions import Feed
 
 
 class VideoRecorder(AsyncStream):

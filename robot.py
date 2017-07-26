@@ -3,7 +3,7 @@ import time
 import logging
 import asyncio
 import lzma as xz
-from atlasbuggy.datastream import DataStream, AsyncStream, ThreadedStream
+from .datastream import DataStream, AsyncStream, ThreadedStream
 
 
 class Robot:
@@ -43,7 +43,6 @@ class Robot:
             directory=None,
             write=False,
             log_level=logging.CRITICAL,
-            # TODO: Make flexible formats
             format="[%(name)s @ %(filename)s:%(lineno)d][%(levelname)s] %(asctime)s: %(message)s",
             file_handle=None
         )
@@ -229,3 +228,4 @@ class Robot:
     def exit():
         # signal all streams to exit
         DataStream.exit()
+

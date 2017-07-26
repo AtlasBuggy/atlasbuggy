@@ -2,7 +2,6 @@
 Keeps loops running at a consistent time. This class will notify you if the loop is falling behind
 """
 import time
-import asyncio
 
 
 class Clock:

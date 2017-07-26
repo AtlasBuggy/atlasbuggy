@@ -1,5 +1,5 @@
 import asyncio
-from atlasbuggy.datastream import AsyncStream
+from ..datastream import AsyncStream
 
 
 class SocketClient(AsyncStream):

@@ -3,8 +3,8 @@ import time
 import numpy as np
 from threading import Lock
 
-from atlasbuggy import get_platform
-from atlasbuggy import ThreadedStream
+from .. import get_platform
+from ..datastream import ThreadedStream
 
 
 class CameraStream(ThreadedStream):

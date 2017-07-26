@@ -4,7 +4,7 @@ import time
 import datetime
 import lzma as xz
 import asyncio
-from atlasbuggy.datastream import AsyncStream
+from .datastream import AsyncStream
 
 
 class LogParser(AsyncStream):

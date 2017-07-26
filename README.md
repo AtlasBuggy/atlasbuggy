@@ -46,6 +46,10 @@ However, there are some dependencies you'll want to get if you want to get the m
     ```bash
     pip3 install picamera
     ```
+1. scipy and numpy - advanced matrix manipulation. Essential for autonomous algorithms. (Numpy is a dependency of scipy and opencv)
+    ```bash
+    pip3 install numpy scipy
+    ```
 
 That should be it!
 
@@ -88,16 +92,19 @@ If you plan on creating your own robot, I recommend getting an SFTP and SSH clie
 # Background <a name="background"></a>
 ## Why does this project exist? <a name="why"></a>
 
-Developing robotic systems is difficult. Atlasbuggy is an attempt to make robotics software development manageable and accessible.<br/><br/>
-ROS (http://www.ros.org) is the most well known attempt at solving this problem. So if ROS exists, why does this project exist? When I dove into ROS, there were many aspects of the user experience I wasn't happy with. Managing multiple terminal windows and multiple files and directories over command line wasn't a fun experience for me. Python is currently my strongest language, so I decided to start from scratch and build a framework in python that I would enjoy working with.<br/><br/>
+Developing robotic systems is difficult. ROS (http://www.ros.org) made me an unhappy programmer, so I decided to write my own robotics development package; one that I would enjoy working with.<br/>
 
-Initially, I built a framework for one robot. Specifically this robot (her name is RoboQuasar):<br/>[insert image]<br/>
-Overtime as I added more and more features, I realized this code base could be applied to any robot with some work. After adapting the same code to another robot named Naboris (https://github.com/AtlasBuggy/Naboris) it was clear this code was viable as a development platform.
+I used this framework I created on two robots:
+RoboQuasar (URL on the way),<br/>
+-insert image-<br/><br/>
+and Naboris (https://github.com/AtlasBuggy/Naboris)<br/>
+-insert image-<br/><br/>
+
+I've had a fun time developing this platform. My goal is to offer people frustrated with ROS an alternative.
 
 ## How will we fulfill this purpose? <a name="how"></a>
 
-By creating a pythonic collection of code that lets vastly different pieces of software play nice together independent of hardware platform.<br/><br/>
-This should sound familiar to ROS. The only difference is the implementation and a few key design decisions.
+By creating a pythonic collection of code that lets vastly different pieces of software play nice together independent of hardware platform. This should sound familiar to ROS. The only difference is the implementation and a few key design decisions.
 
 ## What does this require? <a name="what"></a>
 
