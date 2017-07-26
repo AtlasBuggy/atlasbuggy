@@ -93,6 +93,10 @@ class CameraStream(ThreadedStream):
 
         self.fps = self.capture.get(cv2.CAP_PROP_FPS)
 
+    @property
+    def current_frame_num(self):
+        return self.num_frames
+
     def launch_selector(self):
         selector_window_name = "Select camera for: " + self.name
         selected_capture = None

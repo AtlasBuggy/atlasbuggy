@@ -3,7 +3,7 @@ from atlasbuggy.subscriptions import *
 from atlasbuggy.camera import CameraViewer
 from atlasbuggy.camera import VideoPlayer
 
-robot = Robot()
+robot = Robot(write=False)
 
 viewer = CameraViewer()
 video = VideoPlayer(file_name="...", width=800, height=500)

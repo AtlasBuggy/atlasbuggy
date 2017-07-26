@@ -26,7 +26,7 @@ class MyPipeline(Pipeline):
 
         self.post(self.current_frame_num, self.results_service_tag)
 
-        return np.concatenate((frame, cv2.cvtColor(laplacian_8u, cv2.COLOR_GRAY2BGR)), axis=1)
+        return np.concatenate((cv2.cvtColor(laplacian_8u, cv2.COLOR_GRAY2BGR), frame), axis=1)
 
 
 class DummyConsumer(AsyncStream):
@@ -46,10 +46,10 @@ class DummyConsumer(AsyncStream):
             while not self.pipeline_feed.empty():
                 results = await self.pipeline_feed.get()
                 self.pipeline_feed.task_done()
-                print("results:", results)
+                self.logger.info("results: %s" % results)
             await asyncio.sleep(0.1)
 
-robot = Robot(log_level=10)
+robot = Robot(write=False)
 
 recorder = VideoRecorder()
 camera = CameraStream(capture_number=0, width=800, height=500)
@@ -57,8 +57,8 @@ viewer = CameraViewer(enable_trackbar=False)
 pipeline = MyPipeline()
 dummy = DummyConsumer()
 
-# recorder.subscribe(Feed(recorder.capture_tag, pipeline))
-recorder.subscribe(Feed(recorder.capture_tag, camera))
+recorder.subscribe(Feed(recorder.capture_tag, pipeline))
+# recorder.subscribe(Feed(recorder.capture_tag, camera))
 viewer.subscribe(Update(viewer.capture_tag, pipeline))
 pipeline.subscribe(Update(pipeline.capture_tag, camera))
 dummy.subscribe(Feed(dummy.pipeline_tag, pipeline, dummy.pipeline_service_tag))

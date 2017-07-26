@@ -22,7 +22,7 @@ class Pipeline(ThreadedStream):
         self.capture_feed = None
         self.capture_tag = "capture"
         self.require_subscription(self.capture_tag, Update,
-                                  required_attributes=("width", "height", "num_frames"))
+                                  required_attributes=("width", "height", "num_frames", "current_frame_num"))
 
     def take(self, subscriptions):
         self.capture = self.subscriptions[self.capture_tag].get_stream()

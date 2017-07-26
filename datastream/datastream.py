@@ -92,7 +92,7 @@ class DataStream:
             raise ValueError("subscriptions must be of type Subscription: %s" % subscription)
         self.subscriptions[subscription.tag] = subscription
         subscription.set_consumer(self)
-        
+
         self._subscribed(subscription)
 
         # consumer is adding a request for a service from the producer
