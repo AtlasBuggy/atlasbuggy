@@ -21,10 +21,13 @@ class ThreadedStream(DataStream):
         self.logger.debug("thread is now daemon")
 
     def join(self):
+        """
+        Wait for thread to finish
+        """
         self.thread.join()
 
     def _subscribed(self, subscription):
-        subscription.is_async = False
+        subscription.is_async = False  # tell subscription to use the sync queue
 
     def _init(self):
         """
@@ -33,6 +36,12 @@ class ThreadedStream(DataStream):
         self.thread.start()
 
     def post(self, data, service="default"):
+        """
+        Post data to subscribed consumer streams using the sync method
+
+        :param data: Data to post 
+        :param service: which service to post data to
+        """
         if service in self.subscribers:
             for subscription in self.subscribers[service]:
                 if subscription.enabled:

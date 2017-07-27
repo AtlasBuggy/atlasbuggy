@@ -207,11 +207,12 @@ class Robot:
                 task = stream._run()
                 tasks.append(task)
                 stream.task = task
-                stream.asyncio_loop = self.loop
 
             # add thread to the list
             elif isinstance(stream, ThreadedStream):
                 threads.append(stream)
+
+            stream.asyncio_loop = self.loop
 
         # add loop function as an asynchronous task
         if self.loop_fn is not None:

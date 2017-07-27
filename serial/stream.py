@@ -6,7 +6,6 @@ import traceback
 
 import serial.tools.list_ports
 
-from ..clock import Clock
 from ..datastream import AsyncStream
 from ..serial.errors import *
 from ..serial.events import CommandPause, RecurringEvent
@@ -42,7 +41,6 @@ class SerialStream(AsyncStream):
 
         self.loops_per_second = 200
         self.loop_delay = 1 / self.loops_per_second
-        self.clock = Clock(self.loops_per_second)
 
         # initialize SerialObjects
         self.object_list = serial_objects
@@ -54,6 +52,54 @@ class SerialStream(AsyncStream):
         self.packet_pattern = re.compile(
             r"<(?P<timestamp>[.0-9a-zA-Z]*), (?P<whoiam>.*), (?P<message>.*), (?P<packettype>.*)>"
         )
+
+    # ----- Overridable methods -----
+
+    def serial_start(self):
+        """
+        Additional start behavior. Put commands you'd like to send at the start here
+        """
+        pass
+
+    def serial_close(self):
+        """
+        Extra close behavior. Send any last commands here.
+        """
+        pass
+
+    def list_ports(self):
+        """
+        Find port addresses that are usable by pyserial
+
+        Override this method for different port discovery behavior
+
+        :return: list of discovered ports
+        """
+        port_addresses = []
+
+        # return the port if 'USB' is in the description
+        for port_no, description, address in serial.tools.list_ports.comports():
+            if 'USB' in address:
+                port_addresses.append(port_no)
+        return port_addresses
+
+    def receive_serial_log(self, timestamp, whoiam, packet, packet_type):
+        """
+        Callback for when a SerialObject has received a packet from a log file (this includes commands sent)
+
+        :param timestamp: Time message was recorded
+        :param whoiam: whoiam ID of SerialObject
+        :param packet: recorded data
+        :param packet_type: one of 5 packet flags:
+            object        : from a robot object
+            user          : user logged
+            command       : command sent
+            pause command : pause command
+            debug         : port debug message
+        """
+        pass
+
+    # ----- Non-overridable methods -----
 
     def time_started(self):
         """
@@ -89,6 +135,150 @@ class SerialStream(AsyncStream):
         event = RecurringEvent(repeat_time, time.time(), callback_fn, args, include_event_in_params)
         self.recurring.append(event)
         return event
+
+    def dt(self, current_time=None, use_current_time=False):
+        """
+        Time since SerialStream has started
+        :return: Current time in seconds. 0.0 if the stream hasn't started
+        """
+        if use_current_time:
+            if current_time is None:
+                self.timestamp = time.time()
+            else:
+                self.timestamp = current_time
+
+        if self.start_time is None or self.timestamp is None:
+            return 0.0
+        else:
+            return self.timestamp - self.start_time
+
+    def start(self):
+        """
+        Start up behavior for SerialStream.
+        
+        DO NOT override this method. Call serial_start or started instead
+        """
+
+        self.start_time = time.time()
+        self._init_ports()
+        self._first_packets()
+
+        # send start to all ports
+        for robot_port in self.ports.values():
+            if not robot_port.send_start():
+                self.stop()
+                raise self._handle_error(
+                    RobotSerialPortWritePacketError(
+                        "Unable to send start packet!", self.timestamp, self.packet, robot_port),
+                    traceback.format_stack()
+                )
+
+        # start port processes
+        for robot_port in self.ports.values():
+            robot_port.start()
+
+        self.logger.debug("SerialStream is starting")
+        error = None
+        try:
+            self.serial_start()
+        except BaseException as _error:
+            self.stop()
+            self.exit()
+            error = _error
+
+        if error is not None:
+            raise error
+
+    async def run(self):
+        """
+        Run behavior for SerialStream
+        
+        DO NOT override. For loop behavior, override update
+        """
+        self.logger.debug("SerialStream is running")
+        while self.is_running():
+            for port in self.ports.values():
+                self._check_port_packets(port)
+
+            self._update_recurring(time.time())
+            self._send_commands()
+
+            self.update()
+
+            await asyncio.sleep(self.loop_delay)  # maintain a constant loop speed
+
+    def stop(self):
+        """
+        Close all SerialPort processes and close their serial ports
+        """
+        error = None
+        try:
+            self.serial_close()
+        except BaseException as error:
+            self._handle_error(error, traceback.format_stack())
+
+        self._send_commands()
+        self.logger.debug("Sent last commands")
+        self._stop_all_ports()
+        self.logger.debug("Closed ports successfully")
+        self._grab_all_port_prints()
+
+        if error is not None:
+            self.exit()
+            raise error
+
+    def receive_log(self, log_level, message, line_info):
+        """
+        Parse a SerialStream log message
+
+        DO NOT override this method. Use receive_serial_log instead
+
+        :param log_level: What type of log message it is
+        :param message: The message itself
+        :param line_info: dictionary of important values associated with the message
+        """
+
+        # check if message is a SerialPort debug message, otherwise parse it as a normal message
+        if not self._match_port_debug(message):
+            self._match_log(message)
+
+    # ----- Internal methods -----
+
+    def _first_packets(self):
+        """
+        Send each port's first packet to the corresponding object if it isn't an empty string
+        """
+        for whoiam in self.objects.keys():
+            first_packet = self.ports[whoiam].first_packet
+            if len(first_packet) > 0:
+                self._deliver_first_packet(whoiam, first_packet)
+
+                # record first packets
+                self._record(None, whoiam, first_packet, "object")
+        self.logger.debug("First packets sent")
+
+    def _deliver_first_packet(self, whoiam, first_packet):
+        """
+        Call the corresponding SerialObject's receive_first method. Give it the packet received
+        """
+        error = None
+        try:
+            if self.objects[whoiam].receive_first(first_packet) is not None:
+                self.logger.warning("Closing all from first_packets()")
+                self.stop()
+                self.exit()
+        except BaseException as _error:
+            self.stop()
+            self.exit()
+            error = _error
+
+        if error is not None:
+            raise self._handle_error(
+                RobotObjectReceiveError(whoiam, first_packet),
+                traceback.format_stack()
+            ) from error
+
+        self._received(whoiam)
 
     def _init_objects(self, serial_objects):
         """
@@ -156,22 +346,6 @@ class SerialStream(AsyncStream):
         for serial_object in self.object_list:
             serial_object.is_live = True
 
-    def dt(self, current_time=None, use_current_time=False):
-        """
-        Time since SerialStream has started
-        :return: Current time in seconds. 0.0 if the stream hasn't started
-        """
-        if use_current_time:
-            if current_time is None:
-                self.timestamp = time.time()
-            else:
-                self.timestamp = current_time
-
-        if self.start_time is None or self.timestamp is None:
-            return 0.0
-        else:
-            return self.timestamp - self.start_time
-
     def _configure_port(self, serial_port, errors_list):
         """
         Initialize a serial port recognized by pyserial.
@@ -223,131 +397,36 @@ class SerialStream(AsyncStream):
                     self.ports[whoiam].change_rate(object_baud)
         self.ports = used_ports
 
-    def list_ports(self):
+    def _update_recurring(self, timestamp):
         """
-        Find port addresses that are usable by pyserial
-        
-        Override this method for different port discovery behavior
-        
-        :return: list of discovered ports
+        Update recurring events
         """
-        port_addresses = []
-
-        # return the port if 'USB' is in the description
-        for port_no, description, address in serial.tools.list_ports.comports():
-            if 'USB' in address:
-                port_addresses.append(port_no)
-        return port_addresses
-
-    def _first_packets(self):
-        """
-        Send each port's first packet to the corresponding object if it isn't an empty string
-        """
-        for whoiam in self.objects.keys():
-            first_packet = self.ports[whoiam].first_packet
-            if len(first_packet) > 0:
-                self._deliver_first_packet(whoiam, first_packet)
-
-                # record first packets
-                self.record(None, whoiam, first_packet, "object")
-        self.logger.debug("First packets sent")
-
-    def _deliver_first_packet(self, whoiam, first_packet):
-        """
-        Call the corresponding SerialObject's receive_first method. Give it the packet received
-        """
-        error = None
-        try:
-            if self.objects[whoiam].receive_first(first_packet) is not None:
-                self.logger.warning("Closing all from first_packets()")
-                self.stop()
-                self.exit()
-        except BaseException as _error:
-            self.stop()
-            self.exit()
-            error = _error
-
-        if error is not None:
-            raise self.handle_error(
-                RobotObjectReceiveError(whoiam, first_packet),
-                traceback.format_stack()
-            ) from error
-
-        self.received(whoiam)
-
-    def start(self):
-        """
-        Start up behavior for SerialStream.
-        
-        DO NOT override this method. Call serial_start or started instead
-        """
-
-        self.start_time = time.time()
-        self.clock.start(self.start_time)
-        self._init_ports()
-
-        self._first_packets()
-
-        for robot_port in self.ports.values():
-            if not robot_port.send_start():
-                self.stop()
-                raise self.handle_error(
-                    RobotSerialPortWritePacketError(
-                        "Unable to send start packet!", self.timestamp, self.packet, robot_port),
-                    traceback.format_stack()
-                )
-
-        # start port processes
-        for robot_port in self.ports.values():
-            robot_port.start()
-
-        self.logger.debug("SerialStream is starting")
-        error = None
-        try:
-            self.serial_start()
-        except BaseException as _error:
-            self.stop()
-            self.exit()
-            error = _error
-
-        if error is not None:
-            raise error
-
-    def serial_start(self):
-        pass
-
-    async def run(self):
-        self.logger.debug("SerialStream is running")
-        while self.is_running():
-            for port in self.ports.values():
-                self.check_port_packets(port)
-
-            self.update_recurring(time.time())
-            self.send_commands()
-
-            await asyncio.sleep(self.loop_delay)  # maintain a constant loop speed
-
-    def update_recurring(self, timestamp):
         for event in self.recurring:
             event.update(timestamp)
 
-    def check_port_packets(self, port):
+    def _check_port_packets(self, port):
+        """
+        Check a port for new packets
+        :param port: Instance of SerialPort
+        """
         with port.lock:
-            self.check_port_status(port)
+            self._check_port_status(port)
 
             while not port.packet_queue.empty():
                 self.timestamp, self.packet = port.packet_queue.get()
+
+                # update queue length counters
                 port.counter.value -= 1
-
-                self.deliver(port.whoiam)
-                self.received(port.whoiam)
-
-                self.record(self.timestamp, port.whoiam, self.packet, "object")
-                self.record_debug_prints(self.timestamp, port)
-
                 port.queue_len = port.counter.value
 
-    def check_port_status(self, port):
+                self._deliver(port.whoiam)  # give a packet to the corresponding SerialObject
+                self._received(port.whoiam)  # notify the SerialStream that a packet was received
+
+                # record packets
+                self._record(self.timestamp, port.whoiam, self.packet, "object")
+                self._record_debug_prints(self.timestamp, port)
+
+    def _check_port_status(self, port):
         """
         Check if the process is running properly. An error will be thrown if not.
 
@@ -360,21 +439,49 @@ class SerialStream(AsyncStream):
             self.stop()
             self.logger.debug("status:", status)
             if status == 0:
-                raise self.handle_error(
+                raise self._handle_error(
                     RobotSerialPortNotConfiguredError(
                         "Port with ID '%s' isn't configured!" % port.whoiam, self.timestamp, self.packet,
                         port),
                     traceback.format_stack()
                 )
             elif status == -1:
-                raise self.handle_error(
+                raise self._handle_error(
                     RobotSerialPortSignalledExitError(
                         "Port with ID '%s' signalled to exit" % port.whoiam, self.timestamp, self.packet,
                         port),
                     traceback.format_stack()
                 )
 
-    def received(self, whoiam):
+    def _deliver(self, whoiam):
+        """
+        Give a received packet to the correct SerialObject. Call its receive method
+        :param whoiam: whoiam ID of the SerialObject
+        """
+        error = None
+        try:
+            if self.objects[whoiam].receive(self.timestamp, self.packet) is not None:
+                self.logger.warning(
+                    "receive for object signalled to exit. whoiam ID: '%s', packet: %s" % (
+                        whoiam, repr(self.packet)))
+                self.stop()
+        except BaseException as _error:
+            self.logger.warning("Closing from deliver")
+            self.stop()
+            self.exit()
+            error = _error
+
+        if error is not None:
+            raise self._handle_error(
+                RobotObjectReceiveError(whoiam, self.packet),
+                traceback.format_stack()
+            ) from error
+
+    def _received(self, whoiam):
+        """
+        Signal callback functions when the corresponding SerialObject receives a packet
+        :param whoiam: whoiam ID of the SerialObject
+        """
         error = None
         try:
             if whoiam in self.callbacks:
@@ -390,90 +497,94 @@ class SerialStream(AsyncStream):
             error = _error
 
         if error is not None:
-            raise self.handle_error(
+            raise self._handle_error(
                 PacketReceivedError(error),
                 traceback.format_stack()
             ) from error
 
-    def deliver(self, whoiam):
-        error = None
-        try:
-            if self.objects[whoiam].receive(self.timestamp, self.packet) is not None:
-                self.logger.warning(
-                    "receive for object signalled to exit. whoiam ID: '%s', packet: %s" % (
-                        whoiam, repr(self.packet)))
-                self.stop()
-        except BaseException as _error:
-            self.logger.warning("Closing from deliver")
-            self.stop()
-            self.exit()
-            error = _error
-
-        if error is not None:
-            raise self.handle_error(
-                RobotObjectReceiveError(whoiam, self.packet),
-                traceback.format_stack()
-            ) from error
-
-    def send_commands(self):
+    def _send_commands(self):
         """
         Check every robot object. Send all commands if there are any
         """
         for whoiam in self.objects.keys():
             # loop through all commands and send them
-            while not self.objects[whoiam].command_packets.empty():
-                if self.objects[whoiam].is_paused():
-                    if self.objects[whoiam]._pause_command.update():
-                        self.objects[whoiam]._pause_command = None
+
+            serial_object = self.objects[whoiam]
+
+            # send all commands on the queue
+            while not serial_object.command_packets.empty():
+
+                # if the serial object is currently paused, move onto the next serial_object
+                if serial_object.is_paused():
+                    # if update is True, that means the appropriate amount of time has passed
+                    if serial_object._pause_command.update():
+                        serial_object._pause_command = None
                     else:
                         break
 
-                command = self.objects[whoiam].command_packets.get()
+                # get the latest command if not paused
+                command = serial_object.command_packets.get()
 
+                # if the command is pause, pause the SerialObject and move on
                 if isinstance(command, CommandPause):
-                    self.objects[whoiam]._pause_command = command
-                    self.objects[whoiam]._pause_command.set_prev_time()
-                    self.record(time.time(), whoiam, str(command.delay_time), "pause command")
+                    serial_object._pause_command = command
+                    serial_object._pause_command.set_prev_time()
+                    self._record(time.time(), whoiam, str(command.delay_time), "pause command")
                 else:
                     # log sent command.
-                    self.record(time.time(), whoiam, command, "command")
+                    self._record(time.time(), whoiam, command, "command")
 
-                    # if write packet fails, throw an error
+                    # write packet. Throw an error if write packet fails
                     if not self.ports[whoiam].write_packet(command):
                         self.logger.warning("Closing all from _send_commands")
                         self.stop()
                         self.exit()
-                        raise self.handle_error(
+                        raise self._handle_error(
                             RobotSerialPortWritePacketError(
                                 "Failed to send command %s to '%s'" % (command, whoiam), self.timestamp, self.packet,
                                 self.ports[whoiam]),
                             traceback.format_stack())
 
-    def record(self, timestamp, whoiam, packet, packet_type):
+    def _record(self, timestamp, whoiam, packet, packet_type):
         """
-        object        : from a robot object
-        user          : user logged
-        command       : command sent
-        pause command : pause command
-        debug         : port debug message
+        Record information about a packet
+        
+        :param timestamp: time packet was received
+        :param whoiam: whoiam ID of the SerialObject
+        :param packet: packet to record
+        :param packet_type: one of 5 packet flags:
+            object        : from a robot object
+            user          : user logged
+            command       : command sent
+            pause command : pause command
+            debug         : port debug message
         """
         self.logger.debug("<%s, %s, %s, %s>" % (timestamp, whoiam, packet, packet_type))
 
-    def handle_error(self, error, traceback):
+    def _handle_error(self, error, traceback):
+        """
+        Log error message to the log file
+        :param error: Exception class
+        :param traceback: stack trace as determined by the traceback module
+        :return: The error being thrown (so optionally it can be raised when handle_error is called)
+        """
         error_message = "".join(traceback[:-1])
         error_message += "%s: %s" % (error.__class__.__name__, error.args[0])
         error_message += "\n".join(error.args[1:])
         self.logger.error(error_message)
 
-        self.grab_all_port_prints()
+        self._grab_all_port_prints()
         return error
 
-    def grab_all_port_prints(self):
+    def _grab_all_port_prints(self):
+        """
+        Record all port's debug messages
+        """
         for port in self.ports.values():
-            self.record_debug_prints(self.timestamp, port)
+            self._record_debug_prints(self.timestamp, port)
         self.logger.debug("Port debug prints recorded")
 
-    def record_debug_prints(self, timestamp, port):
+    def _record_debug_prints(self, timestamp, port):
         """
         Take all of the port's queued debug messages and record them
         :param timestamp: current timestamp
@@ -481,9 +592,9 @@ class SerialStream(AsyncStream):
         """
         with port.print_out_lock:
             while not port.debug_print_outs.empty():
-                self.record(timestamp, port.whoiam, port.debug_print_outs.get(), "debug")
+                self._record(timestamp, port.whoiam, port.debug_print_outs.get(), "debug")
 
-    def stop_all_ports(self):
+    def _stop_all_ports(self):
         """
         Close all robot port processes
         """
@@ -505,39 +616,15 @@ class SerialStream(AsyncStream):
             self.logger.debug("%s, '%s' has %s" % (port.address, port.whoiam,
                                                    "exited" if has_exited else "not exited!!"))
             if not has_exited:
-                raise self.handle_error(RobotSerialPortFailedToStopError(
+                raise self._handle_error(RobotSerialPortFailedToStopError(
                     "Port signalled error while stopping", self.timestamp, self.packet,
                     port), traceback.format_stack())
         self.logger.debug("All ports exited")
 
-    def stop(self):
+    def _match_port_debug(self, message):
         """
-        Close all SerialPort processes and close their serial ports
+        Check if a message is a SerialPort debug message. Parse it and print it if it is
         """
-        error = None
-        try:
-            self.serial_close()
-        except BaseException as error:
-            self.handle_error(error, traceback.format_stack())
-
-        self.send_commands()
-        self.logger.debug("Sent last commands")
-        self.stop_all_ports()
-        self.logger.debug("Closed ports successfully")
-        self.grab_all_port_prints()
-
-        if error is not None:
-            self.exit()
-            raise error
-
-    def serial_close(self):
-        pass
-
-    def receive_log(self, log_level, message, line_info):
-        if not self.match_port_debug(message):
-            self.match_log(message, line_info)
-
-    def match_port_debug(self, message):
         matches = re.finditer(self.port_pattern, message)
         matched = False
         for match_num, match in enumerate(matches):
@@ -546,7 +633,12 @@ class SerialStream(AsyncStream):
             self.logger.debug("[%(timestamp)s, %(whoiam)s, %(portname)s]: %(message)s" % matchdict)
         return matched
 
-    def match_log(self, packet, line_info):
+    def _match_log(self, packet):
+        """
+        Parse message as a normal log message.
+        
+        :param packet: Packet that was received
+        """
         matches = re.finditer(self.packet_pattern, packet)
 
         for match_num, match in enumerate(matches):
@@ -569,10 +661,7 @@ class SerialStream(AsyncStream):
                 else:
                     self.packet = packet
 
-                    self.deliver(whoiam)
-                    self.received(whoiam)
+                    self._deliver(whoiam)
+                    self._received(whoiam)
 
             self.receive_serial_log(self.timestamp, whoiam, packet, packet_type)
-
-    def receive_serial_log(self, timestamp, whoiam, packet, packet_type):
-        pass

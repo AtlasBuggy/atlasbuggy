@@ -13,11 +13,12 @@ class AsyncStream(DataStream):
         self.coroutine = None
 
     def _subscribed(self, subscription):
-        subscription.is_async = True
+        subscription.is_async = True  # tell subscription to use the async queue
 
     async def _run(self):
         """
-        Added async tag since this method will be asynchronous
+        Added async tag since this method will be asynchronous. Make sure to include this tag
+        when subclassing AsyncStream
         """
 
         try:
@@ -43,6 +44,12 @@ class AsyncStream(DataStream):
         pass
 
     async def post(self, data, service="default"):
+        """
+        Post data to subscribed consumer streams using the async method
+        
+        :param data: Data to post 
+        :param service: which service to post data to
+        """
         if service in self.subscribers:
             for subscription in self.subscribers[service]:
                 if subscription.enabled:
