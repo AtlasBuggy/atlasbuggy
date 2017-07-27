@@ -72,9 +72,9 @@ class DataStream:
 
     def dt(self, current_time=None, use_current_time=True):
         """
-        Time since stream_start was called. Supply your own timestamp or use the current system time
+        Time since start was called. Supply your own timestamp or use the current system time
         Overwrite time_started to change the initial time
-        :return:
+        :return: Current time in seconds
         """
         # use the system time as current time by default. If you have another time source (e.g. log files),
         # use this method to update the stream's time

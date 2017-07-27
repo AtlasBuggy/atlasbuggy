@@ -1,7 +1,7 @@
 """
-RobotSerialPorts are the direct interface between serial port objects and robot objects.
+SerialPorts are the direct interface between serial port objects and microcontrollers.
 Each port runs on its own process. The whoiam ID of the port is found at runtime. The
-corresponding robot object is paired in RobotInterface.
+corresponding SerialObject is paired in SerialStream.
 """
 
 import re
@@ -19,8 +19,8 @@ from ..serial.errors import *
 
 class SerialPort(Process):
     """
-    A multiprocessing based wrapper for an instance of pyserial Serial.
-    A RobotInterface class manages all instances of this class.
+    A multiprocessing based wrapper for an instance of pyserial's Serial.
+    A SerialStream class manages all instances of this class.
     This class is for internal use only
     """
 
@@ -28,11 +28,7 @@ class SerialPort(Process):
 
     def __init__(self, port_address):
         """
-
-        :param queue: a multiprocessing queue to which packets are passed
-        :param lock: a shared lock to prevent multiple sources accessing the queue
-        :param counter: a queue size counter. Keeps track of the number of packets in the queue
-        :param updates_per_second: How often the port should update. This is passed to a Clock instance
+        :param port_address: Address to use when starting up the port
         """
 
         self.address = port_address
@@ -103,6 +99,10 @@ class SerialPort(Process):
     # ----- initialization methods -----
 
     def initialize(self):
+        """
+        Run through start up protocols. Find the whoiam ID and retrieve find packets. 
+        """
+
         # attempt to open the serial port
         try:
             self.serial_ref = serial.Serial(port=self.address, baudrate=self.baud_rate.value)
@@ -126,24 +126,23 @@ class SerialPort(Process):
         """
         Send the start flag
         For external use
-        :return: None
+        :return: True if successful
         """
         self.debug_print("sending start")
         return self.write_packet("start")
 
     def find_whoiam(self):
         """
-        Get the whoiam packet from the microcontroller. This method will wait 1 second
-        until the packet is received
+        Get the whoiam packet from the microcontroller. This method will wait 1 second for a packet before
+        throwing a timeout error.
 
         example:
             sent: "whoareyou\n"
             received: "iamlidar\n"
-
-        When the packet is found, parse_whoiam_packet is called and whoiam is assigned
+            
+            The whoiam ID for this object is 'lidar'
 
         For initialization
-        :return: whoiam packet and first_packet
         """
 
         self.whoiam = self.check_protocol(self.whoiam_ask, self.whoiam_header)
@@ -153,12 +152,12 @@ class SerialPort(Process):
         else:
             # self.configured = False
             self.abides_protocols = False
-            self.debug_print("Failed to obtain whoiam ID!", ignore_flag=True)
+            self.debug_print("Failed to obtain whoiam ID!")
 
     def find_first_packet(self):
         """
-        Get the first packet from the microcontroller. This method will wait 1 second
-        until the packet is received
+        Get the first packet from the microcontroller. This method will wait 1 second for a packet before
+        throwing a timeout error.
 
         example:
             sent: "init?\n"
@@ -166,10 +165,7 @@ class SerialPort(Process):
             received: "init:something interesting\t01\t23\n"
                 'something interesting\t01\t23' would be the first packet
 
-        When the packet is found, parse_whoiam_packet is called and whoiam is assigned
-
         For initialization
-        :return: whoiam packet and first_packet
         """
         self.first_packet = self.check_protocol(self.first_packet_ask, self.first_packet_header)
 
@@ -178,7 +174,7 @@ class SerialPort(Process):
         else:
             # self.configured = False
             self.abides_protocols = False
-            self.debug_print("Failed to obtain first packet!", ignore_flag=True)
+            self.debug_print("Failed to obtain first packet!")
 
     def check_protocol(self, ask_packet, recv_packet_header):
         """
@@ -189,7 +185,7 @@ class SerialPort(Process):
 
         :param ask_packet: packet to send
         :param recv_packet_header: what the received packet should start with
-        :return: the packet received without the header and packet end
+        :return: the packet received with the header and packet end removed
         """
         self.debug_print("Checking '%s' protocol" % ask_packet)
 
@@ -246,13 +242,12 @@ class SerialPort(Process):
 
     def handle_error(self, error, stack_trace):
         """
-        When errors occur in a RobotSerialPort, the process doesn't crash. The error is recorded,
+        When errors occur in a SerialPort, the process doesn't crash. The error is recorded,
         self.update is stopped, and the main process is notified so all other ports can close safely
 
         For initialization and process use
 
         :param error: The error message to record
-        :return: None
         """
         with self.exit_event_lock:
             self.exit_event.set()
@@ -279,19 +274,14 @@ class SerialPort(Process):
 
     def update(self):
         """
-        Called when RobotSerialPort.start is called
-
-        :return: None
+        Called when SerialPort.start is called. Continuously checks the serial port for new data.
         """
 
         self.start_time = time.time()
         clock = Clock(SerialPort.port_updates_per_second)
         clock.start(self.start_time)
 
-        # with self.start_event_lock:
-        #     self.start_event.set()
-
-        time.sleep(0.01)
+        time.sleep(0.01)  # Wait a brief time before starting and changing the baud rate
 
         with self.baud_rate.get_lock():
             if self.baud_rate.value != self.default_rate:  # if changed externally
@@ -305,18 +295,21 @@ class SerialPort(Process):
 
         try:
             while True:
+                # break if exit flag is set
                 with self.exit_event_lock:
                     if self.exit_event.is_set():
                         break
 
-                # close the process if the serial port isn't open
                 with self.serial_lock:
+                    # close the process if the serial port isn't open
                     if not self.serial_ref.isOpen():
                         self.stop()
                         raise RobotSerialPortClosedPrematurelyError("Serial port isn't open for some reason...", self)
 
                     in_waiting = self.in_waiting()
+
                     if in_waiting is None:
+                        # caught an OSError. Likely the cable came loose
                         self.stop()
                         raise RobotSerialPortClosedPrematurelyError(
                             "Failed to check serial. Is there a loose connection?", self)
@@ -331,8 +324,12 @@ class SerialPort(Process):
                         with self.lock:
                             for packet in packets:
                                 put_on_queue = True
+
+                                # check for protocol packet responses (responses to whoareyou, init?, start, stop)
                                 for header in self.protocol_packets:
                                     if len(packet) >= len(header) and packet[:len(header)] == header:
+
+                                        # the Arduino can signal to stop if it sends "stopping"
                                         if header == self.stop_packet_header:
                                             self.stop()
                                             raise RobotSerialPortClosedPrematurelyError(
@@ -357,6 +354,10 @@ class SerialPort(Process):
             self.handle_error("Stop flag failed to send!", traceback.format_stack())
 
     def in_waiting(self):
+        """
+        Safely check the serial buffer.
+        :return: None if an OSError occurred, otherwise an integer value indicating the buffer size 
+        """
         try:
             return self.serial_ref.inWaiting()
         except OSError as error:
@@ -371,8 +372,8 @@ class SerialPort(Process):
 
         For initialization and process use
 
-        :return: None indicates the serial read failed and that the communicator thread should be stopped.
-            returns the received packets otherwise
+        :return: None indicates the serial read failed and that the main thread should be stopped.
+            Returns the received packets otherwise
         """
         try:
             # read every available character
@@ -394,6 +395,7 @@ class SerialPort(Process):
                 self.handle_error(error, traceback.format_stack())
                 return None
 
+            # apply a regex pattern to remove invalid characters
             buf = self.buffer_pattern.sub('', self.buffer)
             if len(self.buffer) != len(buf):
                 self.debug_print("Invalid characters found:", repr(self.buffer))
@@ -404,7 +406,7 @@ class SerialPort(Process):
                 packets = self.buffer.split(self.packet_end)
                 self.prev_read_packets = packets
 
-                # reset the buffer
+                # reset the buffer. If the buffer ends with \n, the last element in packets will be an empty string
                 self.buffer = packets.pop(-1)
 
                 return packets
@@ -413,12 +415,15 @@ class SerialPort(Process):
     def write_packet(self, packet):
         """
         Safely write a packet over serial. Automatically appends packet_end to the input.
+        This method is run on the main thread
 
         For initialization and process use
 
         :param packet: an arbitrary string without packet_end in it
         :return: True or False if the write was successful
         """
+
+        # keep track of the previously sent packet for debugging
         self.prev_write_packet = str(packet)
         try:
             data = bytearray(str(packet) + self.packet_end, 'ascii')
@@ -457,13 +462,9 @@ class SerialPort(Process):
 
     # ----- external and status methods -----
 
-    def debug_print(self, *strings, ignore_flag=False):
+    def debug_print(self, *strings):
         """
-        For initialization and process use
-
-        :param strings:
-        :param ignore_flag:
-        :return:
+        Append a print statement to the queue. They will be printed by SerialStream 
         """
         string = "[%s] %s" % (self.whoiam, " ".join(map(str, strings)))
         with self.print_out_lock:
@@ -471,10 +472,9 @@ class SerialPort(Process):
 
     def change_rate(self, new_baud_rate):
         """
+        Change this port's baud rate. Only works while the port is initializing
+        
         For external use
-
-        :param new_baud_rate:
-        :return:
         """
         self.debug_print("Setting baud to", new_baud_rate)
         with self.baud_rate.get_lock():
@@ -483,12 +483,12 @@ class SerialPort(Process):
 
     def is_running(self):
         """
-        Check if the port's thread is running correctly
+        Check if the port's process is running correctly
 
         For external use
 
         :return:
-            -1: event event thrown
+            -1: exit event thrown
             0: self.configured is False
             1: process hasn't started or everything is fine
         """
@@ -496,10 +496,10 @@ class SerialPort(Process):
             if not self.start_event.is_set():  # process hasn't started
                 return 1
 
-        if not self.configured:
+        if not self.configured:  # protocols didn't complete successfully
             return 0
 
-        with self.exit_event_lock:
+        with self.exit_event_lock:  # process has exited
             if self.exit_event.is_set():
                 return -1
 
@@ -507,16 +507,12 @@ class SerialPort(Process):
 
     def send_stop_events(self):
         """
-
+        When the process exits, tell the Arduino to stop
+        
         For process use
 
-        :return:
+        :return: True if successful
         """
-
-        # with self.exit_event_lock:
-        #     if self.exit_event.is_set():
-        #         self.debug_print("Exit event already set. Stop was sent internally")
-        #         return True
 
         if self.start_time > 0 and time.time() - self.start_time <= 2:  # wait for arduino to listen
             time.sleep(2)
@@ -542,6 +538,7 @@ class SerialPort(Process):
 
     def close_serial(self):
         """
+        Shutdown the serial port connection
 
         For external use
 
@@ -561,10 +558,9 @@ class SerialPort(Process):
 
     def stop(self):
         """
-        Send stop packet, close the serial port.
+        Send stop packet
 
         For external use
-        :return: None
         """
 
         self.debug_print("Acquiring exit lock")
@@ -576,10 +572,9 @@ class SerialPort(Process):
 
     def has_exited(self):
         """
-
+        Check if the process has exited
+        
         For external use
-
-        :return:
         """
         return self.exit_event.is_set()
 

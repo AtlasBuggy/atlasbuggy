@@ -5,6 +5,9 @@ from atlasbuggy.datastream import ThreadedStream
 
 
 class Website(ThreadedStream):
+    """
+    Base class for flask based website hosts. This class should be subclassed
+    """
     def __init__(self, template_folder, static_folder, flask_params=None, app_params=None, enabled=True, log_level=None,
                  name=None, use_index=True, host='0.0.0.0', port=5000):
         if flask_params is None:
@@ -43,10 +46,15 @@ class Website(ThreadedStream):
         @app.route('/hello')
         def hello_world():
            return 'hello world'
+        
+        Override this method as needed
         """
         return render_template('index.html')
 
     def run(self):
+        """
+        Do not override this method. Starts the website.
+        """
         self.logger.debug("Running website on %s:%s" % (self.host, self.port))
         try:
             self.app.run(host=self.host, port=self.port, debug=False, threaded=True, **self.app_params)

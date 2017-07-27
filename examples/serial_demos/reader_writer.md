@@ -78,10 +78,10 @@ Initialization data is data that's passed from the Arduino to the PC when the py
 In the loop function, write this code block:
 
 ```cpp
-while (robot.available())
-{
-	
-}
+    while (robot.available())
+    {
+        
+    }
 ```
 
 loop is called well... in a loop! This while loop doesn't loop forever. It loops while there's stuff available in the Arduino's serial buffer. 
@@ -89,13 +89,15 @@ loop is called well... in a loop! This while loop doesn't loop forever. It loops
 Inside that block, add the following:
 
 ```cpp
-int status = robot.readSerial();
-if (status == 0) {  // user command
-    String command = robot.getCommand();
-}
+        int status = robot.readSerial();
+        if (status == 0) {  // user command
+            String command = robot.getCommand();
+        }
 ```
 
 ```robot.readSerial()``` utilizes Serial.read. Specifically ```Serial.readStringUntil('\n')```. Atlasbuggy reserves the newline character. Each new message is separated by \n (10 or 0xA in number form). Every time robot.readSerial is called, it discovers a new message on the buffer separated by \n characters.
+
+It's worth mentioning atlasbuggy will only accept ascii characters \t, \n, \r and characters with values from 20 to 126 (all letter and number characters with some punctuation). This is to avoid decoding errors. So to send the number 240, instead of sending the character '\xf0' or 'ð', send three characters '2', '4', and '0'. Same applies to sending floating point numbers.
 
 The important concept to understand about serial is data is sent one character or byte at a time. The maximum amount of data that can be sent at any one time is a value from 0...255. However, these characters can be concatenated together to form much more complex messages. The problem is when to stop concatenating? What separates one message from the next. The technique I've chosen here is to split the message whenever a particular character appears. This has the disadvantage of making the character \n unusable for anything else except message breaks, but it makes message forming very simple. Other devices like SICK's LMS200 LIDAR implement a different way of parsing bytes, but I won't go into detail here.
 
@@ -106,20 +108,20 @@ The status code indicates what sort of command was received. 0 indicates a user 
 Add the following code blocks for completeness below the user status code block:
 
 ```cpp
-else if (status == 1) {  // stop event
-
-}
-else if (status == 2) {  // start event
-
-}
+        else if (status == 1) {  // stop event
+        
+        }
+        else if (status == 2) {  // start event
+        
+    }
 ```
 
 Finally, outside the robot.available() while loop block, add the following:
 
 ```cpp
-if (!robot.isPaused()) {
-
-}
+    if (!robot.isPaused()) {
+    
+    }
 ```
 
 Code in this block will run continously while the python program is running and be ignored when the python program stops.
@@ -135,26 +137,26 @@ The Atlasbuggy uses LED13 as a debug light to let the user know if it's running 
 Write the following code (user command block included for convenience):
 
 ```cpp
-if (status == 0) {  // user command
-    String command = robot.getCommand();
-
-    if (command == "on") {
-        robot.setLed(true);
-    }
-    else if (command == "off") {
-        robot.setLed(false);
-    }
-    else if (command == "toggle") {
-        robot.setLed(!robot.getLed());
-    }
-}
+        if (status == 0) {  // user command
+            String command = robot.getCommand();
+        
+            if (command == "on") {
+                robot.setLed(true);
+            }
+            else if (command == "off") {
+                robot.setLed(false);
+            }
+            else if (command == "toggle") {
+                robot.setLed(!robot.getLed());
+            }
+        }
 ```
 
 We'll also add create some dummy data to send back to the PC. For now, we'll send the Arduino's clock time. In the isPaused code block, write the following:
 
 ```cpp
-Serial.print(millis());
-Serial.print('\n');
+        Serial.print(millis());
+        Serial.print('\n');
 ```
 
 Serial.write() is valid as well. Make sure to use ```Serial.print('\n');``` and not ```Serial.println(millis());```. Serial.println ends every message with \r\n. We don't want extraneous \r's in our messages.
@@ -207,22 +209,22 @@ Create a new class and subclass SerialObject:
 
 ```python
 class ReaderWriterInterface(SerialObject):
-	def __init__(self):
-		
+    def __init__(self):
+        
 ```
 
 Recall we sent two initialization values using setInitData in the Arduino code. Let link them in the python code. Create two variables in the \_\_init__ method and set them equal to None. I like to set variables that will be initialized later equal to None.
 
 ```python
-	def __init__(self):
-		self.magic_value_1 = None
-		self.magic_value_2 = None
+    def __init__(self):
+        self.magic_value_1 = None
+        self.magic_value_2 = None
 ```
 
 Now, since we're subclassing SerialObject, we need to call its constructor:
 
 ```python
-		super(ReaderWriterInterface, self).__init__("my_reader_writer_bot")
+        super(ReaderWriterInterface, self).__init__("my_reader_writer_bot")
 ```
 
 This line is really important. You'll notice ```"my_reader_writer_bot"``` matches the string we defined in the Arduino code. Behind the scenes, this ID is called a "whoiam ID." If you want this SerialObject to be paired with the right Arduino at runtime, make sure these IDs match. If two of the same ID appear at runtime, atlasbuggy will point out that you likely uploaded the same code to two Arduinos by accident. When the command ```whoareyou``` is sent, ```my_reader_writer_bot``` should come back. That port is then assigned to this SerialObject.
@@ -232,7 +234,7 @@ As a side note, here's where you'd set an alternative baud rate. There's a param
 We want to assign these "magic values" something meaningful. There's no way to do this in the SerialObject's constructor. The ```init?``` command isn't sent until later. For this, we will override the ```receive_first``` method:
 
 ```python
-	def receive_first(self, packet):
+    def receive_first(self, packet):
 ```
 
 ```packet``` contains the initialization data sent when the Arduino unpauses. We want a way to be able to parse out the information and assign it to ```self.magic_value_1``` and ```self.magic_value_2```. In reader_writer.py I have implemented three different ways of parsing. Choose the one you're most comfortable with. In the long run, I recommend regex (http://regex101.com/). It's a string parsing language. Once you get the hang of it, it's really easy to parse arbitrary and complex strings.
@@ -304,7 +306,7 @@ Define a method called timed_toggle:
         self.interface.toggle()
 ```
 
-In the ```__init__``` method, let's tell SerialStream to call this method every 0.5 seconds:
+In the ```__init__``` method, let's tell SerialStream to call this method every 0.5 seconds. __Make sure to put this line after the call to ```super()```__. ```self.link_recurring``` adds to a lookup table that only gets initialized after the call to the super class.
 
 ```python
         self.link_recurring(0.5, self.timed_toggle)
@@ -315,7 +317,7 @@ Let's add a callback so the SerialStream knows when ReaderWriterInterface receiv
     def interface_received(self, timestamp, packet):
         self.logger.info("notified that interface received: '%s' @ %0.4f" % (packet, timestamp))
 
-put this in the ```__init__```:
+put this in the ```__init__``` (after the call to ```super()```):
 
 ```python
         self.link_callback(self.interface, self.interface_received)

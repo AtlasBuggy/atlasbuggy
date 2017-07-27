@@ -68,11 +68,17 @@ class SerialObject:
 
     def pause(self, gap_time):
         """
-        Non-blocking pause for sending commands. When the serial async loop encounters this,
+        Non-blocking pause for sending commands. When the serial stream encounters this,
         it will keep checking back until the timer has expired then move to the next command for the object
         """
         if self.enabled and self.is_live:
             self.command_packets.put(CommandPause(gap_time))
+
+    def is_paused(self):
+        """
+        Check if a pause command has been sent. If you're worried about flooding your command buffer, use this method
+        """
+        return self._pause_command is not None
 
     def __str__(self):
         return "%s(whoiam=%s)\n\t" % (self.__class__.__name__, self.whoiam)

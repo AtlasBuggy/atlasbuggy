@@ -1,4 +1,4 @@
-Welcome to the atlasbuggy repository! This readme will serve as a high level design document.
+Welcome to the atlasbuggy repository! This readme will serve as a high level design document. This code package is an attempt at making developing DIY robots easy, fun, and pythonic.
 
 # Table of Contents
 1. [Software setup](#setup)
@@ -24,23 +24,28 @@ Most dependencies can be installed with python's "pip." Depending on your instal
 If you encounter permission errors on macOS or linux, try adding ```sudo``` to the beginning of your command.
 
 However, there are some dependencies you'll want to get if you want to get the most out of this repository:
+
 1. pyserial - for working with usb serial devices such as arduino
+
     ```bash
     pip3 install pyserial
     ```
 1. opencv - for camera visualization. https://www.pyimagesearch.com has some great tutorials on how to get this set up
 1. flask - website hosting for remote control of robots
+
     ```bash
     pip3 install flask
-    ```
+    ```    
 1. matplotlib - for data visualization
+
     ```bash
     pip3 install matplotlib
     ```
 1. picamera - for accessing the raspberry pi camera (obviously only get this if you're on a raspberry pi)
+
     ```bash
     pip3 install picamera
-    ```
+    ```    
 1. scipy and numpy - advanced matrix manipulation. Essential for autonomous algorithms. (Numpy is a dependency of scipy and opencv)
     ```bash
     pip3 install numpy scipy
@@ -53,25 +58,31 @@ Since atlasbuggy is not on pip, you can't install it that way. Python packages a
 
 ### macOS and linux instructions
 Boot up your terminal application and download the repository into the directory of your choice. It will create a folder called atlasbuggy and fill it with the repository:
+
 ```bash
 git clone https://github.com/AtlasBuggy/atlasbuggy.git
 ```
 
 To find this directory, type the following:
-```python
+
+```bash
 $ python3  # or whatever command starts the python repl for you
 >>> import sys
 >>> sys.path
 ```
+
 Look for the path that ends with ```site-packages```. If you can't find it, sys.path lists every path it checks for modules in. Search those directories until you find site-packages.
 
 On macOS and linux, to create a link between folders (or a symlink), type the following:
+
 ```bash
 sudo ln -s $PWD/atlasbuggy /usr/local/lib/python3.6/site-packages
 ```
+
 This is assuming my site-packages folder is called /usr/local/lib/python3.6/site-packages, I've installed atlasbuggy in ~/Documents, and I'm currently in the Documents directory. It's important to symlink absolute directories (not ../some_other_directory) so that links don't confused. $PWD inserts the current directory you're in. This operation requires administrator privileges.
 
 Try it out:
+
 ```python
 python3
 >>> import atlasbuggy

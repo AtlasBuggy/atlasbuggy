@@ -44,10 +44,10 @@ class ReaderWriterRobot(SerialStream):
     def __init__(self, enabled=True, log_level=None):
         self.interface = ReaderWriterInterface()
 
+        super(ReaderWriterRobot, self).__init__(self.interface, enabled=enabled, log_level=log_level)
+
         self.link_callback(self.interface, self.interface_received)
         self.link_recurring(0.5, self.timed_toggle)
-
-        super(ReaderWriterRobot, self).__init__(self.interface, enabled=enabled, log_level=log_level)
 
     def interface_received(self, timestamp, packet):
         self.logger.info("notified that interface received: '%s' @ %0.4f" % (packet, timestamp))

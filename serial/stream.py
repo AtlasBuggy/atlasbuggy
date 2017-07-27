@@ -15,22 +15,38 @@ from ..serial.port import SerialPort
 
 
 class SerialStream(AsyncStream):
+    """
+    Manages the interfaces between SerialObjects and microcontrollers.
+    
+    Some of its tasks are to connect SerialPorts to SerialObjects, pass data from SerialPorts to SerialObjects
+    when data is received, and to pass queued commands from SerialObjects to SerialPorts.
+    
+    This class should be subclassed
+    """
+
     def __init__(self, *serial_objects, enabled=True, log_level=None, name=None):
+        """
+        :param serial_objects: All the SerialObjects to look for and pass data to and from
+        :param enabled: Toggle this stream
+        :param log_level: Integer value representing which log statements to show (10 = debug, 20 = info, etc)
+        :param name: Name to give this stream besides the default (its class name)
+        """
         super(SerialStream, self).__init__(enabled, name, log_level)
 
-        self.objects = {}
-        self.ports = {}
-        self.callbacks = {}
-        self.recurring = []
+        self.objects = {}  # dictionary of SerialObjects indexed by its whoiam ID
+        self.ports = {}  # dictionary of SerialPorts indexed by its whoiam ID
+        self.callbacks = {}  # dictionary of callback functions indexed by whoiam ID
+        self.recurring = []  # list of recurring callback functions
 
         self.packet = ""
 
         self.loops_per_second = 200
         self.loop_delay = 1 / self.loops_per_second
         self.clock = Clock(self.loops_per_second)
-        self.object_list = serial_objects
 
-        self.init_objects(self.object_list)
+        # initialize SerialObjects
+        self.object_list = serial_objects
+        self._init_objects(self.object_list)
 
         self.port_pattern = re.compile(
             r"<(?P<timestamp>[.0-9a-zA-Z]*), (?P<whoiam>.*), \[(?P<portname>.*)\] (?P<message>.*), debug>"
@@ -40,13 +56,16 @@ class SerialStream(AsyncStream):
         )
 
     def time_started(self):
+        """
+        By default, no start time is supplied (in case this stream is being used by log parser). A start_time
+        is supplied if this stream is passed to Robot
+        """
         return None
 
     def link_callback(self, arg, callback_fn):
         """
-        :param arg:
+        :param arg: a whoiam ID or SerialObject
         :param callback_fn: function that takes the parameters timestamp and packet
-        :return:
         """
         if type(arg) == str and arg in self.objects.keys():
             whoiam = arg
@@ -58,11 +77,25 @@ class SerialStream(AsyncStream):
         self.callbacks[whoiam] = callback_fn
 
     def link_recurring(self, repeat_time, callback_fn, *args, include_event_in_params=False):
-        self.recurring.append(RecurringEvent(repeat_time, time.time(), callback_fn, args, include_event_in_params))
+        """
+        :param repeat_time: How often to call the passed function 
+        :param callback_fn: a reference to a function. It doesn't take parameters by default. You can supply parameters
+            with the args parameter
+        :param args: Values to pass to the callback function
+        :param include_event_in_params: If this is set to True, an instance of this event will be included.
+            This is if you want to change the repeat time or arguments on the fly.
+        :return: An instance of RecurringEvent in case you want to change the repeat time later. 
+        """
+        event = RecurringEvent(repeat_time, time.time(), callback_fn, args, include_event_in_params)
+        self.recurring.append(event)
+        return event
 
-    def init_objects(self, serial_objects):
+    def _init_objects(self, serial_objects):
+        """
+        Initialize all SerialObjects
+        :param serial_objects: A list of SerialObjects
+        """
         for serial_object in serial_objects:
-            serial_object.is_live = True
             if isinstance(serial_object, SerialObject):
                 self.objects[serial_object.whoiam] = serial_object
                 serial_object.logger = self.logger  # give serial stream's logger to the objects
@@ -70,42 +103,64 @@ class SerialStream(AsyncStream):
                 raise RobotObjectInitializationError(
                     "Object passed is not valid:", repr(serial_object))
 
-    def init_ports(self):
+    def _init_ports(self):
+        """
+        Discover and configure all ports. Validate that all ports pair with an object 
+        """
+
+        # List all ports discovered by pyserial
         discovered_ports = []
         for port_address in self.list_ports():
             discovered_ports.append(SerialPort(port_address))
         self.logger.debug("Discovered ports: " + str(discovered_ports))
 
+        if len(discovered_ports) == 0:
+            raise RobotObjectNotFoundError("No serial ports discovered!!")
+
+        # Configure each port on a separate thread
         threads = []
         error_messages = []
         for serial_port in discovered_ports:
-            config_thread = threading.Thread(target=self.configure_port, args=(serial_port, error_messages))
+            config_thread = threading.Thread(target=self._configure_port, args=(serial_port, error_messages))
             threads.append(config_thread)
             config_thread.start()
 
+        # wait for all ports to configure
         for thread in threads:
             thread.join()
 
+        # check for any error messages
         for error_id, message in error_messages:
             if error_id == 0:
                 raise RobotSerialPortWhoiamIdTaken(message)
             elif error_id == 1:
                 raise RobotSerialPortNotConfiguredError(message)
 
+        # Check for a mismatch in discovered ports and listed objects
         if self.ports.keys() != self.objects.keys():
-            unassigned_ids = self.objects.keys() - self.ports.keys()
-            if len(unassigned_ids) == 1:
-                message = "Failed to assign object with ID "
-            else:
-                message = "Failed to assign objects with IDs "
-            raise RobotObjectNotFoundError(message + str(list(unassigned_ids))[1:-1])
 
-        self.validate_ports()
+            # Check if there are more objects than ports (python set subtraction)
+            unassigned_ids = self.objects.keys() - self.ports.keys()
+            message = "Failed to assign object with ID"
+            if len(unassigned_ids) > 1:
+                message += "s"
+            raise RobotObjectNotFoundError("%s %s" % (message, ", ".join(unassigned_ids)))
+
+        # Check if there are more ports than objects
+        self._validate_ports()
 
         for whoiam in self.ports.keys():
             self.logger.debug("[%s] has ID '%s'" % (self.ports[whoiam].address, whoiam))
 
+        # Real ports are hooked up. Notify all SerialObjects
+        for serial_object in self.object_list:
+            serial_object.is_live = True
+
     def dt(self, current_time=None, use_current_time=False):
+        """
+        Time since SerialStream has started
+        :return: Current time in seconds. 0.0 if the stream hasn't started
+        """
         if use_current_time:
             if current_time is None:
                 self.timestamp = time.time()
@@ -117,7 +172,7 @@ class SerialStream(AsyncStream):
         else:
             return self.timestamp - self.start_time
 
-    def configure_port(self, serial_port, errors_list):
+    def _configure_port(self, serial_port, errors_list):
         """
         Initialize a serial port recognized by pyserial.
         Only devices that are plugged in should be recognized
@@ -125,31 +180,31 @@ class SerialStream(AsyncStream):
         # initialize SerialPort
         serial_port.initialize()
 
-        # check for duplicate IDs
         if serial_port.whoiam in self.ports.keys():
+            # check for duplicate IDs
             errors_list.append((0, "whoiam ID already being used by another port! It's possible "
                                    "the same code was uploaded for two boards.\n"
                                    "Port address: %s, ID: %s" % (serial_port.address, serial_port.whoiam)))
 
-        # check if port abides protocol. Warn the user and stop the port if not (ignore it essentially)
         elif serial_port.configured and (not serial_port.abides_protocols or serial_port.whoiam is None):
+            # check if port abides protocol. Warn the user and stop the port if not (ignore it essentially)
             self.logger.debug("Warning! Port '%s' does not abide by protocol!" % serial_port.address)
             serial_port.stop()
 
-        # check if port is configured correctly
         elif not serial_port.configured:
+            # check if port is configured correctly
             errors_list.append((1, "Port not configured! '%s'" % serial_port.address))
 
-        # disable ports if the corresponding object if disabled
         elif not self.objects[serial_port.whoiam].enabled:
+            # disable ports if the corresponding object if disabled
             serial_port.stop()
             self.logger.debug("Ignoring port with ID: %s (Disabled by user)" % serial_port.whoiam)
 
-        # add the port if configured and abides protocol
         else:
+            # add the port if configured and abides protocol
             self.ports[serial_port.whoiam] = serial_port
 
-    def validate_ports(self):
+    def _validate_ports(self):
         """
         Validate that all ports are assigned to enabled objects. Warn the user otherwise
             (this allows for ports not listed in objects to be plugged in but not used)
@@ -169,6 +224,13 @@ class SerialStream(AsyncStream):
         self.ports = used_ports
 
     def list_ports(self):
+        """
+        Find port addresses that are usable by pyserial
+        
+        Override this method for different port discovery behavior
+        
+        :return: list of discovered ports
+        """
         port_addresses = []
 
         # return the port if 'USB' is in the description
@@ -177,20 +239,23 @@ class SerialStream(AsyncStream):
                 port_addresses.append(port_no)
         return port_addresses
 
-    def first_packets(self):
+    def _first_packets(self):
         """
         Send each port's first packet to the corresponding object if it isn't an empty string
         """
         for whoiam in self.objects.keys():
             first_packet = self.ports[whoiam].first_packet
             if len(first_packet) > 0:
-                self.deliver_first_packet(whoiam, first_packet)
+                self._deliver_first_packet(whoiam, first_packet)
 
                 # record first packets
                 self.record(None, whoiam, first_packet, "object")
         self.logger.debug("First packets sent")
 
-    def deliver_first_packet(self, whoiam, first_packet):
+    def _deliver_first_packet(self, whoiam, first_packet):
+        """
+        Call the corresponding SerialObject's receive_first method. Give it the packet received
+        """
         error = None
         try:
             if self.objects[whoiam].receive_first(first_packet) is not None:
@@ -211,11 +276,17 @@ class SerialStream(AsyncStream):
         self.received(whoiam)
 
     def start(self):
+        """
+        Start up behavior for SerialStream.
+        
+        DO NOT override this method. Call serial_start or started instead
+        """
+
         self.start_time = time.time()
         self.clock.start(self.start_time)
-        self.init_ports()
+        self._init_ports()
 
-        self.first_packets()
+        self._first_packets()
 
         for robot_port in self.ports.values():
             if not robot_port.send_start():
@@ -254,13 +325,7 @@ class SerialStream(AsyncStream):
             self.update_recurring(time.time())
             self.send_commands()
 
-            # if no packets have been received for a while, update the timestamp with the current clock time
-            # current_real_time = time.time() - self.start_time
-            # if self.timestamp is None or current_real_time - self.timestamp > 0.01 or len(self.ports) == 0:
-            #     self.timestamp = current_real_time
-
-            await asyncio.sleep(self.loop_delay)
-            # self.clock.update()  # maintain a constant loop speed
+            await asyncio.sleep(self.loop_delay)  # maintain a constant loop speed
 
     def update_recurring(self, timestamp):
         for event in self.recurring:
@@ -357,7 +422,7 @@ class SerialStream(AsyncStream):
         for whoiam in self.objects.keys():
             # loop through all commands and send them
             while not self.objects[whoiam].command_packets.empty():
-                if self.objects[whoiam]._pause_command is not None:
+                if self.objects[whoiam].is_paused():
                     if self.objects[whoiam]._pause_command.update():
                         self.objects[whoiam]._pause_command = None
                     else:
@@ -367,7 +432,7 @@ class SerialStream(AsyncStream):
 
                 if isinstance(command, CommandPause):
                     self.objects[whoiam]._pause_command = command
-                    self.objects[whoiam]._pause_command.prev_time = time.time()
+                    self.objects[whoiam]._pause_command.set_prev_time()
                     self.record(time.time(), whoiam, str(command.delay_time), "pause command")
                 else:
                     # log sent command.
@@ -500,7 +565,7 @@ class SerialStream(AsyncStream):
 
             if packet_type == "object":
                 if self.timestamp is None:
-                    self.deliver_first_packet(whoiam, packet)
+                    self._deliver_first_packet(whoiam, packet)
                 else:
                     self.packet = packet
 
