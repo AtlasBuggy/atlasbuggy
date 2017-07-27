@@ -90,10 +90,15 @@ If you plan on creating your own robot, I recommend getting an SFTP and SSH clie
 Developing robotic systems is difficult. ROS (http://www.ros.org) made me an unhappy programmer, so I decided to write my own robotics development package; one that I would enjoy working with.<br/>
 
 I used this framework I created on two robots:
-RoboQuasar (URL on the way),<br/>
--insert image-<br/><br/>
-and Naboris (https://github.com/AtlasBuggy/Naboris)<br/>
--insert image-<br/><br/>
+RoboQuasar (URL on the way),
+
+![alt text](examples/readme_images/roboquasar.jpg "RoboQuasar")
+![alt text](examples/readme_images/crossing_the_finish_line.jpg "Crossing the finish line")
+
+and Naboris (https://github.com/AtlasBuggy/Naboris)
+
+![alt text](examples/readme_images/naboris.jpg "Naboris")
+
 
 I've had a fun time developing this platform. My goal is to offer people frustrated with ROS an alternative.
 

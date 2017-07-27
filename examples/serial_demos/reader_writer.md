@@ -159,15 +159,37 @@ Serial.print('\n');
 
 Serial.write() is valid as well. Make sure to use ```Serial.print('\n');``` and not ```Serial.println(millis());```. Serial.println ends every message with \r\n. We don't want extraneous \r's in our messages.
 
+This will completely flood our buffer with the current time in milliseconds. To avoid this, let's add a timer. When designing Arduino code for atlasbuggy __make sure you avoid using ```delay```__. Delay stops the program for listening to serial. The Arduino's serial buffer is limited so it's possible to drop large portions of your commands. I would also avoid any Arduino libraries that use delay in their code.
+
+Add a timer variable somewhere below the ```#include "Atlasbuggy.h"```
+
+```cpp
+uint32_t timer = millis();
+```
+
+Insert this code:
+
+```cpp
+    if (!robot.isPaused()) {
+        if (timer > millis())  timer = millis();  // reset the timer if there is overflow
+        if ((millis() - ping_timer) > 500) {  // every 0.5 seconds, print the current time in milliseconds
+            Serial.print(millis());
+            Serial.print('\n');
+        }
+    }
+```
+
 Since that's the only thing I can guarentee you have on your Arduino, that's all I can do for this example unfortunately. I encourage you to get creative here and try adding some servos or sensors to this sketch. Take advantage of atlasbuggy's start and stop events for initializating and deinitializing elements and the isPaused method.
 
 Before writing any python code, I suggest booting up Arduino's built-in serial monitor and testing your code out. The characters sent here are the same ones we'll be telling python to send.
 
-Check the bottom right corner of the window. Make sure you see "Newlines" and "115200 baud." This ensures the correct baud rate and that we're sending \n characters every time we hit enter. All you really need to send is ```start\n```, but the sequence of commands sent are, ```whoareyou\n```, ```init?\n```, ```start\n```, program runs and data is transferred, ```stop\n```. I'll go over what all of these mean when we implement the python code. When you type ```start```, the Arduino is now ready to receive commands. 
+Check the bottom right corner of the window. Make sure you see "Newlines" and "115200 baud." This ensures the correct baud rate and that we're sending \n characters every time we hit enter. All you really need to send is ```start```, but the sequence of commands sent are, ```whoareyou```, ```init?```, ```start```, ```stop```. I'll go over what all of these mean when we implement the python code. When you type ```start```, the Arduino is now ready to receive commands. 
 
 If you wrote the example exactly as I wrote it, you should just see the current time since the Arduino started in milliseconds flooding your screen. Type ```stop``` to pause the Arduino.
 
 While the Arduino is unpaused, try typing ```toggle```. You should see your Arduino's LED change state. Hooray!! You have the start of your own little robot. Now let's do in python.
+
+Make sure to check https://github.com/Atlasbuggy/AtlasbuggyLowLevel/Arduino/ReaderWriter for the completed example.
 
 ## Implementing the Python code
 
@@ -189,3 +211,130 @@ class ReaderWriterInterface(SerialObject):
 		
 ```
 
+Recall we sent two initialization values using setInitData in the Arduino code. Let link them in the python code. Create two variables in the \_\_init__ method and set them equal to None. I like to set variables that will be initialized later equal to None.
+
+```python
+	def __init__(self):
+		self.magic_value_1 = None
+		self.magic_value_2 = None
+```
+
+Now, since we're subclassing SerialObject, we need to call its constructor:
+
+```python
+		super(ReaderWriterInterface, self).__init__("my_reader_writer_bot")
+```
+
+This line is really important. You'll notice ```"my_reader_writer_bot"``` matches the string we defined in the Arduino code. Behind the scenes, this ID is called a "whoiam ID." If you want this SerialObject to be paired with the right Arduino at runtime, make sure these IDs match. If two of the same ID appear at runtime, atlasbuggy will point out that you likely uploaded the same code to two Arduinos by accident. When the command ```whoareyou``` is sent, ```my_reader_writer_bot``` should come back. That port is then assigned to this SerialObject.
+
+As a side note, here's where you'd set an alternative baud rate. There's a parameter called baud. If you set this equal to something, atlasbuggy will attempt to switch to that baud rate after it finds your SerialObject's port. In the Arduino code, call ```robot.changeBaud()``` in the start event block. Make sure to call it again in the stop block to reset it: ```robot.changeBaud(DEFAULT_RATE);```
+
+We want to assign these "magic values" something meaningful. There's no way to do this in the SerialObject's constructor. The ```init?``` command isn't sent until later. For this, we will override the ```receive_first``` method:
+
+```python
+	def receive_first(self, packet):
+```
+
+```packet``` contains the initialization data sent when the Arduino unpauses. We want a way to be able to parse out the information and assign it to ```self.magic_value_1``` and ```self.magic_value_2```. In reader_writer.py I have implemented three different ways of parsing. Choose the one you're most comfortable with. In the long run, I recommend regex (http://regex101.com/). It's a string parsing language. Once you get the hang of it, it's really easy to parse arbitrary and complex strings.
+
+When designing this portion of the package, I tried to make it flexible. Instead of having to learn protocols, you get to define how data is sent and parsed. It makes life much simpler.
+
+Here's the code to parse the values using regex (make sure to ```import re``` at the top of your file):
+
+```python
+        match = re.match(r"(?P<magic_val_1>[0-9]*)\t(?P<magic_val_2>[0-9]*)", packet)
+        if match is None:
+            self.logger.warning("Failed to parse initial packet: %s" % packet)
+        else:
+            values = match.groupdict()
+            self.magic_value_1 = int(values["magic_val_1"])
+            self.magic_value_2 = int(values["magic_val_2"])
+```
+
+We also said that we'd be sending the Arduino's current time every 0.5 seconds. Since there isn't a whole lot we can do with this information, let's just print it:
+
+```python
+    def receive(self, timestamp, packet):
+        self.logger.info("interface received: '%s' @ %0.4f" % (packet, timestamp))
+```
+
+An important note is logger can only accept one string parameter. It doesn't behave like the print statement. Look up string formatting if you don't know what's going on in this line.
+
+Finally, let's hook up the three commands ```on```, ```off```, and ```toggle```:
+
+```python
+    def on(self):
+        self.send("on")
+
+    def off(self):
+        self.send("off")
+
+    def toggle(self):
+        self.send("toggle")
+```
+SerialObject implements a method called ```send```. Strings passed in will be sent to the Arduino.
+
+That's everything we coded our Arduino to do, so we're done! At least, with this part.
+
+### Implementing the serial manager
+
+This object isn't actually a subclass of DataStream, so it won't do anything if we pass it to a Robot object. We need a SerialStream to manage all of our SerialObjects:
+
+```python
+class ReaderWriterRobot(SerialStream):
+    def __init__(self, enabled=True, log_level=None):
+    
+```
+
+I've added enabled and log_level as parameters so we can easily toggle this object and debug it.
+
+Instantiate ReaderWriterInterface and give it to the super class:
+
+```python
+   self.interface = ReaderWriterInterface()
+   super(ReaderWriterRobot, self).__init__(self.interface, enabled=enabled, log_level=log_level)
+```
+
+That's actually all we need to do for this class, but this is a pretty boring stream as it is. Let's tell the LED to toggle every 0.5 seconds.
+
+Define a method called timed_toggle:
+
+```python
+    def timed_toggle(self):
+        self.interface.toggle()
+```
+
+In the ```__init__``` method, let's tell SerialStream to call this method every 0.5 seconds:
+
+```python
+        self.link_recurring(0.5, self.timed_toggle)
+```
+
+Let's add a callback so the SerialStream knows when ReaderWriterInterface receives a packet:
+
+    def interface_received(self, timestamp, packet):
+        self.logger.info("notified that interface received: '%s' @ %0.4f" % (packet, timestamp))
+
+put this in the ```__init__```:
+
+```python
+        self.link_callback(self.interface, self.interface_received)
+```
+
+Callbacks are great for signalling other streams when data comes in or for transferring data between multiple Arduinos. Here it's pretty useless since we don't have any other data streams to talk to and we only have one Arduino.
+
+Finally, below both of these classes, instantiate robot:
+
+```python
+robot = Robot()
+
+reader_writer = ReaderWriterRobot()
+
+robot.run(reader_writer)
+```
+
+If your Arduino code worked, running this python file should work too. Congratulations!! You now have a python project that controls your Arduino. This small project can easily be expanded to accept multiple Arduinos and process much more complex data at fast pace.
+
+I encourage you to dig through the other serial examples for more complex implementations.
+
+Return to the main readme for the next example: [README.md](../../README.md)

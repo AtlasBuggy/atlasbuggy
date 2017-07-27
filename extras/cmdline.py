@@ -1,7 +1,7 @@
 import sys
 import asyncio
 import traceback
-from datastream import AsyncStream
+from ..datastream import AsyncStream
 
 
 class CommandLine(AsyncStream):

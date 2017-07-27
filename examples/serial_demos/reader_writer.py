@@ -16,8 +16,8 @@ class ReaderWriterInterface(SerialObject):
             self.logger.warning("Failed to parse initial packet: %s" % packet)
         else:
             values = match.groupdict()
-            self.magic_value_1 = values["magic_val_1"]
-            self.magic_value_2 = values["magic_val_2"]
+            self.magic_value_1 = int(values["magic_val_1"])
+            self.magic_value_2 = int(values["magic_val_2"])
 
             # same as:
             # self.magic_value_1, self.magic_value_2 = tuple(map(int, packet.split("\t")))

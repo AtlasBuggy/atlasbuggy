@@ -507,7 +507,7 @@ class SerialStream(AsyncStream):
                     self.deliver(whoiam)
                     self.received(whoiam)
 
-            self.received_log_message(self.timestamp, whoiam, packet, packet_type)
+            self.receive_serial_log(self.timestamp, whoiam, packet, packet_type)
 
-    def received_log_message(self, timestamp, whoiam, packet, packet_type):
+    def receive_serial_log(self, timestamp, whoiam, packet, packet_type):
         pass
