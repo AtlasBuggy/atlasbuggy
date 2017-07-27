@@ -28,6 +28,7 @@ class SerialObject:
         self.is_live = False
         self.command_packets = Queue(maxsize=255)
         self._pause_command = None
+        self.logger = None
 
     def receive_first(self, packet):
         """

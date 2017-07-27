@@ -22,8 +22,8 @@ class RecurringEvent:
 
 
 class CommandPause:
-    def __init__(self, delay_time):
-        self.delay_time = delay_time
+    def __init__(self, delay_sec):
+        self.delay_time = delay_sec
         self.prev_time = 0  # set later on just after being dequeued
         self.activated = False
 
