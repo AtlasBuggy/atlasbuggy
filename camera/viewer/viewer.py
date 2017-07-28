@@ -1,4 +1,5 @@
 import cv2
+import asyncio
 
 from .base import BaseViewer
 from ...subscriptions import Update
@@ -15,7 +16,8 @@ class CameraViewer(BaseViewer):
         self.frame = None
 
         if enable_trackbar:
-            required_attributes = "width", "height", "num_frames", "set_pause", "current_frame_num", "set_frame"
+            required_attributes = "width", "height", "num_frames", "set_pause", \
+                                  "get_pause", "current_frame_num", "set_frame"
         else:
             required_attributes = None
 
@@ -46,7 +48,11 @@ class CameraViewer(BaseViewer):
 
             cv2.createTrackbar(self.slider_name, self.name, 0, self.slider_ticks, self._on_slider)
 
-            self.delay = 0.5 / self.capture.fps
+            min_fps = 45
+            if self.capture.fps >= min_fps:
+                self.delay = 1 / self.capture.fps
+            else:
+                self.delay = 1 / min_fps
 
     def _on_slider(self, slider_index):
         if self.trackbar_enabled:
@@ -77,9 +83,12 @@ class CameraViewer(BaseViewer):
     def update_slider_pos(self, position=None):
         if self.trackbar_enabled:
             if position is None:
-                position = self.current_frame_num
+                position = self.capture.current_frame_num
             slider_pos = int(position * self.slider_ticks / self.capture.num_frames)
             cv2.setTrackbarPos(self.slider_name, self.name, slider_pos)
+
+    async def update(self):
+        await asyncio.sleep(0.0)
 
     def show_frame(self):
         """
@@ -90,9 +99,8 @@ class CameraViewer(BaseViewer):
         """
         self.key_pressed()
 
-        if not self.capture.paused or self.draw_while_paused:
+        if not self.is_paused() or self.draw_while_paused:
             frame = self.get_frame()
-            self.current_frame_num = self.capture.current_frame_num
             self.update_slider_pos()
 
             if frame is None:
@@ -100,20 +108,11 @@ class CameraViewer(BaseViewer):
 
             cv2.imshow(self.name, frame)
 
-    def pause(self):
-        self.capture.paused = True
-
-    def unpause(self):
-        self.capture.paused = False
-
     def toggle_pause(self):
-        if self.capture.paused:
-            self.unpause()
-        else:
-            self.pause()
+        self.capture.set_pause(not self.capture.get_pause())
 
     def is_paused(self):
-        return self.capture.paused
+        return self.capture.get_pause()
 
     def key_down(self, key):
         if key == 'q':

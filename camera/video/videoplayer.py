@@ -4,7 +4,6 @@ from threading import Lock
 
 import cv2
 
-from ...clock import Clock
 from ...datastream import ThreadedStream
 
 
@@ -69,27 +68,30 @@ class VideoPlayer(ThreadedStream):
 
             self.fps = self.capture.get(cv2.CAP_PROP_FPS)
             self.delay = 1 / self.fps
-            self.clock = Clock(self.fps)
+            if self.delay > 0.5:
+                self.delay = 0.1
             self.num_frames = int(self.capture.get(cv2.CAP_PROP_FRAME_COUNT))
             if self.num_frames <= 0:
                 raise FileNotFoundError("Video failed to load... No frames found!")
 
             self.length_sec = self.num_frames / self.fps
 
-            self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
-            self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
             self.resize_frame = False
 
             if width is None:
+                self.width = int(self.capture.get(cv2.CAP_PROP_FRAME_WIDTH))
                 self.resize_width = self.width
             else:
                 self.resize_width = width
+                self.width = width
                 self.resize_frame = True
 
             if height is None:
+                self.height = int(self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT))
                 self.resize_height = self.height
             else:
                 self.resize_height = height
+                self.height = height
                 self.resize_frame = True
 
             self.current_frame = 0
@@ -128,6 +130,9 @@ class VideoPlayer(ThreadedStream):
 
     def set_pause(self, state):
         self.paused = state
+
+    def get_pause(self):
+        return self.paused
 
     def reset_video(self, position=0):
         self.next_frame = position
@@ -169,7 +174,6 @@ class VideoPlayer(ThreadedStream):
                 )
 
         self.post(self.frame)
-        self.clock.update()
 
     def reset_callback(self):
         pass

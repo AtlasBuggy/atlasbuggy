@@ -8,7 +8,7 @@ class DataStream:
     _exited = Event()  # signal to exit
     _log_info = {}  # information about the logger
 
-    def __init__(self, enabled=True, name=None, log_level=None):
+    def __init__(self, enabled=True, log_level=None, name=None):
         """
         Initialization. No streams have started yet.
         :param enabled: Include this stream in the runtime

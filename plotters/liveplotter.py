@@ -112,10 +112,10 @@ class LivePlotter(BasePlotter, AsyncStream):
 
             await self.update()
 
-            has_updated = False
+            plots_updated = False
             for plot in self.robot_plots:
                 if plot.has_updated():
-                    has_updated = True
+                    plots_updated = True
                     if isinstance(plot, RobotPlot):
                         self.lines[plot.name].set_xdata(plot.data[0])
                         self.lines[plot.name].set_ydata(plot.data[1])
@@ -150,9 +150,10 @@ class LivePlotter(BasePlotter, AsyncStream):
                                 self.axes[plot.name].set_xlim3d(plot.x_range)
                                 self.axes[plot.name].set_ylim3d(plot.y_range)
                                 self.axes[plot.name].set_zlim3d(plot.z_range)
-
-            # print(time.time(), has_updated)
-            if has_updated:
+            if plots_updated:
+                self.has_updated = True
+            
+            if self.has_updated:
                 try:
                     self.fig.canvas.draw()
                     self.plt.pause(LivePlotter.pause_time)  # can't be less than ~0.005
@@ -161,6 +162,9 @@ class LivePlotter(BasePlotter, AsyncStream):
                     self.logger.exception(error)
                     self.exit()
                     raise
+
+                self.has_updated = False
+                
             await asyncio.sleep(LivePlotter.pause_time)
 
 

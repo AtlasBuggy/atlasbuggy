@@ -42,6 +42,8 @@ class BasePlotter:
 
         self.enable_legend = draw_legend
 
+        self.has_updated = True
+
         self.plt = None
 
         self.axes = {}
@@ -203,6 +205,8 @@ class BasePlotter:
         :param dot_properties: matplotlib properties (color, markersize, etc)
         """
         if self.enabled:
+            self.has_updated = True
+
             plot_name = self._get_name(arg)
             if plot_name is None:
                 return
@@ -218,6 +222,8 @@ class BasePlotter:
         Draw a dot on the input plot (plot name or plot instance)
         """
         if self.enabled:
+            self.has_updated = True
+
             plot_name = self._get_name(plot)
             if plot_name is None:
                 return
@@ -271,6 +277,8 @@ class BasePlotter:
         :param text_properties: color, font, etc.
         """
         if self.enabled:
+            self.has_updated = True
+
             plot_name = self._get_name(arg)
             if plot_name is None:
                 return
@@ -291,6 +299,8 @@ class BasePlotter:
         :param kwargs: properties to change
         """
         if self.enabled:
+            self.has_updated = True
+
             plot_name = self._get_name(arg)
             if plot_name is None:
                 return

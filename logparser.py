@@ -11,6 +11,7 @@ class LogParser(AsyncStream):
     """
     Parse a log file to simulate how the robot behaved that day
     """
+
     def __init__(self, file_name, directory="", enabled=True, name=None, log_level=None, update_rate=0.0):
         # regex string code. Logs follow a certain format. Parse out these pieces of info.
         self.pattern = re.compile(
@@ -28,7 +29,7 @@ class LogParser(AsyncStream):
             r"(?P<message>([.\S\s]+?(\n\[)))"
         )
 
-        super(LogParser, self).__init__(enabled, name, log_level)
+        super(LogParser, self).__init__(enabled, log_level, name)
 
         # info about the log file path
         self.file_name = file_name
@@ -59,10 +60,20 @@ class LogParser(AsyncStream):
         )
 
     def take(self, subscriptions):
+        """
+        Listen for subscriptions in log file
+        
+        DO NOT override this method. Use take_from_log instead
+        """
         for subscription in subscriptions.values():
             stream = subscription.producer_stream
             self.logged_streams[stream.name] = stream
 
+        self.take_from_log(subscriptions)
+    
+    def take_from_log(self, subscriptions):
+        pass
+    
     def start(self):
         for stream in self.logged_streams.values():
             stream.check_subscriptions()

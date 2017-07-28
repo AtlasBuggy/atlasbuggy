@@ -8,7 +8,7 @@ from ...subscriptions import Feed
 
 
 class VideoRecorder(AsyncStream):
-    def __init__(self, file_name=None, directory="", enabled=True, live_feed=True, log_level=None,
+    def __init__(self, file_name=None, directory="", enabled=True, log_level=None,
                  width=None, height=None, fps=None):
         self.enabled = enabled
 
@@ -28,7 +28,6 @@ class VideoRecorder(AsyncStream):
 
         self.frame_buffer = []
         self.opened = False
-        self.live_feed = live_feed
         self.required_buffer_len = 50
 
         self.set_path(file_name, directory)
@@ -46,7 +45,7 @@ class VideoRecorder(AsyncStream):
 
     def set_path(self, file_name=None, directory=None):
         if file_name is None:
-            file_name = time.strftime("%H;%M;%S.avi")
+            file_name = time.strftime("%H_%M_%S.avi")
             if directory is None:
                 # only use default if both directory and file_name are None.
                 # Assume file_name has the full path if directory is None
@@ -82,21 +81,18 @@ class VideoRecorder(AsyncStream):
 
         self.is_recording = True
 
-        if not self.live_feed and self.width is not None and self.height is not None:
-            self._dump_buffer()
+        # if not self.live_feed and self.width is not None and self.height is not None:
+        #     self._dump_buffer()
 
     def record(self, frame):
-        if self.live_feed:
-            if self.opened:
-                self._write(frame)
-            else:
-                if len(self.frame_buffer) >= self.required_buffer_len:
-                    self._dump_buffer()
-                else:
-                    self.frame_buffer.append(frame)
-        else:
+        if self.opened:
             self._write(frame)
-            self._dump_buffer()
+        else:
+            if len(self.frame_buffer) >= self.required_buffer_len:
+                self._dump_buffer()
+                self.logger.debug("Dumping buffer. %s frames reached" % self.required_buffer_len)
+            else:
+                self.frame_buffer.append(frame)
 
     async def run(self):
         while self.is_running():
@@ -132,6 +128,13 @@ class VideoRecorder(AsyncStream):
             while len(self.frame_buffer) > 0:
                 self._write(self.frame_buffer.pop(0))
             self.opened = True
+        else:
+            message = ""
+            if self.opened:
+                message += "Video writer was already opened. "
+            if len(self.frame_buffer) == 0:
+                message += "Frame buffer has no frames. "
+            self.logger.debug("Not dumping. " + message)
 
     def _write(self, frame):
         if self.height is None:
@@ -143,6 +146,7 @@ class VideoRecorder(AsyncStream):
             frame = cv2.resize(frame, (self.height, self.width))
 
         self.num_frames += 1
+        self.logger.debug("Writing frame #%s" % self.num_frames)
         if len(frame.shape) == 2:
             self.video_writer.write(cv2.cvtColor(frame, cv2.COLOR_GRAY2BGR))
         else:
@@ -150,7 +154,7 @@ class VideoRecorder(AsyncStream):
 
     def stop(self):
         if self.is_recording:
-            if self.live_feed and not self.opened:  # if required frame buffer size hasn't been met...
+            if not self.opened:  # if required frame buffer size hasn't been met...
                 self._dump_buffer()
             self.video_writer.release()
             self.is_recording = False

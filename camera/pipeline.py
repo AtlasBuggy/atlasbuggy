@@ -5,7 +5,7 @@ from ..subscriptions import Update
 
 class Pipeline(ThreadedStream):
     def __init__(self, enabled, log_level, name=None):
-        super(Pipeline, self).__init__(enabled, name, log_level)
+        super(Pipeline, self).__init__(enabled, log_level, name)
         self.width = None
         self.height = None
 
@@ -35,6 +35,9 @@ class Pipeline(ThreadedStream):
     def set_pause(self, state):
         self.capture_feed.enabled = not state
         self.paused = state
+
+    def get_pause(self):
+        return self.paused
 
     def set_frame(self, position):
         self.capture.set_frame(position)

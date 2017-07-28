@@ -3,11 +3,11 @@ from ..datastream import DataStream
 
 
 class AsyncStream(DataStream):
-    def __init__(self, enabled, name=None, log_level=None):
+    def __init__(self, enabled=True, log_level=None, name=None):
         """
         Initialization for asynchronous stream
         """
-        super(AsyncStream, self).__init__(enabled, name, log_level)
+        super(AsyncStream, self).__init__(enabled, log_level, name)
 
         self.task = None
         self.coroutine = None

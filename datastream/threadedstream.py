@@ -4,11 +4,11 @@ from ..datastream import DataStream
 
 
 class ThreadedStream(DataStream):
-    def __init__(self, enabled, name=None, log_level=None):
+    def __init__(self, enabled=True, log_level=None, name=None):
         """
         Initialization for threaded stream
         """
-        super(ThreadedStream, self).__init__(enabled, name, log_level)
+        super(ThreadedStream, self).__init__(enabled, log_level, name)
 
         self.thread = Thread(target=self._run)
         self.thread.daemon = False
