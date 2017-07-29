@@ -56,3 +56,4 @@ class AsyncStream(DataStream):
                     assert service == subscription.service
                     post_fn = self.subscription_services[service]
                     await subscription.async_post(post_fn(data))
+        await asyncio.sleep(0.0)

@@ -1,5 +1,6 @@
 import cv2
 import asyncio
+import numpy as np
 
 from .base import BaseViewer
 from ...subscriptions import Update
@@ -12,6 +13,8 @@ class CameraViewer(BaseViewer):
         self.slider_name = "frame:"
         self.slider_ticks = 0
         self.current_frame_num = 0
+        self.slider_current_pos = 0
+        self.mouse_parameters = None
 
         self.frame = None
 
@@ -29,6 +32,8 @@ class CameraViewer(BaseViewer):
         self.trackbar_enabled = enable_trackbar
         self.draw_while_paused = draw_while_paused
 
+        cv2.setMouseCallback(self.name, self.mouse_callback)
+
     def take(self, subscriptions):
         self.take_capture(subscriptions)
 
@@ -38,6 +43,8 @@ class CameraViewer(BaseViewer):
 
     def started(self):
         self.initialize_trackbar()
+        blank = np.zeros((300, 300))
+        cv2.imshow(self.name, blank)
 
     def initialize_trackbar(self):
         if self.trackbar_enabled:
@@ -75,6 +82,8 @@ class CameraViewer(BaseViewer):
         if self.capture_feed.empty():
             return None
         else:
+            self.current_frame_num = self.capture.current_frame_num
+            # self.increment_slider()
             return self.draw(self.get_frame_from_feed())
 
     def draw(self, frame):
@@ -83,12 +92,20 @@ class CameraViewer(BaseViewer):
     def update_slider_pos(self, position=None):
         if self.trackbar_enabled:
             if position is None:
-                position = self.capture.current_frame_num
-            slider_pos = int(position * self.slider_ticks / self.capture.num_frames)
-            cv2.setTrackbarPos(self.slider_name, self.name, slider_pos)
+                position = int(self.capture.current_frame_num * self.slider_ticks / self.capture.num_frames)
+            self.slider_current_pos = position
+            cv2.setTrackbarPos(self.slider_name, self.name, self.slider_current_pos)
+
+    def increment_slider(self):
+        self.slider_current_pos += 1
+        cv2.setTrackbarPos(self.slider_name, self.name, self.slider_current_pos)
 
     async def update(self):
-        await asyncio.sleep(0.0)
+        if self.mouse_parameters is not None:
+            await self.post(self.mouse_parameters)
+            self.mouse_parameters = None
+        else:
+            await asyncio.sleep(0.0)
 
     def show_frame(self):
         """
@@ -101,12 +118,14 @@ class CameraViewer(BaseViewer):
 
         if not self.is_paused() or self.draw_while_paused:
             frame = self.get_frame()
-            self.update_slider_pos()
 
             if frame is None:
                 return
 
             cv2.imshow(self.name, frame)
+
+    def mouse_callback(self, *mouse_parameters):
+        self.mouse_parameters = mouse_parameters
 
     def toggle_pause(self):
         self.capture.set_pause(not self.capture.get_pause())
