@@ -16,10 +16,10 @@ from ..serial.port import SerialPort
 class SerialStream(AsyncStream):
     """
     Manages the interfaces between SerialObjects and microcontrollers.
-    
+
     Some of its tasks are to connect SerialPorts to SerialObjects, pass data from SerialPorts to SerialObjects
     when data is received, and to pass queued commands from SerialObjects to SerialPorts.
-    
+
     This class should be subclassed
     """
 
@@ -124,13 +124,13 @@ class SerialStream(AsyncStream):
 
     def link_recurring(self, repeat_time, callback_fn, *args, include_event_in_params=False):
         """
-        :param repeat_time: How often to call the passed function 
+        :param repeat_time: How often to call the passed function
         :param callback_fn: a reference to a function. It doesn't take parameters by default. You can supply parameters
             with the args parameter
         :param args: Values to pass to the callback function
         :param include_event_in_params: If this is set to True, an instance of this event will be included.
             This is if you want to change the repeat time or arguments on the fly.
-        :return: An instance of RecurringEvent in case you want to change the repeat time later. 
+        :return: An instance of RecurringEvent in case you want to change the repeat time later.
         """
         event = RecurringEvent(repeat_time, time.time(), callback_fn, args, include_event_in_params)
         self.recurring.append(event)
@@ -155,7 +155,7 @@ class SerialStream(AsyncStream):
     def start(self):
         """
         Start up behavior for SerialStream.
-        
+
         DO NOT override this method. Call serial_start or started instead
         """
 
@@ -192,7 +192,7 @@ class SerialStream(AsyncStream):
     async def run(self):
         """
         Run behavior for SerialStream
-        
+
         DO NOT override. For loop behavior, override update
         """
         self.logger.debug("SerialStream is running")
@@ -203,7 +203,7 @@ class SerialStream(AsyncStream):
             self._update_recurring(time.time())
             self._send_commands()
 
-            self.update()
+            await self.update()
 
             await asyncio.sleep(self.loop_delay)  # maintain a constant loop speed
 
@@ -295,7 +295,7 @@ class SerialStream(AsyncStream):
 
     def _init_ports(self):
         """
-        Discover and configure all ports. Validate that all ports pair with an object 
+        Discover and configure all ports. Validate that all ports pair with an object
         """
 
         # List all ports discovered by pyserial
@@ -548,7 +548,7 @@ class SerialStream(AsyncStream):
     def _record(self, timestamp, whoiam, packet, packet_type):
         """
         Record information about a packet
-        
+
         :param timestamp: time packet was received
         :param whoiam: whoiam ID of the SerialObject
         :param packet: packet to record
@@ -636,7 +636,7 @@ class SerialStream(AsyncStream):
     def _match_log(self, packet):
         """
         Parse message as a normal log message.
-        
+
         :param packet: Packet that was received
         """
         matches = re.finditer(self.packet_pattern, packet)

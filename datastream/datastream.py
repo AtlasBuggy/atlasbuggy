@@ -132,10 +132,10 @@ class DataStream:
     def take(self, subscriptions):
         """
         Take subscriptions and assign them to object variables.
-        
+
         Example:
             self.some_producer = subscriptions[self.some_producer_tag].get_stream()
-            
+
             # you requested an Update or Feed subscription:
             self.some_producer_feed = subscriptions[self.some_producer_tag].get_feed()
         :param subscriptions: dictionary of subscriptions referenced by subscription tag
@@ -162,7 +162,7 @@ class DataStream:
     def is_subscribed(self, tag):
         """
         Check if this stream is subscribed to subscription that matches the tag.
-        
+
         :param tag: subscription tag name
         :return: True if this stream is subscribed. This is true if a subscription has been added with that tag,
             if the subscription is enabled, and if the producer stream is enabled
@@ -186,8 +186,8 @@ class DataStream:
                 # if subscription is a suggestion, don't check requirements if the subscription wasn't applied
                 if is_suggestion:
                     continue
-                message += "Tag not found! "
-                satisfied = False
+                else:
+                    raise ValueError("Subscription tag '%s' not found in subscriptions for '%s'!" % (tag, self.name))
 
             if subscription_class is not None and \
                             tag in self.subscriptions and \
@@ -260,8 +260,8 @@ class DataStream:
     def post(self, data, service="default"):
         """
         Post data to subscribed consumer streams
-        
-        :param data: Data to post 
+
+        :param data: Data to post
         :param service: which service to post data to
         """
         pass
@@ -270,8 +270,8 @@ class DataStream:
         """
         By default, data posted isn't modified. If you're posting arrays, create a method
         that calls .copy() on the data before posting.
-        
-        :param data: data to post 
+
+        :param data: data to post
         :return: modified (copied) data to post
         """
         return data
@@ -308,10 +308,10 @@ class DataStream:
         """
         Deprecated functionality. Formatting behavior for log messages
         See: https://stackoverflow.com/questions/17558552/how-do-i-add-custom-field-to-python-log-format-string
-        
+
         Example:
         record.version = self.version_num
-        
+
         version is now a field used by the logger for string formatting.
         """
         return True
