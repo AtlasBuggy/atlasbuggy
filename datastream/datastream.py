@@ -384,8 +384,9 @@ class DataStream:
             self.logger.debug("calling run")
             self.run()
             self.logger.debug("%s exiting run" % self.name)
-        except BaseException:
-            self.logger.debug("catching exception in threaded loop")
+        except BaseException as error:
+            self.logger.debug("catching exception in run")
+            self.logger.exception(error)
             self._stop()  # in threads, stop is called inside the thread instead to avoid race conditions
             self.exit()
             raise

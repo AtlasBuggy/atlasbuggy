@@ -66,13 +66,13 @@ class SerialStream(AsyncStream):
     def serial_update(self):
         """
         An update loop independent from main serial loop.
-        
+
         Example usage:
-        
+
         while self.running():
             ...
             ...
-        
+
         Please use the running method or else this method won't exit correctly
         """
         pass
@@ -221,6 +221,7 @@ class SerialStream(AsyncStream):
             self._update_recurring(time.time())
             self._send_commands()
 
+            await self.update()
             await asyncio.sleep(self.loop_delay)  # maintain a constant loop speed
 
     def stop(self):
