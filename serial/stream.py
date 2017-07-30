@@ -53,11 +53,27 @@ class SerialStream(AsyncStream):
             r"<(?P<timestamp>[.0-9a-zA-Z]*), (?P<whoiam>.*), (?P<message>.*), (?P<packettype>.*)>"
         )
 
+        self.update_thread = threading.Thread(target=self.serial_update, daemon=True)
+
     # ----- Overridable methods -----
 
     def serial_start(self):
         """
         Additional start behavior. Put commands you'd like to send at the start here
+        """
+        pass
+
+    def serial_update(self):
+        """
+        An update loop independent from main serial loop.
+        
+        Example usage:
+        
+        while self.running():
+            ...
+            ...
+        
+        Please use the running method or else this method won't exit correctly
         """
         pass
 
@@ -177,6 +193,8 @@ class SerialStream(AsyncStream):
         for robot_port in self.ports.values():
             robot_port.start()
 
+        self.update_thread.start()
+
         self.logger.debug("SerialStream is starting")
         error = None
         try:
@@ -202,8 +220,6 @@ class SerialStream(AsyncStream):
 
             self._update_recurring(time.time())
             self._send_commands()
-
-            await self.update()
 
             await asyncio.sleep(self.loop_delay)  # maintain a constant loop speed
 
