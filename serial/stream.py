@@ -3,6 +3,7 @@ import re
 import threading
 import time
 import traceback
+import datetime
 
 import serial.tools.list_ports
 
@@ -193,19 +194,14 @@ class SerialStream(AsyncStream):
         for robot_port in self.ports.values():
             robot_port.start()
 
-        self.update_thread.start()
-
-        self.logger.debug("SerialStream is starting")
-        error = None
         try:
             self.serial_start()
-        except BaseException as _error:
+        except BaseException as error:
             self.stop()
             self.exit()
-            error = _error
+            raise self._handle_error(error, traceback.format_stack())
 
-        if error is not None:
-            raise error
+        self.update_thread.start()
 
     async def run(self):
         """
@@ -213,7 +209,7 @@ class SerialStream(AsyncStream):
 
         DO NOT override. For loop behavior, override update
         """
-        self.logger.debug("SerialStream is running")
+
         while self.is_running():
             for port in self.ports.values():
                 self._check_port_packets(port)
@@ -576,7 +572,11 @@ class SerialStream(AsyncStream):
             pause command : pause command
             debug         : port debug message
         """
-        self.logger.debug("<%s, %s, %s, %s>" % (timestamp, whoiam, packet, packet_type))
+        if type(timestamp) != float:
+            date = "-"
+        else:
+            date = datetime.datetime.fromtimestamp(timestamp).strftime('%Y-%m-%d %H:%M:%S,%f')
+        self.logger.debug("<%s, %s, %s, %s>" % (date, whoiam, packet, packet_type))
 
     def _handle_error(self, error, traceback):
         """
