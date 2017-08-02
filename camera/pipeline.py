@@ -21,8 +21,14 @@ class Pipeline(ThreadedStream):
         self.capture = None
         self.capture_feed = None
         self.capture_tag = "capture"
-        self.require_subscription(self.capture_tag, Update,
-                                  required_attributes=("width", "height", "num_frames", "current_frame_num", "set_pause"))
+        self.require_subscription(
+            self.capture_tag, Update,
+            required_attributes=(
+                "width", "height", "num_frames", "current_frame_num", "set_pause")
+        )
+
+        # overwrite the default service with different post function
+        self.add_service("default", lambda data: data.copy())
 
     def take(self, subscriptions):
         self.capture = self.subscriptions[self.capture_tag].get_stream()
@@ -74,9 +80,6 @@ class Pipeline(ThreadedStream):
                 self.fps_sum += delta_num / (time.time() - self.prev_t)
                 self.fps = self.fps_sum / self.processed_frame_counter
                 self.prev_t = time.time()
-
-    def default_post_service(self, data):
-        return data.copy()
 
     def pipeline(self, frame):
         raise NotImplementedError("Please override this method.")
