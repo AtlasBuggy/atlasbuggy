@@ -41,6 +41,10 @@ class CameraViewer(BaseViewer):
         self.initialize_trackbar()
         blank = np.zeros((300, 300))
         cv2.imshow(self.name, blank)
+        self.viewer_started()
+
+    def viewer_started(self):
+        pass
 
     def initialize_trackbar(self):
         if self.trackbar_enabled:
