@@ -86,3 +86,7 @@ class BaseViewer(AsyncStream):
 
     def stop(self):
         cv2.destroyWindow(self.name)
+        self.viewer_stopped()
+
+    def viewer_stopped(self):
+        pass

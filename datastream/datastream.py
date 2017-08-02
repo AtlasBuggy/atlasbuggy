@@ -156,8 +156,17 @@ class DataStream:
         """
         if required_attributes is not None:
             assert type(required_attributes) == tuple
-        self._required_subscriptions[tag] = (
-            subscription_class, stream_class, service_tag, required_attributes, is_suggestion)
+        self._required_subscriptions[tag] = dict(
+            subscription_class=subscription_class,
+            stream_class=stream_class,
+            service_tag=service_tag,
+            required_attributes=required_attributes,
+            is_suggestion=is_suggestion
+        )
+
+    def adjust_subscription(self, tag, **properties):
+        subscription = self._required_subscriptions[tag]
+        subscription.update(properties)
 
     def is_subscribed(self, tag):
         """
@@ -178,10 +187,16 @@ class DataStream:
         """
         self.logger.debug("Checking subscriptions")
 
-        for tag, (subscription_class, stream_class, service_tag, required_attributes,
-                  is_suggestion) in self._required_subscriptions.items():
+        for tag, subscr_props in self._required_subscriptions.items():
             satisfied = True
             message = ""
+
+            subscription_class = subscr_props["subscription_class"]
+            stream_class = subscr_props["stream_class"]
+            service_tag = subscr_props["service_tag"]
+            required_attributes = subscr_props["required_attributes"]
+            is_suggestion = subscr_props["is_suggestion"]
+
             if tag not in self.subscriptions:
                 # if subscription is a suggestion, don't check requirements if the subscription wasn't applied
                 if is_suggestion:
@@ -207,6 +222,11 @@ class DataStream:
                 # check if the requested service is offered by the producer stream
                 message += "Service '%s' is not offered by producer stream '%s'! " % (
                     service_tag, producer_stream.name)
+                satisfied = False
+
+            if service_tag is not None and service_tag != self.subscriptions[tag].service:
+                message += "Subscribed to the wrong service! Found '%s', should be '%s'" % (
+                    self.subscriptions[tag].service, service_tag)
                 satisfied = False
 
             if required_attributes is not None:
@@ -245,8 +265,8 @@ class DataStream:
         non_existent_services = []
         for requested_service, subscriptions in self.subscribers.items():
             if requested_service not in self.subscription_services.keys():
-                for subscription in subscriptions:
-                    non_existent_services.append((subscription.consumer_stream.name, requested_service))
+                for subscr_props in subscriptions:
+                    non_existent_services.append((subscr_props.consumer_stream.name, requested_service))
         if len(non_existent_services) > 0:
             raise ValueError("The following services were requested from '%s' that don't exist:\n\t%s" % (
                 self.name, str(["%s: %s" % (name, service) for name, service in non_existent_services])[1:-1]))

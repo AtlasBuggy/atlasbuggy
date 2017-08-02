@@ -67,6 +67,8 @@ class Pipeline(ThreadedStream):
                 self.frame = self.pipeline(self.capture_feed.get())
                 self.post(self.frame)
 
+            time.sleep(1 / self.fps)
+
             if self.processed_frame_counter != prev_num:
                 delta_num = self.processed_frame_counter - prev_num
                 self.fps_sum += delta_num / (time.time() - self.prev_t)

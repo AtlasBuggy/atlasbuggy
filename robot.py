@@ -197,6 +197,8 @@ class Robot:
     def get_loops(self):
         tasks = []
         threads = []
+        async_streams = []
+        static_streams = []
         # separate async and threaded streams
         for stream in self.streams:
             if not isinstance(stream, DataStream):
@@ -206,11 +208,14 @@ class Robot:
             if isinstance(stream, AsyncStream):
                 task = stream._run()
                 tasks.append(task)
+                async_streams.append(stream)
                 stream.task = task
 
             # add thread to the list
             elif isinstance(stream, ThreadedStream):
                 threads.append(stream)
+            else:
+                static_streams.append(stream)
 
             stream.asyncio_loop = self.loop
 
@@ -222,6 +227,10 @@ class Robot:
         coroutine = asyncio.gather(*tasks)
         for stream in self.streams:
             stream.coroutine = coroutine
+
+        self.logger.debug("Asynchronous streams: %s" % str(async_streams))
+        self.logger.debug("Threaded streams: %s" % str(threads))
+        self.logger.debug("Static streams: %s" % str(static_streams))
 
         return coroutine, threads
 
