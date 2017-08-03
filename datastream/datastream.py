@@ -43,7 +43,7 @@ class DataStream:
 
         # dictionary of subscription properties referenced by subscription tag name
         # contains tuples: (subscription_class, stream_class, service_tag, required_attributes, is_suggestion)
-        self._required_subscriptions = {}
+        self.required_subscriptions = {}
 
         # services offered by this data stream. Every stream has the default service
         # adding services will allow you to post different kinds of content
@@ -156,7 +156,7 @@ class DataStream:
         """
         if required_attributes is not None:
             assert type(required_attributes) == tuple
-        self._required_subscriptions[tag] = dict(
+        self.required_subscriptions[tag] = dict(
             subscription_class=subscription_class,
             stream_class=stream_class,
             service_tag=service_tag,
@@ -165,7 +165,7 @@ class DataStream:
         )
 
     def adjust_subscription(self, tag, **properties):
-        subscription = self._required_subscriptions[tag]
+        subscription = self.required_subscriptions[tag]
         subscription.update(properties)
 
     def is_subscribed(self, tag):
@@ -187,7 +187,7 @@ class DataStream:
         """
         self.logger.debug("Checking subscriptions")
 
-        for tag, subscr_props in self._required_subscriptions.items():
+        for tag, subscr_props in self.required_subscriptions.items():
             satisfied = True
             message = ""
 
