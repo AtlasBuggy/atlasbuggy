@@ -25,10 +25,10 @@ class Website(ThreadedStream):
 
         self.app = Flask(__name__, template_folder=template_folder, static_folder=static_folder, **flask_params)
 
-        self.app.logger.setLevel(logging.DEBUG)
-        self.app.logger.addHandler(self.print_handle)
+        self.flask_logger.setLevel(logging.DEBUG)
+        self.flask_logger.addHandler(self.print_handle)
         if DataStream._log_info["file_handle"] is not None:
-            self.app.logger.addHandler(DataStream._log_info["file_handle"])
+            self.flask_logger.addHandler(DataStream._log_info["file_handle"])
 
         if use_index:
             self.app.add_url_rule("/", "index", self.index)
