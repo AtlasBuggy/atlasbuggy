@@ -155,6 +155,7 @@ class VideoPlayer(ThreadedStream):
                 self._set_frame(self.next_frame)
 
             self.current_frame = self.next_frame
+            self.logger.debug("frame #%s of %s" % (self.current_frame, self.num_frames))
             self.next_frame += self.frame_skip + 1
 
             success, self.frame = self.capture.read()

@@ -1,7 +1,7 @@
 import os
 import logging
 from flask import Flask, render_template
-from atlasbuggy.datastream import ThreadedStream
+from ..datastream import ThreadedStream, DataStream
 
 
 class Website(ThreadedStream):
@@ -10,6 +10,8 @@ class Website(ThreadedStream):
     """
     def __init__(self, template_folder, static_folder, flask_params=None, app_params=None, enabled=True, log_level=None,
                  name=None, use_index=True, host='0.0.0.0', port=5000):
+        super(Website, self).__init__(enabled, name, log_level)
+
         if flask_params is None:
             flask_params = {}
 
@@ -23,6 +25,11 @@ class Website(ThreadedStream):
 
         self.app = Flask(__name__, template_folder=template_folder, static_folder=static_folder, **flask_params)
 
+        self.app.logger.setLevel(logging.DEBUG)
+        self.app.logger.addHandler(self.print_handle)
+        if DataStream._log_info["file_handle"] is not None:
+            self.app.logger.addHandler(DataStream._log_info["file_handle"])
+
         if use_index:
             self.app.add_url_rule("/", "index", self.index)
 
@@ -31,9 +38,7 @@ class Website(ThreadedStream):
         else:
             self.app_params = {}
 
-        super(Website, self).__init__(enabled, name, log_level)
-
-        self.flask_logger.setLevel(self.log_level)
+        self.flask_logger.setLevel(logging.DEBUG)
 
         self.set_to_daemon()
 
