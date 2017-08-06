@@ -64,7 +64,8 @@ Atlasbuggy robot("my_reader_writer_bot");
 
 ```"my_reader_writer_bot"``` is an important aspect of why working with atlasbuggy makes serial convenient. We'll get to exactly what this string means but essentially it's a unique identifier for your device. Every device that's connected to your PC should have a different identifier. You can name it whatever you like but it has to be unique!
 
-Next, get the robot ready:
+In setup(), get the robot ready:
+
 ```cpp
 robot.begin();
 ```
@@ -73,9 +74,13 @@ Behind the scenes, this is setting Serial's baud rate to 115200, timeout to 100m
 
 Next, provide some initialization values. See the lines below ```// ...checking some values...```. You'll need to make your best judgement for this part.
 
+```cpp
+robot.setInitData(someMagicalValueString + "\t" someOtherMagicalValueString);
+```
+
 Initialization data is data that's passed from the Arduino to the PC when the python program first starts up. These data are typically constants the Arduino uses and the PC should know about. Some specific examples are the update rate of a GPS, the maximum speed of a motor, the limits on a servo, the number of leds on a strip. These values are important constants that are subject to change. Bad use cases really depend on what kind of data you need. If you define a constant and send it over to the PC but never use it in the Arduino, that's a wasted resource. It'd be much easier to define that constant in python and leave the Arduino in ignorant bliss.
 
-In the loop function, write this code block:
+Moving on to the loop function, write this code block:
 
 ```cpp
     while (robot.available())
