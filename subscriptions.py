@@ -34,18 +34,19 @@ class Subscription:
         return self.producer_stream
 
     def get_feed(self):
-        return None
+        raise ValueError("Subscriptions of type '%s' don't supply feeds" % self.__class__.__name__)
 
-    async def async_post(self, data):
+    @asyncio.coroutine
+    def async_post(self, data):
         """
         Behavior for posting to a feed based subscription
         :param data: Data to post to subscribers. When posting lists, make sure to copy them if you intend to modify
             its contents in the subscriber's stream
         """
-        await asyncio.sleep(0.0)
+        raise ValueError("Subscriptions of type '%s' don't post data" % self.__class__.__name__)
 
     def sync_post(self, data):
-        pass
+        raise ValueError("Subscriptions of type '%s' don't post data" % self.__class__.__name__)
 
     def __repr__(self):
         return "%s(tag='%s', producer_stream=%s, consumer_stream=%s)" % (
@@ -72,11 +73,12 @@ class Feed(Subscription):
         else:
             return self.queue.sync_q
 
-    async def async_post(self, data):
-        await self.queue.async_q.put(data)
+    @asyncio.coroutine
+    def async_post(self, data, **kwargs):
+        yield from self.queue.async_q.put(data)
 
-    def sync_post(self, data):
-        self.queue.sync_q.put(data)
+    def sync_post(self, data, **kwargs):
+        self.queue.sync_q.put(data, **kwargs)
 
 
 class Update(Subscription):
@@ -89,14 +91,15 @@ class Update(Subscription):
         self.mailbox = _SingletonQueue()
         self.description = "receiving updates from"  # for debug printing
 
-    async def async_post(self, data):
+    @asyncio.coroutine
+    def async_post(self, data):
         """
         Behavior for posting to an update based subscription
         :param data: Data to post to subscribers. When posting lists, make sure to copy them if you intend to modify
             its contents in the subscriber's stream
         """
         self.mailbox.put(data)
-        await asyncio.sleep(0.0)
+        yield from asyncio.sleep(0.0)
 
     def sync_post(self, data):
         self.mailbox.put(data)
@@ -114,8 +117,9 @@ class Callback(Subscription):
         self.callback_fn = callback_fn
         assert callable(self.callback_fn)
 
-    async def async_post(self, data):
-        await self.callback_fn(data)
+    @asyncio.coroutine
+    def async_post(self, data):
+        yield from self.callback_fn(data)
 
     def sync_post(self, data):
         self.callback_fn(data)

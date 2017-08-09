@@ -177,12 +177,16 @@ class Robot:
 
     def stop_coroutines(self):
         """Shutdown behavior for asyncio"""
-        self.logger.debug("Canceling coroutines")
-        # if self.coroutines_started and self.coroutine is not None:
-        #     self.coroutine.cancel()
-        #     self.loop.run_forever()
-        #     self.coroutine.exception()
-        self.logger.debug("Coroutines canceled")
+
+        # ensure that async routines shutdown
+        if self.coroutines_started and self.coroutine is not None:
+            self.logger.debug("Canceling coroutines")
+            self.coroutine.cancel()
+            self.loop.run_until_complete(self.coroutine)
+            self.coroutine.exception()
+            self.logger.debug("Coroutines canceled")
+        else:
+            self.logger.debug("Skipping cancellation of coroutines")
         self.loop.close()
 
     def stop(self):

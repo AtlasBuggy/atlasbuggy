@@ -35,7 +35,7 @@ class ThreadedStream(DataStream):
         """
         self.thread.start()
 
-    def post(self, data, service="default"):
+    def post(self, data, service="default", **kwargs):
         """
         Post data to subscribed consumer streams using the sync method
 
@@ -47,4 +47,4 @@ class ThreadedStream(DataStream):
                 if subscription.enabled:
                     assert service == subscription.service
                     post_fn = self.subscription_services[service]
-                    subscription.sync_post(post_fn(data))
+                    subscription.sync_post(post_fn(data), **kwargs)

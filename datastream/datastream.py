@@ -289,7 +289,7 @@ class DataStream:
             if len(unused_services) > 0:
                 self.logger.warning("The following subscription services are not being consumed: %s" % unused_services)
 
-    def post(self, data, service="default"):
+    def post(self, data, service="default", **kwargs):
         """
         Post data to subscribed consumer streams
 

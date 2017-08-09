@@ -50,7 +50,7 @@ class AsyncStream(DataStream):
         yield from asyncio.sleep(0.0)
 
     @asyncio.coroutine
-    def post(self, data, service="default"):
+    def post(self, data, service="default", **kwargs):
         """
         Post data to subscribed consumer streams using the async method
         
@@ -62,5 +62,5 @@ class AsyncStream(DataStream):
                 if subscription.enabled:
                     assert service == subscription.service
                     post_fn = self.subscription_services[service]
-                    yield from subscription.async_post(post_fn(data))
+                    yield from subscription.async_post(post_fn(data), **kwargs)
         yield from asyncio.sleep(0.0)
