@@ -43,10 +43,10 @@ class Subscription:
         :param data: Data to post to subscribers. When posting lists, make sure to copy them if you intend to modify
             its contents in the subscriber's stream
         """
-        raise ValueError("Subscriptions of type '%s' don't post data" % self.__class__.__name__)
+        yield from asyncio.sleep(0.0)
 
     def sync_post(self, data):
-        raise ValueError("Subscriptions of type '%s' don't post data" % self.__class__.__name__)
+        pass
 
     def __repr__(self):
         return "%s(tag='%s', producer_stream=%s, consumer_stream=%s)" % (

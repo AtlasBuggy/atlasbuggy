@@ -43,7 +43,7 @@ class Robot:
             file_name=None,
             directory=None,
             write=True,
-            log_level=logging.CRITICAL,
+            log_level=logging.WARNING,
             format="[%(name)s @ %(filename)s:%(lineno)d][%(levelname)s] %(asctime)s: %(message)s",
             file_handle=None
         )
