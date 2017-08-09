@@ -78,8 +78,9 @@ class LogParser(AsyncStream):
         for stream in self.logged_streams.values():
             stream.check_subscriptions()
             stream.take(stream.subscriptions)
-
-    async def run(self):
+    
+    @asyncio.coroutine
+    def run(self):
         # find all matches in the log
         matches = re.finditer(self.pattern, self.content)
 
@@ -122,7 +123,7 @@ class LogParser(AsyncStream):
                 stream.receive_log(self.line_info["loglevel"], self.line_info["message"], self.line_info)
 
             # call subclass's update
-            await self.update()
+            yield from self.update()
 
             self.prev_time = self.line_info["timestamp"]
 
@@ -135,9 +136,10 @@ class LogParser(AsyncStream):
             return 0.0
         else:
             return self.line_info["timestamp"] - self.prev_time
-
-    async def update(self):
-        await asyncio.sleep(self.update_rate)
+    
+    @asyncio.coroutine
+    def update(self):
+        yield from asyncio.sleep(self.update_rate)
 
 
 if __name__ == "__main__":
@@ -148,11 +150,12 @@ if __name__ == "__main__":
     class DemoParser(LogParser):
         def __init__(self, file_name, directory):
             super(DemoParser, self).__init__(file_name, directory)
-
-        async def update(self):
+        
+        @asyncio.coroutine
+        def update(self):
             print("\t'%s'" % self.line)
             # print(self.line_info)
-            await asyncio.sleep(0.0)
+            yield from asyncio.sleep(0.0)
 
 
     def parse_file(file_name, directory):

@@ -80,8 +80,9 @@ class BuggyJoystick(PygameStream):
             if bool(name) != False:
                 dict_mapping[name] = index
         return dict_mapping
-
-    async def run(self):
+    
+    @asyncio.coroutine
+    def run(self):
         """
         Go through every queued pygame event.
         If an event is JOYAXISMOTION, assign to the axes property list
@@ -94,10 +95,10 @@ class BuggyJoystick(PygameStream):
         :return: False if pygame signals the QUIT event
         """
         self.logger.debug("Waiting 1 second...")
-        await asyncio.sleep(1)
+        yield from asyncio.sleep(1)
 
         while True:
-            await asyncio.sleep(self.delay)
+            yield from asyncio.sleep(self.delay)
 
             self.update()
 

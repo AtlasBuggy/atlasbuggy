@@ -42,12 +42,13 @@ class Consumer(ThreadedStream):
                 self.producer_feed.task_done()  # when you're done getting, make sure to call this
                 self.logger.info("I consumed '%s'" % counter)  # print to terminal
             time.sleep(0.5)  # wait for 0.5 seconds
+            raise Exception("something")
 
     def stop(self):
         self.logger.info("Good bye!")
 
 
-robot = Robot(write=False, log_level=10)
+robot = Robot(write=False)
 
 producer = Producer()
 consumer = Consumer()

@@ -143,7 +143,7 @@ class DataStream:
         pass
 
     def require_subscription(self, tag, subscription_class=None, stream_class=None, service_tag=None,
-                             required_attributes=None, is_suggestion=False):
+                             required_attributes=None, required_methods=None, is_suggestion=False):
         """
         Require that this stream be subscribed to another stream
         :param tag: What the subscription tag should be
@@ -161,6 +161,7 @@ class DataStream:
             stream_class=stream_class,
             service_tag=service_tag,
             required_attributes=required_attributes,
+            required_methods=required_methods,
             is_suggestion=is_suggestion
         )
 
@@ -192,6 +193,7 @@ class DataStream:
             subscription_class = subscr_props["subscription_class"]
             stream_class = subscr_props["stream_class"]
             service_tag = subscr_props["service_tag"]
+            required_methods = subscr_props["required_methods"]
             required_attributes = subscr_props["required_attributes"]
             is_suggestion = subscr_props["is_suggestion"]
 
@@ -237,6 +239,18 @@ class DataStream:
                 if len(missing_attributes) > 0:
                     message += "%s doesn't have the required attributes: %s" % (
                         producer_stream.name, missing_attributes)
+                    satisfied = False
+
+            if required_methods is not None:
+                missing_methods = []
+                for method_name in required_methods:
+                    if not hasattr(producer_stream, method_name) or \
+                            not callable(getattr(producer_stream, method_name)):
+                        missing_methods.append(method_name)
+
+                if len(missing_methods) > 0:
+                    message += "%s doesn't have the required methods: %s" % (
+                        producer_stream.name, missing_methods)
                     satisfied = False
 
             # throw an error if any of the above requirements failed
@@ -363,6 +377,11 @@ class DataStream:
         """Internal extra startup behavior"""
         pass
 
+    def _apply_subs(self):
+        self.check_subscriptions()
+        self.logger.debug("applying subscriptions: %s" % str(self.subscriptions))
+        self.take(self.subscriptions)
+
     def _start(self):
         """Wrapper for starting the stream"""
         if not self._has_started.is_set():  # only call _start once
@@ -373,10 +392,6 @@ class DataStream:
             self.logger.debug("starting")
             self._has_started.set()
             self.start_time = self.time_started()
-
-            self.check_subscriptions()
-            self.logger.debug("applying subscriptions: %s" % str(self.subscriptions))
-            self.take(self.subscriptions)
 
             self.start()
             self._init()
@@ -395,13 +410,11 @@ class DataStream:
         except BaseException as error:
             self.logger.debug("catching exception in run")
             self.logger.exception(error)
+            raise
+        finally:
+            self.logger.debug("run finished")
             self._stop()  # in threads, stop is called inside the thread instead to avoid race conditions
             self.exit()
-            raise
-
-        self.logger.debug("run finished")
-        self._stop()
-        self.exit()
 
     def run(self):
         """Main behavior of the stream. Put 'while self.running():' in this method"""

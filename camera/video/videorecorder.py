@@ -93,13 +93,15 @@ class VideoRecorder(AsyncStream):
                 self.logger.debug("Dumping buffer. %s frames reached" % self.required_buffer_len)
             else:
                 self.frame_buffer.append(frame)
-
-    async def run(self):
+    
+    @asyncio.coroutine
+    def run(self):
         while self.is_running():
             while not self.capture_feed.empty():
-                self.record(await self.capture_feed.get())
+                frame = yield from self.capture_feed.get()
+                self.record(frame)
                 self.capture_feed.task_done()
-            await asyncio.sleep(0.5 / self.capture.fps)
+            yield from asyncio.sleep(0.5 / self.capture.fps)
 
     def poll_for_fps(self):
         if self.prev_t is None:

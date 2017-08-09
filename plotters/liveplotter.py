@@ -90,8 +90,9 @@ class LivePlotter(BasePlotter, AsyncStream):
         self.add_subplots(*robot_plots, num_columns=num_columns)
         for plot in self.robot_plots:
             self._create_lines(plot)
-
-    async def run(self):
+    
+    @asyncio.coroutine
+    def run(self):
         """
         Update plot using data supplied to the robot plot objects
         :return: True or False if the plotting operation was successful
@@ -107,10 +108,10 @@ class LivePlotter(BasePlotter, AsyncStream):
 
             if self.is_paused:
                 self.plt.pause(LivePlotter.pause_time)
-                await asyncio.sleep(LivePlotter.pause_time * 10)
+                yield from asyncio.sleep(LivePlotter.pause_time * 10)
                 continue
 
-            await self.update()
+            yield from self.update()
 
             plots_updated = False
             for plot in self.robot_plots:
@@ -165,7 +166,7 @@ class LivePlotter(BasePlotter, AsyncStream):
 
                 self.has_updated = False
                 
-            await asyncio.sleep(LivePlotter.pause_time)
+            yield from asyncio.sleep(LivePlotter.pause_time)
 
 
     def pause(self):

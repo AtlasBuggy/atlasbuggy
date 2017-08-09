@@ -38,22 +38,24 @@ class BaseViewer(AsyncStream):
 
     def update_key_codes(self, **new_key_codes):
         self.key_codes.update(new_key_codes)
-
-    async def run(self):
+    
+    @asyncio.coroutine
+    def run(self):
         while self.is_running():
             self.show_frame()
-            await self.update()
-
-    async def update(self):
-        await asyncio.sleep(self.delay)
+            yield from self.update()
+    
+    @asyncio.coroutine
+    def update(self):
+        yield from asyncio.sleep(self.delay)
 
     def get_frame(self):
         raise NotImplementedError("Please overwrite this method")
 
     def set_frame(self, frame_num):
         pass
-
-    async def show_frame(self):
+    
+    def show_frame(self):
         """
         Display the frame in the Capture's window using cv2.imshow
         """

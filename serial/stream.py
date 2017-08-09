@@ -203,7 +203,8 @@ class SerialStream(AsyncStream):
 
         self.update_thread.start()
 
-    async def run(self):
+    @asyncio.coroutine
+    def run(self):
         """
         Run behavior for SerialStream
 
@@ -217,8 +218,8 @@ class SerialStream(AsyncStream):
             self._update_recurring(time.time())
             self._send_commands()
 
-            await self.update()
-            await asyncio.sleep(self.loop_delay)  # maintain a constant loop speed
+            yield from self.update()
+            yield from asyncio.sleep(self.loop_delay)  # maintain a constant loop speed
 
     def stop(self):
         """

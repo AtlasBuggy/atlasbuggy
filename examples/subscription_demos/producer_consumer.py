@@ -14,8 +14,9 @@ class Producer(AsyncStream):
         while self.is_running():
             await asyncio.sleep(0.5)  # wait 0.5 seconds
             self.logger.info("I'm producing '%s'" % self.counter)  # signal that counter was posted
-            await self.post(self.counter)  # post the shared resource
             self.counter += 1  # change the value
+
+            await self.post(self.counter)  # post the shared resource
 
 
 class Consumer(AsyncStream):
@@ -39,7 +40,7 @@ class Consumer(AsyncStream):
             await asyncio.sleep(0.1)  # wait for 0.1 seconds
 
 
-robot = Robot(write=False)
+robot = Robot(write=False, log_level=10)
 
 producer = Producer()
 consumer = Consumer()
