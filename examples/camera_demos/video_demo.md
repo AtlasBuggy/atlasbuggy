@@ -14,7 +14,7 @@ robot = Robot()
 We want this to be a simple video player, so let's import the video player stream. Put all your imports at the top of the file.
 
 ```python
-from atlasbuggy.cameras.videoplayer import VideoPlayer
+from atlasbuggy.camera import VideoPlayer
 ```
 
 Initialize the video player stream. It's important to put this after initializing the robot. Replace ```"..."``` with a path to a video. You can't resize the window after it launches, so put a small-ish width and height.
@@ -22,11 +22,11 @@ Initialize the video player stream. It's important to put this after initializin
 video = VideoPlayer(file_name="...", width=800, height=500)
 ```
 
-Next we'll want a way to view the video, so let's import a viewer stream. There a basic viewer, CameraViewer, and a featured viewer, CameraViewerWithTrackbar. CameraViewerWithTrackbar works out of the box while CameraViewer requires subclassing to function.
+Next we'll want a way to view the video, so let's import a viewer stream. There a basic viewer, CameraViewer, and a featured viewer, CameraViewer. CameraViewer works out of the box while CameraViewer requires subclassing to function.
 ```python
-from atlasbuggy.cameras.viewer import CameraViewerWithTrackbar  # put this at the top
+from atlasbuggy.camera import CameraViewer  # put this at the top
 
-viewer = CameraViewerWithTrackbar()  # put this below robot's definition
+viewer = CameraViewer()  # put this below robot's definition
 ```
 
 Now we need to tell the viewer where the video source is. First import subscriptions,
@@ -39,11 +39,11 @@ then link the viewer and the video.
 viewer.subscribe(Update(viewer.capture_tag, video))
 ```
 
-Let me explain what's going on. CameraViewerWithTrackbar requires a subscription which is explicitly defined in its constructor (atlasbuggy/cameras/viewer/trackbar.py and see for yourself). A subscription is essential a data pipe that two data streams share. When the viewer "subscribes" to the video player, the viewer is now listening for data from the video player.
+Let me explain what's going on. CameraViewer requires a subscription which is explicitly defined in its constructor (atlasbuggy/cameras/viewer/trackbar.py and see for yourself). A subscription is essential a data pipe that two data streams share. When the viewer "subscribes" to the video player, the viewer is now listening for data from the video player.
 
 Update is a subscription type that defines one possible relationship these two streams can have. This subscription type acts like a mailbox. The video player "posts" one frame of the video in the mailbox. The viewer sees that there is something new in the mailbox so it "get"'s it. Get and post are the names of methods used in this process. If the video player adds a new frame before the viewer can grab it, the video player discards the old frame and replaces it with a new one. This is so the viewer doesn't get behind when displaying frames.
 
-capture\_tag is a property of CameraViewerWithTrackbar. Most data streams define the subscription tag with \<something\>_tag. Check the stream's documentation for that.
+capture\_tag is a property of CameraViewer. Most data streams define the subscription tag with \<something\>_tag. Check the stream's documentation for that.
 
 The last step is to tell the robot to run.
 ```python

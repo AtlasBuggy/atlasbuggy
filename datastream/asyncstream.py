@@ -20,7 +20,6 @@ class AsyncStream(DataStream):
         Added async tag since this method will be asynchronous. Make sure to include this tag
         when subclassing AsyncStream
         """
-
         try:
             self.started()
             await self.run()

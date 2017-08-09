@@ -132,8 +132,8 @@ class Robot:
 
                 # start asynchronous coroutines
                 self.logger.debug("Starting coroutine")
-                self.loop.run_until_complete(self.coroutine)
                 self.coroutines_started = True
+                self.loop.run_until_complete(self.coroutine)
                 self.logger.debug("Coroutines complete")
 
                 # if all coroutines finish, wait for threads to finish if they are still running
@@ -150,18 +150,33 @@ class Robot:
                 self.logger.debug("Robot has finished")
             else:
                 logging.warning("No streams to run!")
+
+        except KeyboardInterrupt:
+            # don't print exception
+            self.exit()
+            self.stop_coroutines()
+            self.logger.debug("KeyboardInterrupt")
         except BaseException as error:
+            self.exit()
+            self.stop_coroutines()
             self.logger.debug("Catching exception")
             self.logger.exception(error)
+        finally:
             self.stop()
-            raise
-        self.stop()
-        self.logger.debug("finished")
+            self.logger.debug("finished")
+
+    def stop_coroutines(self):
+        """Shutdown behavior for asyncio"""
+        self.logger.debug("Canceling coroutines")
+        if self.coroutines_started and self.coroutine is not None:
+            self.coroutine.cancel()
+            self.loop.run_forever()
+            self.coroutine.exception()
+        self.logger.debug("Coroutines canceled")
+        self.loop.close()
 
     def stop(self):
-        """
-        Teardown behavior for the robot. Stops all streams from running
-        """
+        """Teardown behavior for the robot. Stops all streams from running"""
         self.logger.debug("Calling stop")
         if self.stop_fn is not None:
             self.stop_fn(self)
@@ -169,14 +184,6 @@ class Robot:
         # signal for streams to exit. They call their own stop methods
         self.logger.debug("Exit event set")
         self.exit()
-
-        # in cause coroutines are still running, call cancel
-        self.logger.debug("Canceling coroutines")
-        if self.coroutines_started:
-            if self.coroutine is not None:
-                self.coroutine.cancel()
-            self.loop.close()
-        self.logger.debug("Coroutines canceled")
 
         # call each streams' stopped method for post teardown behavior
         self.logger.debug("Calling post stop methods")
@@ -238,4 +245,3 @@ class Robot:
     def exit():
         # signal all streams to exit
         DataStream.exit()
-

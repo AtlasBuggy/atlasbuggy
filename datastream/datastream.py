@@ -182,9 +182,7 @@ class DataStream:
                 self.subscriptions[tag].producer_stream.enabled)
 
     def check_subscriptions(self):
-        """
-        Check if all required subscriptions have been satisfied
-        """
+        """Check if all required subscriptions have been satisfied"""
         self.logger.debug("Checking subscriptions")
 
         for tag, subscr_props in self.required_subscriptions.items():
@@ -337,15 +335,11 @@ class DataStream:
         return True
 
     def start(self):
-        """
-        Callback for stream_start. Time has started, run has not been called.
-        """
+        """Callback for stream_start. Time has started, run has not been called."""
         pass
 
     def started(self):
-        """
-        Callback for _start. _run has been called.
-        """
+        """Callback for _start. _run has been called."""
         pass
 
     @staticmethod
@@ -366,15 +360,11 @@ class DataStream:
         return time.time()
 
     def _init(self):
-        """
-        Internal extra startup behavior
-        """
+        """Internal extra startup behavior"""
         pass
 
     def _start(self):
-        """
-        Wrapper for starting the stream
-        """
+        """Wrapper for starting the stream"""
         if not self._has_started.is_set():  # only call _start once
             if not self.enabled:
                 self.logger.debug("stream not enabled")
@@ -395,9 +385,7 @@ class DataStream:
         return self._has_started.is_set()
 
     def _run(self):
-        """
-        Wrapper for running stream
-        """
+        """Wrapper for running stream"""
 
         try:
             self.started()
@@ -416,21 +404,15 @@ class DataStream:
         self.exit()
 
     def run(self):
-        """
-        Main behavior of the stream. Put 'while self.running():' in this method
-        """
+        """Main behavior of the stream. Put 'while self.running():' in this method"""
         pass
 
     def update(self):
-        """
-        Optional method to be called inside run's while loop
-        """
+        """Optional method to be called inside run's while loop"""
         pass
 
     def _stop(self):
-        """
-        Wrapper for stopping the stream. Assumes that exit has been set
-        """
+        """Wrapper for stopping the stream. Assumes that exit has been set"""
         if not self.enabled:
             return
         if not self._has_stopped.is_set():  # only call _stop once
@@ -440,9 +422,7 @@ class DataStream:
             self.logger.debug("closed")
 
     def stop(self):
-        """
-        Stop behavior of the stream
-        """
+        """Stop behavior of the stream"""
         pass
 
     def has_stopped(self):

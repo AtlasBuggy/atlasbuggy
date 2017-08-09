@@ -1,7 +1,6 @@
 from atlasbuggy import Robot
 from atlasbuggy.subscriptions import *
-from atlasbuggy.camera import CameraViewer
-from atlasbuggy.camera import VideoPlayer
+from atlasbuggy.camera import CameraViewer, VideoPlayer
 
 robot = Robot(write=False)
 

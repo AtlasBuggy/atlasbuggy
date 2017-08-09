@@ -143,3 +143,5 @@ Here's a collection of examples on how to use this repository effectively. I wil
 [Video player](examples/camera_demos/video_demo.md)
 
 [Simple Arduino reader and writer](examples/serial_demos/reader_writer.md)
+
+[An explanation of subscriptions](examples/subscription_demos/subscriptions.md)
