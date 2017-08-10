@@ -182,7 +182,7 @@ class DataStream:
                 self.subscriptions[tag].producer_stream is not None and
                 self.subscriptions[tag].producer_stream.enabled)
 
-    def check_subscriptions(self):
+    def _check_subscriptions(self):
         """Check if all required subscriptions have been satisfied"""
         self.logger.debug("Checking subscriptions")
 
@@ -377,8 +377,8 @@ class DataStream:
         """Internal extra startup behavior"""
         pass
 
-    def _apply_subs(self):
-        self.check_subscriptions()
+    def apply_subs(self):
+        self._check_subscriptions()
         self.logger.debug("applying subscriptions: %s" % str(self.subscriptions))
         self.take(self.subscriptions)
 
@@ -432,7 +432,7 @@ class DataStream:
             self._has_stopped.set()
             self.logger.debug("stopping")
             self.stop()
-            self.logger.debug("closed")
+            self.logger.debug("stopped")
 
     def stop(self):
         """Stop behavior of the stream"""
@@ -442,9 +442,7 @@ class DataStream:
         return self._has_stopped.is_set()
 
     def stopped(self):
-        """
-        Behavior after all streams have stopped
-        """
+        """Behavior after all streams have stopped"""
         pass
 
     @staticmethod

@@ -130,28 +130,38 @@ class HexAndFloatConsumer(AsyncStream):
         self.logger.info("Got hex byte: '%s'" % hex_byte)
 
 
-robot = Robot(write=False, log_level=10)
+def run():
+    robot = Robot(write=False, log_level=10)
 
-float_generator = FloatGenerator()
-float_consumer = FloatConsumer()
-hex_byte_consumer = HexByteConsumer()
-float_and_hex_consumer = HexAndFloatConsumer()
+    float_generator = FloatGenerator()
+    float_consumer = FloatConsumer()
+    hex_byte_consumer = HexByteConsumer()
+    float_and_hex_consumer = HexAndFloatConsumer()
 
-float_consumer.subscribe(
-    Feed(float_consumer.float_generator_tag, float_generator)
-)
-hex_byte_consumer.subscribe(
-    Feed(hex_byte_consumer.float_generator_tag, float_generator, hex_byte_consumer.hex_byte_service_tag)
-)
-float_and_hex_consumer.subscribe(
-    Feed(float_and_hex_consumer.float_tag, float_generator)
-)
-float_and_hex_consumer.subscribe(
-    Feed(float_and_hex_consumer.hex_tag, float_generator, float_and_hex_consumer.hex_byte_service_tag)
-)
+    float_consumer.subscribe(Feed(
+        float_consumer.float_generator_tag,
+        float_generator
+    ))
+    hex_byte_consumer.subscribe(Feed(
+        hex_byte_consumer.float_generator_tag,
+        float_generator,
+        hex_byte_consumer.hex_byte_service_tag
+    ))
+    float_and_hex_consumer.subscribe(Feed(
+        float_and_hex_consumer.float_tag,
+        float_generator
+    ))
+    float_and_hex_consumer.subscribe(Feed(
+        float_and_hex_consumer.hex_tag,
+        float_generator,
+        float_and_hex_consumer.hex_byte_service_tag
+    ))
 
-float_generator.subscribe(
-    Feed(float_generator.multiplier_tag, float_consumer)
-)
+    float_generator.subscribe(Feed(
+        float_generator.multiplier_tag, float_consumer
+    ))
 
-robot.run(float_generator, float_consumer, hex_byte_consumer, float_and_hex_consumer)
+    robot.run(float_generator, float_consumer, hex_byte_consumer, float_and_hex_consumer)
+
+
+run()

@@ -151,7 +151,7 @@ class Robot:
         # apply subscriptions
         self.logger.debug("Applying subscriptions")
         for stream in self.streams:
-            stream._apply_subs()
+            stream.apply_subs()
 
         # start all streams. Threaded streams call their _run methods here
         self.logger.debug("Starting streams, threads have started")

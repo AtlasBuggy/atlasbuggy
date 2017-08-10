@@ -76,9 +76,8 @@ class LogParser(AsyncStream):
     
     def start(self):
         for stream in self.logged_streams.values():
-            stream.check_subscriptions()
-            stream.take(stream.subscriptions)
-    
+            stream.apply_subs()
+
     @asyncio.coroutine
     def run(self):
         # find all matches in the log
