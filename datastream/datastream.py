@@ -169,6 +169,9 @@ class DataStream:
         subscription = self.required_subscriptions[tag]
         subscription.update(properties)
 
+    def remove_subscription(self, tag):
+        del self.required_subscriptions[tag]
+
     def is_subscribed(self, tag):
         """
         Check if this stream is subscribed to subscription that matches the tag.
