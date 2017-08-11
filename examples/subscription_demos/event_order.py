@@ -91,7 +91,7 @@ class ImportantMethods(AsyncStream):
         self.some_stream = None
         self.require_subscription(self.some_tag)
 
-        self.adjust_subscription(
+        self.adjust_requirement(
             self.some_tag,
             # change properties of some_subscription.
             # this is for changing or overriding the subscriptions of super classes
@@ -99,7 +99,7 @@ class ImportantMethods(AsyncStream):
 
         self.some_other_tag = "some other stream"
         self.require_subscription(self.some_other_tag)
-        self.remove_subscription(self.some_other_tag)  # remove the subscription from a super class
+        self.remove_requirement(self.some_other_tag)  # remove the subscription from a super class
 
         self.some_service = "new_service"
         self.add_service(self.some_service, lambda data: data.copy())

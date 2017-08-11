@@ -165,11 +165,11 @@ class DataStream:
             is_suggestion=is_suggestion
         )
 
-    def adjust_subscription(self, tag, **properties):
+    def adjust_requirement(self, tag, **properties):
         subscription = self.required_subscriptions[tag]
         subscription.update(properties)
 
-    def remove_subscription(self, tag):
+    def remove_requirement(self, tag):
         del self.required_subscriptions[tag]
 
     def is_subscribed(self, tag):
