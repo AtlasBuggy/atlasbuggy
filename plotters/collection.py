@@ -11,6 +11,8 @@ class RobotPlotCollection:
         :param enabled: Turn collections on and off easily with this flag. If False, all subplots will be disabled
         :param flat: 2D if True, 3D if False. All subplots will be assigned this value
         """
+        
+        assert type(collection_name) == str
         self.name = collection_name
         self.plots = []
 
@@ -18,6 +20,7 @@ class RobotPlotCollection:
         self.flat = flat
         self.enabled = enabled
         self.window_resizing = window_resizing
+        self.image_artist = None
         for plot in robot_plots:
             self.add_plot(plot)
 

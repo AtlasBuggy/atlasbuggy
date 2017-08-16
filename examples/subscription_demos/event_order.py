@@ -1,10 +1,10 @@
 import time
-import asyncio
 import traceback
 from atlasbuggy import DataStream, AsyncStream, ThreadedStream, Robot
 from atlasbuggy.subscriptions import *
+import asyncio
 
-enable_trackback = True
+enable_trackback = False
 
 
 def get_traceback():
@@ -101,8 +101,10 @@ class ImportantMethods(AsyncStream):
         self.require_subscription(self.some_other_tag)
         self.remove_requirement(self.some_other_tag)  # remove the subscription from a super class
 
+        # create a new service. Instead of employing the default behavior of posting directly,
+        # first create a copy of the data
         self.some_service = "new_service"
-        self.add_service(self.some_service, lambda data: data.copy())
+        self.add_service(self.some_service, post_fn=lambda data: data.copy())
 
     # ----- Runs in sequence -----
 
@@ -127,9 +129,13 @@ class ImportantMethods(AsyncStream):
 
         # if subscription isn't required, check if this consumer stream has subscribed
         am_subscribed = self.is_subscribed(self.some_tag)
-        self.logger.info(
-            "I'm subscribed to %s: %s" % (self.some_tag, am_subscribed)
-        )
+        if am_subscribed:
+            self.logger.info(
+                "I'm subscribed to stream named '%s' with tag '%s': %s" % (
+                    self.some_stream.name, self.some_tag, am_subscribed)
+            )
+        else:
+            self.logger.info("I'm not subscribed to a required solution!! This shouldn't happen!!!")
 
         await asyncio.sleep(0.01)
 
@@ -176,7 +182,7 @@ asynchronous = OrderDemoAsync()
 threaded = OrderDemoThreaded()
 
 important_methods = ImportantMethods()
-important_methods.subscribe(Subscription(important_methods.some_tag, DataStream()))
+important_methods.subscribe(Subscription(important_methods.some_tag, static))
 
 # robot.run(static)
 # robot.run(asynchronous)

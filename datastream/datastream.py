@@ -50,6 +50,7 @@ class DataStream:
         self.subscription_services = {
             "default": self.default_post_service  # function pointer. By default no modifications are made to the post
         }
+        self.service_suppressed_warnings = {"default"}
 
         # instance of logging. Use this instance to print debug statement and log
         self.logger = logging.getLogger(self.name)
@@ -103,24 +104,32 @@ class DataStream:
         if not isinstance(subscription, Subscription):
             raise ValueError("subscriptions must be of type Subscription: %s" % subscription)
 
-        # put subscription in the table
-        self.subscriptions[subscription.tag] = subscription
-
-        # subscription now has a reference to the producer stream and consumer stream
-        subscription.set_consumer(self)
-
-        # mostly for async streams. Tell subscription whether to use the async or sync queue
-        self._subscribed(subscription)
-
-        # Add this data stream (the consumer) to the producer stream's subscriptions
-        # Request a particular service
         producer = subscription.producer_stream
-        if subscription.service in subscription.producer_stream.subscribers:
-            producer.subscribers[subscription.service].append(subscription)
-        else:
-            producer.subscribers[subscription.service] = [subscription]
 
-        self.logger.debug("'%s' %s '%s'" % (self, subscription.description, subscription.producer_stream))
+        if producer.enabled:
+            # put subscription in the table
+            self.subscriptions[subscription.tag] = subscription
+
+            # subscription now has a reference to the producer stream and consumer stream
+            subscription.set_consumer(self)
+
+            # mostly for async streams. Tell subscription whether to use the async or sync queue
+            self._subscribed(subscription)
+
+            # Add this data stream (the consumer) to the producer stream's subscriptions
+            # Request a particular service
+            if subscription.service in subscription.producer_stream.subscribers:
+                producer.subscribers[subscription.service].append(subscription)
+            else:
+                producer.subscribers[subscription.service] = [subscription]
+
+            if subscription.service != "default":
+                message = "requesting '%s' service" % subscription.service
+            else:
+                message = ""
+            self.logger.debug("'%s' %s '%s' %s" % (self, subscription.description, subscription.producer_stream, message))
+        else:
+            self.logger.debug("'%s' is disabled. Not subscribing." % producer.name)
 
     def _subscribed(self, subscription):
         """
@@ -155,7 +164,17 @@ class DataStream:
             So there can be either no subscription or a subscription must abide by these requirements
         """
         if required_attributes is not None:
-            assert type(required_attributes) == tuple
+            try:
+                iter(required_attributes)
+            except TypeError:
+                required_attributes = tuple(required_attributes)
+
+        if required_methods is not None:
+            try:
+                iter(required_methods)
+            except TypeError:
+                required_methods = tuple(required_methods)
+
         self.required_subscriptions[tag] = dict(
             subscription_class=subscription_class,
             stream_class=stream_class,
@@ -166,10 +185,17 @@ class DataStream:
         )
 
     def adjust_requirement(self, tag, **properties):
+        """
+        Adjust a required subscription
+        
+        :param tag: The tag of the requirement to adjust  
+        :param properties: can be subscription_class, stream_class, service_tag, required_attributes, or is_suggestion
+        """
         subscription = self.required_subscriptions[tag]
         subscription.update(properties)
 
     def remove_requirement(self, tag):
+        """Remove a subscription requirement"""
         del self.required_subscriptions[tag]
 
     def is_subscribed(self, tag):
@@ -283,14 +309,19 @@ class DataStream:
                 for subscr_props in subscriptions:
                     non_existent_services.append((subscr_props.consumer_stream.name, requested_service))
         if len(non_existent_services) > 0:
-            raise ValueError("The following services were requested from '%s' that don't exist:\n\t%s" % (
-                self.name, str(["%s: %s" % (name, service) for name, service in non_existent_services])[1:-1]))
+            message = ""
+            for name, service in non_existent_services:
+                message += "\t%s is requesting '%s'\n" % (name, service)
+            raise ValueError("The following services were requested from '%s' that don't exist:\n%s" % (
+                self.name, message))
 
         # Check if all services offered by this stream are being used
-        if len(self.subscribers) > 0:
-            unused_services = list(self.subscription_services.keys() - self.subscribers.keys())
+        if len(self.subscribers) > 0:  # only check if services are being used if there are any subscribers
+            unused_services = self.subscription_services.keys() - self.subscribers.keys()
+            unused_services = unused_services - self.service_suppressed_warnings
             if len(unused_services) > 0:
-                self.logger.warning("The following subscription services are not being consumed: %s" % unused_services)
+                message = str(list(unused_services))[1:-1]
+                self.logger.warning("The following subscription services are not being consumed: %s" % message)
 
     def post(self, data, service="default", **kwargs):
         """
@@ -311,7 +342,7 @@ class DataStream:
         """
         return data
 
-    def add_service(self, service_tag, post_fn=None):
+    def add_service(self, service_tag, post_fn=None, suppress_unused_warning=False):
         """
         Call this method in the stream's constructor to add a new service.
         :param service_tag: The name of this service
@@ -324,6 +355,23 @@ class DataStream:
             post_fn = self.default_post_service
         assert callable(post_fn)
         self.subscription_services[service_tag] = post_fn
+        if suppress_unused_warning:
+            self.service_suppressed_warnings.add(service_tag)
+
+    def adjust_service(self, service_tag, post_fn=None, suppress_unused_warning=False):
+        if post_fn is None:
+            post_fn = self.default_post_service
+        assert callable(post_fn)
+        self.subscription_services[service_tag] = post_fn
+
+        if not suppress_unused_warning:
+            self.service_suppressed_warnings.remove(service_tag)
+        else:
+            self.service_suppressed_warnings.add(service_tag)
+
+    def remove_service(self, service_tag):
+        del self.subscription_services[service_tag]
+        self.service_suppressed_warnings.remove(service_tag)
 
     def receive_log(self, log_level, message, line_info):
         """

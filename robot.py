@@ -156,6 +156,7 @@ class Robot:
         # start all streams. Threaded streams call their _run methods here
         self.logger.debug("Starting streams, threads have started")
         for stream in self.streams:
+            self.logger.debug("Calling %s's start" % stream.name)
             stream._start()
 
         # call external setup function
@@ -166,7 +167,7 @@ class Robot:
     def wait_for_threads(self):
         # if all coroutines finish, wait for threads to finish if they are still running
         for thread_stream in self.thread_streams:
-            if not thread_stream.has_stopped() and DataStream.is_running():
+            if not thread_stream.has_stopped():
                 self.logger.debug(
                     "Joining threaded stream: %s. Thread has stopped: %s. Event event thrown: %s" % (
                         thread_stream, thread_stream.has_stopped(), not DataStream.is_running())

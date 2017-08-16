@@ -193,7 +193,10 @@ class BasePlotter:
 
             if plot_name in self.axes.keys():
                 return self.axes[plot_name]
-        return None
+            else:
+                raise ValueError("Trying to get the axis of a plot that hasn't been added!!")
+        else:
+            raise ValueError("Trying to get the axis of a plot that's not enabled!!")
 
     def draw_dot(self, arg, x, y, z=None, **dot_properties):
         """
@@ -227,6 +230,7 @@ class BasePlotter:
             plot_name = self._get_name(plot)
             if plot_name is None:
                 return
+
             image_artist = self.plots[plot_name].image_artist
 
             if type(image) == str:

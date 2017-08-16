@@ -1,6 +1,7 @@
 import os
 import re
 import time
+import logging
 import datetime
 import lzma as xz
 import asyncio
@@ -18,7 +19,7 @@ class LogParser(AsyncStream):
             r"(?P<name>[a-zA-Z0-9]*) @ "
             r"(?P<filename>.*\.py):"
             r"(?P<linenumber>[0-9]*)\]\["
-            r"(?P<loglevel>[A-Z]*)\] "
+            r"(?P<loglevelstr>[A-Z]*)\] "
             r"(?P<year>[0-9]*)-"
             r"(?P<month>[0-9]*)-"
             r"(?P<day>[0-9]*) "
@@ -54,10 +55,12 @@ class LogParser(AsyncStream):
 
         # all pieces information in each line
         self.line_info = dict(
-            name="", filename="", linenumber=0, loglevel="",
+            name="", filename="", linenumber=0, loglevelstr="", loglevel=0,
             year=0, month=0, day=0, hour=0, minute=0, second=0, millisecond=0, timestamp=0,
             message="",
         )
+
+        self.matches = re.finditer(self.pattern, self.content)
 
     def take(self, subscriptions):
         """
@@ -67,64 +70,79 @@ class LogParser(AsyncStream):
         """
         for subscription in subscriptions.values():
             stream = subscription.producer_stream
-            self.logged_streams[stream.name] = stream
+            self.logged_streams[subscription.tag] = stream
 
         self.take_from_log(subscriptions)
-    
+
     def take_from_log(self, subscriptions):
         pass
-    
+
     def start(self):
         for stream in self.logged_streams.values():
             stream.apply_subs()
 
+        self._look_for_start()
+
+    def _look_for_start(self):
+        for match_num, match in enumerate(self.matches):
+            self._post_match(match_num, match)
+            if self.line_info["name"] == "Robot" and \
+                            self.line_info["filename"] == "robot.py" and \
+                            self.line_info["loglevel"] == 10 and \
+                            self.line_info["message"] == "Starting coroutine":
+                break
+
     @asyncio.coroutine
     def run(self):
         # find all matches in the log
-        matches = re.finditer(self.pattern, self.content)
 
-        for match_num, match in enumerate(matches):
+        for match_num, match in enumerate(self.matches):
             if not self.is_running():
                 break
-            self.line_number = match_num
-
-            for line_key, line_value in match.groupdict().items():
-                # convert the matched element to the corresponding line_info's type
-                # if line_info["year"] is of type int, convert the match to an int and assign the value to line_info
-                self.line_info[line_key] = type(self.line_info[line_key])(line_value)
-
-            # a quirk of the way I'm parsing with regex. Move the last character of the message to the beginning and
-            # remove trailing newlines
-            line = match.group()
-            self.line = (line[-1] + line[:-1]).strip("\n")
-            self.line_info["message"] = self.line_info["message"][:-1].strip("\n")
-
-            # under scrutiny, not sure what this was for
-            # if self.prev_time is not None:
-            #     self.prev_time = self.line_info["timestamp"]
-
-            # create a unix timestamp using the date
-            current_date = datetime.datetime(
-                self.line_info["year"],
-                self.line_info["month"],
-                self.line_info["day"],
-                self.line_info["hour"],
-                self.line_info["minute"],
-                self.line_info["second"],
-                self.line_info["millisecond"])
-
-            # make timestamp from unix epoch
-            self.line_info["timestamp"] = time.mktime(current_date.timetuple()) + current_date.microsecond / 1e6
-
-            # notify stream if its name is found in the log
-            if self.line_info["name"] in self.logged_streams:
-                stream = self.logged_streams[self.line_info["name"]]
-                stream.receive_log(self.line_info["loglevel"], self.line_info["message"], self.line_info)
+            self._post_match(match_num, match)
 
             # call subclass's update
             yield from self.update()
 
-            self.prev_time = self.line_info["timestamp"]
+    def _post_match(self, match_num, match):
+        self.line_number = match_num
+
+        for line_key, line_value in match.groupdict().items():
+            # convert the matched element to the corresponding line_info's type
+            # if line_info["year"] is of type int, convert the match to an int and assign the value to line_info
+            self.line_info[line_key] = type(self.line_info[line_key])(line_value)
+
+        # a quirk of the way I'm parsing with regex. Move the last character of the message to the beginning and
+        # remove trailing newlines
+        line = match.group()
+        self.line = (line[-1] + line[:-1]).strip("\n")
+        self.line_info["message"] = self.line_info["message"][:-1].strip("\n")
+
+        # under scrutiny, not sure what this was for
+        # if self.prev_time is not None:
+        #     self.prev_time = self.line_info["timestamp"]
+
+        # create a unix timestamp using the date
+        current_date = datetime.datetime(
+            self.line_info["year"],
+            self.line_info["month"],
+            self.line_info["day"],
+            self.line_info["hour"],
+            self.line_info["minute"],
+            self.line_info["second"],
+            self.line_info["millisecond"])
+
+        # make timestamp from unix epoch
+        self.line_info["timestamp"] = time.mktime(current_date.timetuple()) + current_date.microsecond / 1e6
+
+        # convert string to logging integer code
+        self.line_info["loglevel"] = logging.getLevelName(self.line_info["loglevelstr"])
+
+        # notify stream if its name is found in the log
+        if self.line_info["name"] in self.logged_streams:
+            stream = self.logged_streams[self.line_info["name"]]
+            stream.receive_log(self.line_info["loglevel"], self.line_info["message"], self.line_info)
+
 
     def time_diff(self):
         """
@@ -132,13 +150,19 @@ class LogParser(AsyncStream):
         :return: 0.0 if no log messages have been received yet
         """
         if self.prev_time is None:
+            self.prev_time = self.line_info["timestamp"]
             return 0.0
         else:
-            return self.line_info["timestamp"] - self.prev_time
-    
+            dt = self.line_info["timestamp"] - self.prev_time
+            self.prev_time = self.line_info["timestamp"]
+            return dt
+
     @asyncio.coroutine
     def update(self):
-        yield from asyncio.sleep(self.update_rate)
+        if self.update_rate is None:
+            yield from asyncio.sleep(self.time_diff())
+        else:
+            yield from asyncio.sleep(self.update_rate)
 
 
 if __name__ == "__main__":
@@ -149,7 +173,7 @@ if __name__ == "__main__":
     class DemoParser(LogParser):
         def __init__(self, file_name, directory):
             super(DemoParser, self).__init__(file_name, directory)
-        
+
         @asyncio.coroutine
         def update(self):
             print("\t'%s'" % self.line)
