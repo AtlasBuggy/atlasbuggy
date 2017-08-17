@@ -33,6 +33,8 @@ class DataStream:
         self._has_started = Event()  # start flag
         self._has_stopped = Event()  # stop flag
 
+        self.exit_when_finished = True
+
         # streams this stream is subscribed to referenced by subscription tag name (a dictionary of producers)
         # {subscription_tag: subscription}
         self.subscriptions = {}
@@ -464,8 +466,9 @@ class DataStream:
             raise
         finally:
             self.logger.debug("run finished")
+            if self.exit_when_finished:
+                self.exit()
             self._stop()  # in threads, stop is called inside the thread instead to avoid race conditions
-            self.exit()
 
     def run(self):
         """Main behavior of the stream. Put 'while self.running():' in this method"""

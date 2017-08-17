@@ -35,7 +35,8 @@ class AsyncStream(DataStream):
             self.logger.exception(error)
         finally:
             self.logger.debug("run finished")
-            self.exit()
+            if self.exit_when_finished:
+                self.exit()
             self._stop()
 
     @asyncio.coroutine

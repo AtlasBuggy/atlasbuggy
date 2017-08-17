@@ -32,6 +32,8 @@ class LogParser(AsyncStream):
 
         super(LogParser, self).__init__(enabled, log_level, name)
 
+        self.exit_when_finished = False
+
         # info about the log file path
         self.file_name = file_name
         self.directory = directory
@@ -142,7 +144,6 @@ class LogParser(AsyncStream):
         if self.line_info["name"] in self.logged_streams:
             stream = self.logged_streams[self.line_info["name"]]
             stream.receive_log(self.line_info["loglevel"], self.line_info["message"], self.line_info)
-
 
     def time_diff(self):
         """
