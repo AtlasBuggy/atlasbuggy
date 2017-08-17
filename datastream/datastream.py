@@ -17,7 +17,7 @@ class DataStream:
         if name is None:
             name = self.__class__.__name__
         if log_level is None:
-            log_level = logging.INFO
+            log_level = logging.WARNING
 
         self.name = name
         if type(self.name) != str:
@@ -107,31 +107,29 @@ class DataStream:
             raise ValueError("subscriptions must be of type Subscription: %s" % subscription)
 
         producer = subscription.producer_stream
+        subscription.enabled = producer.enabled
 
-        if producer.enabled:
-            # put subscription in the table
-            self.subscriptions[subscription.tag] = subscription
+        # put subscription in the table
+        self.subscriptions[subscription.tag] = subscription
 
-            # subscription now has a reference to the producer stream and consumer stream
-            subscription.set_consumer(self)
+        # subscription now has a reference to the producer stream and consumer stream
+        subscription.set_consumer(self)
 
-            # mostly for async streams. Tell subscription whether to use the async or sync queue
-            self._subscribed(subscription)
+        # mostly for async streams. Tell subscription whether to use the async or sync queue
+        self._subscribed(subscription)
 
-            # Add this data stream (the consumer) to the producer stream's subscriptions
-            # Request a particular service
-            if subscription.service in subscription.producer_stream.subscribers:
-                producer.subscribers[subscription.service].append(subscription)
-            else:
-                producer.subscribers[subscription.service] = [subscription]
-
-            if subscription.service != "default":
-                message = "requesting '%s' service" % subscription.service
-            else:
-                message = ""
-            self.logger.debug("'%s' %s '%s' %s" % (self, subscription.description, subscription.producer_stream, message))
+        # Add this data stream (the consumer) to the producer stream's subscriptions
+        # Request a particular service
+        if subscription.service in subscription.producer_stream.subscribers:
+            producer.subscribers[subscription.service].append(subscription)
         else:
-            self.logger.debug("'%s' is disabled. Not subscribing." % producer.name)
+            producer.subscribers[subscription.service] = [subscription]
+
+        if subscription.service != "default":
+            message = "requesting '%s' service" % subscription.service
+        else:
+            message = ""
+        self.logger.debug("'%s' %s '%s' %s" % (self, subscription.description, subscription.producer_stream, message))
 
     def _subscribed(self, subscription):
         """
@@ -189,8 +187,8 @@ class DataStream:
     def adjust_requirement(self, tag, **properties):
         """
         Adjust a required subscription
-        
-        :param tag: The tag of the requirement to adjust  
+
+        :param tag: The tag of the requirement to adjust
         :param properties: can be subscription_class, stream_class, service_tag, required_attributes, or is_suggestion
         """
         subscription = self.required_subscriptions[tag]
@@ -233,7 +231,8 @@ class DataStream:
                 if is_suggestion:
                     continue
                 else:
-                    raise ValueError("Subscription tag '%s' not found in subscriptions for '%s'!" % (tag, self.name))
+                    raise ValueError("Subscription tag '%s' not found in subscriptions for '%s'! "
+                                     "Supplied subscriptions: %s" % (tag, self.name, self.subscriptions))
 
             if subscription_class is not None and \
                             tag in self.subscriptions and \
