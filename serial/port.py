@@ -13,7 +13,6 @@ import serial.tools.list_ports
 from serial.serialutil import SerialException
 
 import serial
-from ..clock import Clock
 from ..serial.errors import *
 
 
@@ -52,6 +51,7 @@ class SerialPort(Process):
         # time variables
         self.start_time = 0.0
         self.loop_time = 0.0
+        self.loop_delay = 1 / SerialPort.port_updates_per_second
 
         # whoiam ID info
         self.whoiam = None  # ID tag of the microcontroller
@@ -278,8 +278,6 @@ class SerialPort(Process):
         """
 
         self.start_time = time.time()
-        clock = Clock(SerialPort.port_updates_per_second)
-        clock.start(self.start_time)
 
         time.sleep(0.01)  # Wait a brief time before starting and changing the baud rate
 
@@ -343,7 +341,7 @@ class SerialPort(Process):
 
                             self.counter.value += len(packets)
 
-                clock.update()  # maintain a constant loop speed
+                time.sleep(1 / SerialPort.port_updates_per_second)  # maintain a constant loop speed
         except KeyboardInterrupt:
             self.debug_print("KeyboardInterrupt in port loop")
 

@@ -92,6 +92,7 @@ class LogParser(AsyncStream):
                             self.line_info["filename"] == "robot.py" and \
                             self.line_info["loglevel"] == 10 and \
                             self.line_info["message"] == "Starting coroutine":
+                self.logger.debug("found the start!")
                 break
 
     @asyncio.coroutine

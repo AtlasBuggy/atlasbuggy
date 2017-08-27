@@ -1,5 +1,6 @@
 import logging
 import time
+import asyncio
 from threading import Event
 from ..subscriptions import Subscription
 
@@ -332,6 +333,36 @@ class DataStream:
         :param service: which service to post data to
         """
         pass
+
+    @asyncio.coroutine
+    def async_post(self, data, service="default", **kwargs):
+        """
+        Post data to subscribed consumer streams using the async method
+
+        :param data: Data to post 
+        :param service: which service to post data to
+        """
+        if service in self.subscribers:
+            for subscription in self.subscribers[service]:
+                if subscription.enabled:
+                    assert service == subscription.service
+                    post_fn = self.subscription_services[service]
+                    yield from subscription.async_post(post_fn(data), **kwargs)
+        yield from asyncio.sleep(0.0)
+
+    def sync_post(self, data, service="default", **kwargs):
+        """
+        Post data to subscribed consumer streams using the sync method
+
+        :param data: Data to post 
+        :param service: which service to post data to
+        """
+        if service in self.subscribers:
+            for subscription in self.subscribers[service]:
+                if subscription.enabled:
+                    assert service == subscription.service
+                    post_fn = self.subscription_services[service]
+                    subscription.sync_post(post_fn(data), **kwargs)
 
     def default_post_service(self, data):
         """

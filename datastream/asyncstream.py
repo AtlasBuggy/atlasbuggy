@@ -58,10 +58,4 @@ class AsyncStream(DataStream):
         :param data: Data to post 
         :param service: which service to post data to
         """
-        if service in self.subscribers:
-            for subscription in self.subscribers[service]:
-                if subscription.enabled:
-                    assert service == subscription.service
-                    post_fn = self.subscription_services[service]
-                    yield from subscription.async_post(post_fn(data), **kwargs)
-        yield from asyncio.sleep(0.0)
+        yield from self.async_post(data, service, **kwargs)
