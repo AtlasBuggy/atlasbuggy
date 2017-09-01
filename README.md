@@ -1,4 +1,4 @@
-Welcome to the atlasbuggy repository! This readme will serve as a high level design document. This code package is an attempt at making developing DIY robots easy, fun, and pythonic.
+Welcome to the atlasbuggy repository! This readme will serve as a high level design document. This code package is an attempt at making developing DIY robots easy, fun, and pythonic. Check out our wiki [here](https://github.com/AtlasBuggy/atlasbuggy/wiki)!
 
 # Table of Contents
 1. [Software setup](#setup)
