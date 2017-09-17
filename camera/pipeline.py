@@ -24,7 +24,10 @@ class Pipeline(ThreadedStream):
         self.require_subscription(
             self.capture_tag, Update,
             required_attributes=(
-                "width", "height", "num_frames", "current_frame_num", "set_pause")
+                "width", "height", "num_frames", "current_frame_num",),
+            required_methods=(
+                "set_pause",
+            )
         )
 
         # overwrite the default service with different post function

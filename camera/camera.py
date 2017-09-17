@@ -61,6 +61,9 @@ class CameraStream(ThreadedStream):
     def update_key_codes(self, **new_key_codes):
         self.key_codes.update(new_key_codes)
 
+    def set_pause(self, state):
+        self.paused = state
+
     def start(self):
         if not self.enabled:
             return
