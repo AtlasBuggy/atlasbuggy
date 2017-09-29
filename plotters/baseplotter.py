@@ -116,16 +116,22 @@ class BasePlotter:
             self.num_rows += self.num_plots % self.num_columns
 
     def add_subplots(self, *new_plots, num_columns=None):
-        self._adjust_grid(num_columns, len(new_plots) + self.num_plots)
+        if not self.enabled:
+            return
+        plots = []
+        for new_plot in new_plots:
+            if new_plot.enabled:
+                plots.append(new_plot)
+        self._adjust_grid(num_columns, len(plots) + self.num_plots)
 
         grid = gridspec.GridSpec(self.num_rows, self.num_columns)
         for plot_num, plot in enumerate(self.robot_plots):
             self.axes[plot.name].set_position(grid[plot_num].get_position(self.fig))
 
-        for plot_num, plot in enumerate(new_plots):
+        for plot_num, plot in enumerate(plots):
             self._create_subplot(plot, plot_num + 1 + len(self.robot_plots))
 
-        self.robot_plots.extend(new_plots)
+        self.robot_plots.extend(plots)
         self.update_legend()
 
     def open_matplotlib(self):

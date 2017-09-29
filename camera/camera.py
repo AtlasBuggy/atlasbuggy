@@ -12,6 +12,7 @@ class CameraStream(ThreadedStream):
     used_captures = set()
     min_cap_num = 0
     max_cap_num = None
+    fps_acquisition_num = 100
 
     def __init__(self, width=None, height=None, capture_number=None,
                  enabled=True, log_level=None, name=None, skip_count=0):
@@ -63,6 +64,9 @@ class CameraStream(ThreadedStream):
 
     def set_pause(self, state):
         self.paused = state
+
+    def get_pause(self):
+        return self.paused
 
     def start(self):
         if not self.enabled:
@@ -225,7 +229,7 @@ class CameraStream(ThreadedStream):
 
         self.length_sec = time.time() - self.start_time
         self.num_frames += 1
-        if self.num_frames > 25:
+        if self.num_frames > CameraStream.fps_acquisition_num:
             self.fps_sum += 1 / (time.time() - self.prev_t)
             self.fps_avg = self.fps_sum / self.num_frames
         self.prev_t = time.time()
