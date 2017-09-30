@@ -73,6 +73,8 @@ class BaseViewer(AsyncStream):
             return 255
         key = cv2.waitKey(delay)
         if key > -1:
+            if key > 0x100000:
+                key -= 0x100000
             if key in self.key_codes:
                 self.key = self.key_codes[key]
             elif 0 <= key < 0x100:
