@@ -8,10 +8,10 @@ import datetime
 import serial.tools.list_ports
 
 from ..datastream import AsyncStream
-from ..serial.errors import *
-from ..serial.events import CommandPause, RecurringEvent
-from ..serial.object import SerialObject
-from ..serial.port import SerialPort
+from ..microcontrollers.errors import *
+from ..microcontrollers.events import CommandPause, RecurringEvent
+from ..microcontrollers.object import SerialObject
+from ..microcontrollers.port import SerialPort
 
 
 class SerialStream(AsyncStream):
@@ -33,6 +33,8 @@ class SerialStream(AsyncStream):
         """
         super(SerialStream, self).__init__(enabled, name, log_level)
 
+        self.use_current_time = False  # use packet times instead
+
         self.objects = {}  # dictionary of SerialObjects indexed by its whoiam ID
         self.ports = {}  # dictionary of SerialPorts indexed by its whoiam ID
         self.callbacks = {}  # dictionary of callback functions indexed by whoiam ID
@@ -48,10 +50,10 @@ class SerialStream(AsyncStream):
         self._init_objects(self.object_list)
 
         self.port_pattern = re.compile(
-            r"<(?P<timestamp>[.0-9a-zA-Z]*), (?P<whoiam>.*), \[(?P<portname>.*)\] (?P<message>.*), debug>"
+            r"<(?P<timestamp>[.,:\- 0-9a-zA-Z]*), (?P<whoiam>.*), (?P<message>.*), (?P<packettype>.*), debug>"
         )
         self.packet_pattern = re.compile(
-            r"<(?P<timestamp>[.0-9a-zA-Z]*), (?P<whoiam>.*), (?P<message>.*), (?P<packettype>.*)>"
+            r"<(?P<timestamp>[.,:\- 0-9a-zA-Z]*), (?P<whoiam>.*), (?P<message>.*), (?P<packettype>.*)>"
         )
 
         self.update_thread = threading.Thread(target=self.serial_update, daemon=True)
@@ -152,22 +154,6 @@ class SerialStream(AsyncStream):
         event = RecurringEvent(repeat_time, time.time(), callback_fn, args, include_event_in_params)
         self.recurring.append(event)
         return event
-
-    def dt(self, current_time=None, use_current_time=False):
-        """
-        Time since SerialStream has started
-        :return: Current time in seconds. 0.0 if the stream hasn't started
-        """
-        if use_current_time:
-            if current_time is None:
-                self.timestamp = time.time()
-            else:
-                self.timestamp = current_time
-
-        if self.start_time is None or self.timestamp is None:
-            return 0.0
-        else:
-            return self.timestamp - self.start_time
 
     def start(self):
         """
@@ -427,7 +413,8 @@ class SerialStream(AsyncStream):
             self._check_port_status(port)
 
             while not port.packet_queue.empty():
-                self.timestamp, self.packet = port.packet_queue.get()
+                timestamp, self.packet = port.packet_queue.get()
+                self.set_current_time(timestamp)
 
                 # update queue length counters
                 port.counter.value -= 1
@@ -643,13 +630,14 @@ class SerialStream(AsyncStream):
         """
         Check if a message is a SerialPort debug message. Parse it and print it if it is
         """
-        matches = re.finditer(self.port_pattern, message)
-        matched = False
-        for match_num, match in enumerate(matches):
-            matched = True
+
+        match = re.match(self.port_pattern, message)
+        if match is not None:
             matchdict = match.groupdict()
-            self.logger.debug("[%(timestamp)s, %(whoiam)s, %(portname)s]: %(message)s" % matchdict)
-        return matched
+            self.logger.debug("[logged][%(timestamp)s, %(whoiam)s, %(portname)s]: %(message)s" % matchdict)
+            return True
+        else:
+            return False
 
     def _match_log(self, packet):
         """
@@ -657,29 +645,29 @@ class SerialStream(AsyncStream):
 
         :param packet: Packet that was received
         """
-        matches = re.finditer(self.packet_pattern, packet)
+        match = re.match(self.packet_pattern, packet)
+        if match is None:
+            return
 
-        for match_num, match in enumerate(matches):
-            matchdict = match.groupdict()
-            timestamp = matchdict["timestamp"]
-            whoiam = matchdict["whoiam"]
-            packet = matchdict["message"]
-            packet_type = matchdict["packettype"]
+        matchdict = match.groupdict()
+        timestamp = matchdict["timestamp"]
+        whoiam = matchdict["whoiam"]
+        packet = matchdict["message"]
+        packet_type = matchdict["packettype"]
 
-            if timestamp == "None":
-                self.timestamp = None
+        if timestamp == "-":
+            self.set_current_time(None)
+        else:
+            if self.start_time is None:
+                self.start_time = self.timestamp
+
+        if packet_type == "object":
+            if self.timestamp is None:
+                self._deliver_first_packet(whoiam, packet)
             else:
-                self.timestamp = float(timestamp)
-                if self.start_time is None:
-                    self.start_time = self.timestamp
+                self.packet = packet
 
-            if packet_type == "object":
-                if self.timestamp is None:
-                    self._deliver_first_packet(whoiam, packet)
-                else:
-                    self.packet = packet
+                self._deliver(whoiam)
+                self._received(whoiam)
 
-                    self._deliver(whoiam)
-                    self._received(whoiam)
-
-            self.receive_serial_log(self.timestamp, whoiam, packet, packet_type)
+        self.receive_serial_log(self.timestamp, whoiam, packet, packet_type)

@@ -58,6 +58,9 @@ class CameraStream(ThreadedStream):
         else:
             self.key_codes = {}
 
+    def default_post_service(self, frame):
+        return frame.copy()
+
     def update_key_codes(self, **new_key_codes):
         self.key_codes.update(new_key_codes)
 
@@ -229,9 +232,6 @@ class CameraStream(ThreadedStream):
             self.fps_sum += 1 / (time.time() - self.prev_t)
             self.fps_avg = self.fps_sum / self.num_frames
         self.prev_t = time.time()
-
-    def default_post_service(self, frame):
-        return frame.copy()
 
     def log_frame(self):
         self.logger.debug("frame #%s" % self.num_frames)

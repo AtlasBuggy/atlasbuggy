@@ -81,7 +81,7 @@ class FloatConsumer(AsyncStream):
     async def get_number(self):
         number = await self.float_generator_feed.get()
         self.logger.info("Got number: '%s'" % number)
-        await self.post(100.0)
+        await self.post(number)
 
 
 class HexByteConsumer(AsyncStream):
