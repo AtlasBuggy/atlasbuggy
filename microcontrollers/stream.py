@@ -131,6 +131,10 @@ class SerialStream(AsyncStream):
         """
         :param arg: a whoiam ID or SerialObject
         :param callback_fn: function that takes the parameters timestamp and packet
+        
+        example:
+        def received_<sensor name>(self, timestamp, packet):
+            ...
         """
         if type(arg) == str and arg in self.objects.keys():
             whoiam = arg
