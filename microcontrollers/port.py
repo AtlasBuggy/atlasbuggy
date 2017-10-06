@@ -13,7 +13,7 @@ import serial.tools.list_ports
 from serial.serialutil import SerialException
 
 import serial
-from ..serial.errors import *
+from ..microcontrollers.errors import *
 
 
 class SerialPort(Process):

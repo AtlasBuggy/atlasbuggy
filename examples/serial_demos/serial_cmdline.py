@@ -1,7 +1,7 @@
 import re
 from atlasbuggy import Robot
 from atlasbuggy.subscriptions import *
-from atlasbuggy.serial import SerialStream, SerialObject
+from atlasbuggy.microcontrollers import SerialStream, SerialObject
 from atlasbuggy.extras.cmdline import CommandLine
 
 
@@ -54,12 +54,12 @@ class ReaderWriterRobot(SerialStream):
 
 class MiniCommandLine(CommandLine):
     def __init__(self, enabled=True, log_level=None):
+        super(MiniCommandLine, self).__init__(enabled, log_level)
 
         self.reader_writer = None
         self.reader_writer_tag = "reader_writer"
         self.require_subscription(self.reader_writer_tag, Subscription, ReaderWriterRobot)
 
-        super(MiniCommandLine, self).__init__(enabled, log_level)
 
     def handle_input(self, line):
         if line == "0" or line == "off":
@@ -69,12 +69,12 @@ class MiniCommandLine(CommandLine):
         if line == "2" or line == "toggle":
             self.reader_writer.interface.toggle()
 
+if __name__ == '__main__':
+    robot = Robot()
 
-robot = Robot()
+    reader_writer = ReaderWriterRobot()
+    cmdline = MiniCommandLine()
 
-reader_writer = ReaderWriterRobot()
-cmdline = MiniCommandLine()
+    cmdline.subscribe(Subscription(cmdline.reader_writer_tag, reader_writer))
 
-cmdline.subscribe(Subscription(cmdline.reader_writer_tag, reader_writer))
-
-robot.run(reader_writer, cmdline)
+    robot.run(reader_writer, cmdline)

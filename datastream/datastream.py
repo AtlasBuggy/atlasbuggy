@@ -28,8 +28,9 @@ class DataStream:
 
         self.asyncio_loop = None  # asyncio event loop. Assigned by Robot
 
-        self.timestamp = None  # current time since epoch
+        self._timestamp = None  # current time since epoch
         self.start_time = None  # stream start time. Can be set externally
+        self.use_current_time = True
 
         self._has_started = Event()  # start flag
         self._has_stopped = Event()  # stop flag
@@ -86,7 +87,16 @@ class DataStream:
 
         self.logger.addFilter(stream_filter)
 
-    def dt(self, current_time=None, use_current_time=True):
+    @property
+    def timestamp(self):
+        if self.use_current_time:
+            self._timestamp = time.time()
+        return self._timestamp
+
+    def set_current_time(self, current_time):
+        self._timestamp = current_time
+
+    def dt(self):
         """
         Time since start was called. Supply your own timestamp or use the current system time
         Overwrite time_started to change the initial time
@@ -94,9 +104,6 @@ class DataStream:
         """
         # use the system time as current time by default. If you have another time source (e.g. log files),
         # use this method to update the stream's time
-        if current_time is None and use_current_time:
-            current_time = time.time()
-        self.timestamp = current_time
 
         if self.start_time is None or self.timestamp is None:
             return 0.0
@@ -404,6 +411,10 @@ class DataStream:
     def remove_service(self, service_tag):
         del self.subscription_services[service_tag]
         self.service_suppressed_warnings.remove(service_tag)
+
+    def _receive_log(self, log_level, message, line_info):
+        self.set_current_time(line_info["timestamp"])
+        self.receive_log(log_level, message, line_info)
 
     def receive_log(self, log_level, message, line_info):
         """

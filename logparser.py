@@ -40,6 +40,7 @@ class LogParser(AsyncStream):
         self.full_path = os.path.join(self.directory, self.file_name)
 
         self.logged_streams = {}
+        self.encountered_names = set()
 
         # current line of the log we're on
         self.line_number = 0
@@ -144,7 +145,11 @@ class LogParser(AsyncStream):
         # notify stream if its name is found in the log
         if self.line_info["name"] in self.logged_streams:
             stream = self.logged_streams[self.line_info["name"]]
-            stream.receive_log(self.line_info["loglevel"], self.line_info["message"], self.line_info)
+            stream._receive_log(self.line_info["loglevel"], self.line_info["message"], self.line_info)
+
+        if self.line_info["name"] not in self.encountered_names:
+            self.encountered_names.add(self.line_info["name"])
+            self.logger.debug("Encountered name: %s @ line #%s" % (self.line_info["name"], self.line_number))
 
     def time_diff(self):
         """

@@ -1,14 +1,14 @@
-
 from atlasbuggy import Robot
 from atlasbuggy.logparser import LogParser
 from atlasbuggy.subscriptions import *
-from .serial_cmdline import ReaderWriterRobot
+from imu_bot import ImuBot
 
-robot = Robot()
+robot = Robot(write=False)
 
-simulator = LogParser("fill with the path to your log file", enabled=True, update_rate=0.001)
-reader_writer = ReaderWriterRobot()
+simulator = LogParser("logs/test.log.xz", enabled=True,
+                      update_rate=0.001, log_level=10)
+imu_bot = ImuBot()
 
-simulator.subscribe(Subscription("reader_writer", reader_writer))
+simulator.subscribe(Subscription(imu_bot.name, imu_bot))
 
 robot.run(simulator)

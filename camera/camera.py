@@ -12,6 +12,7 @@ class CameraStream(ThreadedStream):
     used_captures = set()
     min_cap_num = 0
     max_cap_num = None
+    fps_acquisition_num = 100
 
     def __init__(self, width=None, height=None, capture_number=None,
                  enabled=True, log_level=None, name=None, skip_count=0):
@@ -57,6 +58,9 @@ class CameraStream(ThreadedStream):
             }
         else:
             self.key_codes = {}
+
+    def default_post_service(self, frame):
+        return frame.copy()
 
     def update_key_codes(self, **new_key_codes):
         self.key_codes.update(new_key_codes)
@@ -192,6 +196,8 @@ class CameraStream(ThreadedStream):
             return 255
         key = cv2.waitKey(delay) % 255
         if key != 255:
+            if key > 0x100000:
+                key -= 0x100000
             if key in self.key_codes:
                 self.key = self.key_codes[key]
             elif 0 <= key < 0x100:
@@ -228,13 +234,10 @@ class CameraStream(ThreadedStream):
 
         self.length_sec = time.time() - self.start_time
         self.num_frames += 1
-        if self.num_frames > 25:
+        if self.num_frames > CameraStream.fps_acquisition_num:
             self.fps_sum += 1 / (time.time() - self.prev_t)
             self.fps_avg = self.fps_sum / self.num_frames
         self.prev_t = time.time()
-
-    def default_post_service(self, frame):
-        return frame.copy()
 
     def log_frame(self):
         self.logger.debug("frame #%s" % self.num_frames)

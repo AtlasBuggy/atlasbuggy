@@ -1,6 +1,6 @@
 import re
 from atlasbuggy import Robot
-from atlasbuggy.serial import SerialStream, SerialObject
+from atlasbuggy.microcontrollers import SerialStream, SerialObject
 
 
 class ReaderWriterInterface(SerialObject):
@@ -56,8 +56,9 @@ class ReaderWriterRobot(SerialStream):
         self.interface.toggle()
 
 
-robot = Robot()
+if __name__ == '__main__':
+    robot = Robot()
 
-reader_writer = ReaderWriterRobot()
+    reader_writer = ReaderWriterRobot()
 
-robot.run(reader_writer)
+    robot.run(reader_writer)

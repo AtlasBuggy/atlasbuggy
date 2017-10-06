@@ -12,11 +12,11 @@ class Producer(AsyncStream):
 
     async def run(self):
         while self.is_running():
-            # await asyncio.sleep(0.5)  # wait 0.5 seconds
+            await asyncio.sleep(0.5)  # wait 0.5 seconds
             self.counter += 1  # change the value
 
-            await self.post(self.counter)  # post the shared resource
             self.logger.info("I'm producing '%s'" % self.counter)  # signal that counter was posted
+            await self.post(self.counter)  # post the shared resource
 
     def stop(self):
         self.logger.info("Good bye!")

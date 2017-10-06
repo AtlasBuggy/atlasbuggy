@@ -31,6 +31,9 @@ class VideoPlayer(ThreadedStream):
         else:
             self.paused = True
 
+    def default_post_service(self, data):
+        return data.copy()
+
     def load_video(self, file_name, directory="", width=None, height=None, frame_skip=0,
                    loop_video=False, start_frame=0):
         with self.frame_lock:
@@ -178,9 +181,6 @@ class VideoPlayer(ThreadedStream):
 
     def reset_callback(self):
         pass
-
-    def default_post_service(self, data):
-        return data.copy()
 
     def run(self):
         while self.is_running():
