@@ -64,6 +64,9 @@ class CameraStream(ThreadedStream):
     def set_pause(self, state):
         self.paused = state
 
+    def get_pause(self):
+        return self.paused
+
     def start(self):
         if not self.enabled:
             return

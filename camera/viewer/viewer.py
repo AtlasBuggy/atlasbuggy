@@ -17,15 +17,19 @@ class CameraViewer(BaseViewer):
         self.frame = None
 
         if enable_trackbar:
-            self.capture_required_attributes = "width", "height", "num_frames", "set_pause", \
-                                  "get_pause", "current_frame_num", "set_frame"
+            self.capture_required_attributes = "width", "height", "num_frames", "current_frame_num"
+            self.capture_required_methods = "set_pause", "get_pause", "set_frame"
         else:
             self.capture_required_attributes = None
+            self.capture_required_methods = None
 
         self.capture_tag = "capture"
         self.capture = None
         self.capture_feed = None
-        self.require_subscription(self.capture_tag, Update, required_attributes=self.capture_required_attributes)
+        self.require_subscription(self.capture_tag, Update,
+            required_attributes=self.capture_required_attributes,
+            required_methods=self.capture_required_methods
+        )
 
         self.trackbar_enabled = enable_trackbar
         self.draw_while_paused = draw_while_paused
