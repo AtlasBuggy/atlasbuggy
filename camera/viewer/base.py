@@ -38,13 +38,13 @@ class BaseViewer(AsyncStream):
 
     def update_key_codes(self, **new_key_codes):
         self.key_codes.update(new_key_codes)
-    
+
     @asyncio.coroutine
     def run(self):
         while self.is_running():
             self.show_frame()
             yield from self.update()
-    
+
     @asyncio.coroutine
     def update(self):
         yield from asyncio.sleep(self.delay)
@@ -54,13 +54,14 @@ class BaseViewer(AsyncStream):
 
     def set_frame(self, frame_num):
         pass
-    
+
     def show_frame(self):
         """
         Display the frame in the Capture's window using cv2.imshow
         """
         self.key_pressed()
 
+        self.logger.debug("getting frame")
         frame = self.get_frame()
 
         if frame is None:
@@ -73,6 +74,7 @@ class BaseViewer(AsyncStream):
             return 255
         key = cv2.waitKey(delay)
         if key > -1:
+            self.logger.debug("OpenCV key: '%s'" % key)
             if key > 0x100000:
                 key -= 0x100000
             if key in self.key_codes:
@@ -80,8 +82,9 @@ class BaseViewer(AsyncStream):
             elif 0 <= key < 0x100:
                 self.key = chr(key)
             else:
-                print(("Unrecognized key: " + str(key)))
+                self.logger.warning(("Unrecognized key: " + str(key)))
 
+            self.logger.debug("Interpreted key: '%s'" % self.key)
             self.key_down(self.key)
 
     def key_down(self, key):
@@ -89,6 +92,7 @@ class BaseViewer(AsyncStream):
             self.exit()
 
     def stop(self):
+        self.logger.debug("Destroying opencv window '%s'" % self.name)
         cv2.destroyWindow(self.name)
         self.viewer_stopped()
 

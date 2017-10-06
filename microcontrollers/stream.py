@@ -97,7 +97,12 @@ class SerialStream(AsyncStream):
         port_addresses = []
 
         # return the port if 'USB' is in the description
-        for port_no, description, address in serial.tools.list_ports.comports():
+        com_ports = serial.tools.list_ports.comports()
+        if len(com_ports) == 0:
+            raise RuntimeError("No serial ports found!! "
+                               "Try overriding this method with an alternative port finder or "
+                               "install the correct drivers")
+        for port_no, description, address in com_ports:
             if 'USB' in address:
                 port_addresses.append(port_no)
         return port_addresses
@@ -131,7 +136,7 @@ class SerialStream(AsyncStream):
         """
         :param arg: a whoiam ID or SerialObject
         :param callback_fn: function that takes the parameters timestamp and packet
-        
+
         example:
         def received_<sensor name>(self, timestamp, packet):
             ...

@@ -87,6 +87,7 @@ class CameraViewer(BaseViewer):
             return None
         else:
             self.current_frame_num = self.capture.current_frame_num
+            self.logger.debug("Got frame #%s" % self.current_frame_num)
             # self.increment_slider()
             return self.draw(self.get_frame_from_feed())
 
@@ -119,6 +120,7 @@ class CameraViewer(BaseViewer):
             if frame is None:
                 return
 
+            self.logger.debug("showing frame #%s" % self.current_frame_num)
             cv2.imshow(self.name, frame)
 
     def toggle_pause(self):
