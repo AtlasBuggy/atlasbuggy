@@ -11,19 +11,19 @@ class Robot:
     Manages all streams associated with the robot, log initialization, and exception handling
     """
 
-    def __init__(self, setup_fn=None, loop_fn=None, stop_fn=None, event_loop=None, **log_options):
+    def __init__(self, setup_fn=None, run_fn=None, stop_fn=None, event_loop=None, **log_options):
         """
         :param setup_fn: An external function to call at start up if setting up a new stream is too much functionality
-        :param loop_fn: An external function to call after all streams have started.
+        :param run_fn: An external function to call after all streams have started.
             Put a while loop in this function. Make sure it abides asyncio protocol
         :param stop_fn: An external function to call after all streams have stopped
-        :param event_loop: If you have an external asyncio event loop, supply it here 
+        :param event_loop: If you have an external asyncio event loop, supply it here
         :param log_options: current log options: file_name, directory, write, log_level
             log_level: which types of log messages should be displayed? See python's logging module for details
         """
         self.streams = []
 
-        self.loop_fn = loop_fn
+        self.run_fn = run_fn
         self.setup_fn = setup_fn
         self.stop_fn = stop_fn
 
@@ -103,9 +103,12 @@ class Robot:
     def log_filter(self, record):
         return True
 
+    def is_running(self):
+        return DataStream.is_running()
+
     def run(self, *streams):
         """
-        After all streams are initialized, call robot.run and pass in the initialized streams 
+        After all streams are initialized, call robot.run and pass in the initialized streams
         :param streams: streams for this robot to run
         """
 
@@ -244,8 +247,8 @@ class Robot:
             stream.asyncio_loop = self.loop
 
         # add loop function as an asynchronous task
-        if self.loop_fn is not None:
-            tasks.append(self.loop_fn(self))
+        if self.run_fn is not None:
+            tasks.append(self.run_fn(self))
 
         # create coroutine. Make it available to all streams (just in case)
         coroutine = asyncio.gather(*tasks)

@@ -52,7 +52,9 @@ class DataStream:
         # services offered by this data stream. Every stream has the default service
         # adding services will allow you to post different kinds of content
         self.subscription_services = {
-            "default": self.default_post_service  # function pointer. By default no modifications are made to the post
+            # function pointer. By default no modifications are made to the post.
+            # None implies any type of message will be broadcast by the producer
+            "default": (self.default_post_service, None)
         }
         self.service_suppressed_warnings = {"default"}
 
@@ -160,14 +162,21 @@ class DataStream:
         pass
 
     def require_subscription(self, tag, subscription_class=None, stream_class=None, service_tag=None,
-                             required_attributes=None, required_methods=None, is_suggestion=False):
+                             required_attributes=None, required_methods=None, required_message_classes=None,
+                             is_suggestion=False):
         """
         Require that this stream be subscribed to another stream
         :param tag: What the subscription tag should be
         :param subscription_class: What type of subscription it should be (None for any)
         :param stream_class: What class the producer stream should be (None for any)
         :param service_tag: The service the producer stream should provide (None for "default")
-        :param required_attributes: What variables or methods the stream should have
+        :param required_attributes: What variables the stream should have.
+            Can be a tuple of strings or one string
+        :param required_methods: What methods the stream should have.
+            Can be a tuple of method pointers or a single method pointer
+        :param required_message_classes: What type of message the consumer should expect.
+            Can be tuple of classes or a single class type. Alternatively, you can put a string containing the name
+            of the class.
         :param is_suggestion: If True, this requirement will only be enforced if the stream actually subscribes.
             So there can be either no subscription or a subscription must abide by these requirements
         """
@@ -175,13 +184,19 @@ class DataStream:
             try:
                 iter(required_attributes)
             except TypeError:
-                required_attributes = tuple(required_attributes)
+                required_attributes = (required_attributes,)
 
         if required_methods is not None:
             try:
                 iter(required_methods)
             except TypeError:
-                required_methods = tuple(required_methods)
+                required_methods = (required_methods,)
+
+        if required_message_classes is not None:
+            try:
+                iter(required_message_classes)
+            except TypeError:
+                required_message_classes = (required_message_classes,)
 
         self.required_subscriptions[tag] = dict(
             subscription_class=subscription_class,
@@ -189,7 +204,8 @@ class DataStream:
             service_tag=service_tag,
             required_attributes=required_attributes,
             required_methods=required_methods,
-            is_suggestion=is_suggestion
+            is_suggestion=is_suggestion,
+            required_message_classes=required_message_classes
         )
 
     def adjust_requirement(self, tag, **properties):
@@ -219,12 +235,113 @@ class DataStream:
                 self.subscriptions[tag].producer_stream is not None and
                 self.subscriptions[tag].producer_stream.enabled)
 
+    def _check_subscription_tag(self, tag, is_suggestion):
+        if tag not in self.subscriptions:
+            # if subscription is a suggestion, don't check requirements if the subscription wasn't applied
+            if is_suggestion:
+                return None
+            else:
+                raise ValueError("Subscription tag '%s' not found in subscriptions for '%s'! "
+                                 "Supplied subscriptions: %s" % (tag, self.name, self.subscriptions))
+        return True
+
+    def _check_subscription_type(self, tag, subscription_class, message):
+        if subscription_class is not None and \
+                        tag in self.subscriptions and \
+                        type(self.subscriptions[tag]) != subscription_class:
+            # check if subscription classes match
+            message += "Subcription classes don't match! "
+            return False, message
+        else:
+            return True, message
+
+    def _check_expected_producer_class(self, producer_stream, stream_class, message):
+        if stream_class is not None and type(producer_stream) != stream_class:
+            # check if subscription is the correct type
+            message += "Stream classes don't match! "
+            return False, message
+        else:
+            return True, message
+
+    def _check_service_tags(self, tag, producer_stream, service_tag, message):
+        if service_tag is not None and service_tag not in producer_stream.subscription_services:
+            # check if the requested service is offered by the producer stream
+            message += "Service '%s' is not offered by producer stream '%s'! " % (
+                service_tag, producer_stream.name)
+            return False, message
+
+        if service_tag is not None and service_tag != self.subscriptions[tag].service:
+            message += "Subscribed to the wrong service! Found '%s', should be '%s'" % (
+                self.subscriptions[tag].service, service_tag)
+            return False, message
+
+        return True, message
+
+    def _check_producer_attributes(self, producer_stream, required_attributes, message):
+        if required_attributes is not None:
+            # check if the producer stream has the required attributes
+            missing_attributes = []
+            for attribute_name in required_attributes:
+                if not hasattr(producer_stream, attribute_name):
+                    missing_attributes.append(attribute_name)
+
+            if len(missing_attributes) > 0:
+                message += "%s doesn't have the required attributes: %s" % (
+                    producer_stream.name, missing_attributes)
+                return False, message
+        return True, message
+
+    def _check_producer_methods(self, producer_stream, required_methods, message):
+        if required_methods is not None:
+            missing_methods = []
+            for method_name in required_methods:
+                if not hasattr(producer_stream, method_name) or \
+                        not callable(getattr(producer_stream, method_name)):
+                    missing_methods.append(method_name)
+
+            if len(missing_methods) > 0:
+                message += "%s doesn't have the required methods: %s" % (
+                    producer_stream.name, missing_methods)
+                return False, message
+        return True, message
+
+    def _check_subscription_messages(self, producer_stream, required_message_classes, message):
+        satisfied = True
+        if required_message_classes is not None:
+            for service_tag, (service_fn, message_class) in producer_stream.subscription_services.items():
+                if message_class is None:
+                    continue
+
+                for required_message_class in required_message_classes:
+                    if type(required_message_class) == str:
+                        if message_class.__name__ != required_message_class:
+                            satisfied = False
+                    else:
+                        if message_class != required_message_class:
+                            satisfied = False
+
+                    if not satisfied:
+                        if type(required_message_class) == type:
+                            required_message_class_str = required_message_class.__name__
+                        else:
+                            required_message_class_str = required_message_class
+
+                        message += \
+                            "Consumer '%s' expects a message of type named '%s' from producer '%s' " \
+                            "for the service '%s'. %s broadcasts the message type '%s' for the service '%s'" % (
+                                self.name, required_message_class_str, producer_stream.name, service_tag,
+                                producer_stream.name, message_class.__name__, service_tag
+                            )
+                        break
+                if not satisfied:
+                    break
+        return satisfied, message
+
     def _check_subscriptions(self):
         """Check if all required subscriptions have been satisfied"""
         self.logger.debug("Checking subscriptions")
 
         for tag, subscr_props in self.required_subscriptions.items():
-            satisfied = True
             message = ""
 
             subscription_class = subscr_props["subscription_class"]
@@ -233,65 +350,39 @@ class DataStream:
             required_methods = subscr_props["required_methods"]
             required_attributes = subscr_props["required_attributes"]
             is_suggestion = subscr_props["is_suggestion"]
+            required_message_classes = subscr_props["required_message_classes"]
 
-            if tag not in self.subscriptions:
-                # if subscription is a suggestion, don't check requirements if the subscription wasn't applied
-                if is_suggestion:
-                    continue
-                else:
-                    raise ValueError("Subscription tag '%s' not found in subscriptions for '%s'! "
-                                     "Supplied subscriptions: %s" % (tag, self.name, self.subscriptions))
+            result = self._check_subscription_tag(tag, is_suggestion)
+            if result is None:
+                continue
 
-            if subscription_class is not None and \
-                            tag in self.subscriptions and \
-                            type(self.subscriptions[tag]) != subscription_class:
-                # check if subscription classes match
-                message += "Subcription classes don't match! "
-                satisfied = False
-
+            subscription_types_match, message = \
+                self._check_subscription_type(tag, subscription_class, message)
             producer_stream = self.subscriptions[tag].producer_stream
 
-            if stream_class is not None and type(producer_stream) != stream_class:
-                # check if subscription is the correct type
-                message += "Stream classes don't match! "
-                satisfied = False
+            producer_class_matches, message = \
+                self._check_expected_producer_class(producer_stream, stream_class, message)
+            service_tags_match, message = \
+                self._check_service_tags(tag, producer_stream, service_tag, message)
 
-            if service_tag is not None and service_tag not in producer_stream.subscription_services:
-                # check if the requested service is offered by the producer stream
-                message += "Service '%s' is not offered by producer stream '%s'! " % (
-                    service_tag, producer_stream.name)
-                satisfied = False
+            producer_attibutes_match, message = \
+                self._check_producer_attributes(producer_stream, required_attributes, message)
 
-            if service_tag is not None and service_tag != self.subscriptions[tag].service:
-                message += "Subscribed to the wrong service! Found '%s', should be '%s'" % (
-                    self.subscriptions[tag].service, service_tag)
-                satisfied = False
+            producer_methods_match, message = \
+                self._check_producer_methods(producer_stream, required_attributes, message)
 
-            if required_attributes is not None:
-                # check if the producer stream has the required attributes
-                missing_attributes = []
-                for attribute_name in required_attributes:
-                    if not hasattr(producer_stream, attribute_name):
-                        missing_attributes.append(attribute_name)
-
-                if len(missing_attributes) > 0:
-                    message += "%s doesn't have the required attributes: %s" % (
-                        producer_stream.name, missing_attributes)
-                    satisfied = False
-
-            if required_methods is not None:
-                missing_methods = []
-                for method_name in required_methods:
-                    if not hasattr(producer_stream, method_name) or \
-                            not callable(getattr(producer_stream, method_name)):
-                        missing_methods.append(method_name)
-
-                if len(missing_methods) > 0:
-                    message += "%s doesn't have the required methods: %s" % (
-                        producer_stream.name, missing_methods)
-                    satisfied = False
+            messages_match, message = \
+                self._check_subscription_messages(producer_stream, required_message_classes, message)
 
             # throw an error if any of the above requirements failed
+            satisfied = (
+                subscription_types_match and
+                producer_class_matches and
+                producer_attibutes_match and
+                producer_methods_match and
+                messages_match
+            )
+
             if not satisfied:
                 if subscription_class is not None or stream_class is not None:
                     if subscription_class is None:
@@ -353,7 +444,12 @@ class DataStream:
             for subscription in self.subscribers[service]:
                 if subscription.enabled:
                     assert service == subscription.service
-                    post_fn = self.subscription_services[service]
+                    post_fn, message_class = self.subscription_services[service]
+
+                    if message_class != type(data):
+                        raise ValueError("posted data of type '%s' does not match type '%s'" % (
+                            type(data), message_class))
+
                     yield from subscription.async_post(post_fn(data), **kwargs)
         yield from asyncio.sleep(0.0)
 
@@ -368,7 +464,7 @@ class DataStream:
             for subscription in self.subscribers[service]:
                 if subscription.enabled:
                     assert service == subscription.service
-                    post_fn = self.subscription_services[service]
+                    post_fn, message_class = self.subscription_services[service]
                     subscription.sync_post(post_fn(data), **kwargs)
 
     def default_post_service(self, data):
@@ -381,7 +477,7 @@ class DataStream:
         """
         return data
 
-    def add_service(self, service_tag, post_fn=None, suppress_unused_warning=False):
+    def add_service(self, service_tag, post_fn=None, message_class=None, suppress_unused_warning=False):
         """
         Call this method in the stream's constructor to add a new service.
         :param service_tag: The name of this service
@@ -389,19 +485,31 @@ class DataStream:
             You should supply an alternate post function if you're posting lists or dictionaries (references to objects)
             For those situations call .copy() on the data before returning it
             Don't call self.post inside that method
+        :param message_class: The class type of messages being 
+        :param suppress_unused_warning: If this service isn't used by any consumers, don't print a warning
         """
         if post_fn is None:
             post_fn = self.default_post_service
-        assert callable(post_fn)
-        self.subscription_services[service_tag] = post_fn
+        assert callable(post_fn), "post_fn isn't a function pointer!! '%s'" % post_fn
+        assert type(message_class) == type, "message_class isn't a type!! '%s'" % message_class
+
+        self.subscription_services[service_tag] = (post_fn, message_class)
         if suppress_unused_warning:
             self.service_suppressed_warnings.add(service_tag)
 
-    def adjust_service(self, service_tag, post_fn=None, suppress_unused_warning=False):
-        if post_fn is None:
-            post_fn = self.default_post_service
-        assert callable(post_fn)
-        self.subscription_services[service_tag] = post_fn
+    def adjust_service(self, service_tag, post_fn=None, message_class=None, suppress_unused_warning=False):
+        old_post_fn, old_message_class = self.subscription_services[service_tag]
+        if post_fn is not None:
+            assert callable(post_fn), "post_fn isn't a function pointer!! '%s'" % post_fn
+        else:
+            post_fn = old_post_fn
+
+        if message_class is not None:
+            assert type(message_class) == type, "message_class isn't a type!! '%s'" % message_class
+        else:
+            message_class = old_message_class
+
+        self.subscription_services[service_tag] = (post_fn, message_class)
 
         if not suppress_unused_warning:
             self.service_suppressed_warnings.remove(service_tag)
