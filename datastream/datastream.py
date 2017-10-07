@@ -465,6 +465,11 @@ class DataStream:
                 if subscription.enabled:
                     assert service == subscription.service
                     post_fn, message_class = self.subscription_services[service]
+
+                    if message_class != type(data):
+                        raise ValueError("posted data of type '%s' does not match type '%s'" % (
+                            type(data), message_class))
+
                     subscription.sync_post(post_fn(data), **kwargs)
 
     def default_post_service(self, data):
