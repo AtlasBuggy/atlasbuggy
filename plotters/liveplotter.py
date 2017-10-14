@@ -90,7 +90,7 @@ class LivePlotter(BasePlotter, AsyncStream):
         self.add_subplots(*robot_plots, num_columns=num_columns)
         for plot in self.robot_plots:
             self._create_lines(plot)
-    
+
     @asyncio.coroutine
     def run(self):
         """
@@ -110,6 +110,15 @@ class LivePlotter(BasePlotter, AsyncStream):
                 self.plt.pause(LivePlotter.pause_time)
                 yield from asyncio.sleep(LivePlotter.pause_time * 10)
                 continue
+
+            if self.plot_skip_count != 0:
+                self.skip_counter += 1
+                if self.skip_counter % self.plot_skip_count != 0:
+                    yield from asyncio.sleep(LivePlotter.pause_time)
+                    continue
+                else:
+                    self.skip_counter = 0
+                    self.logger.info("skip enabled (every %s). Drawing this frame" % self.plot_skip_count)
 
             yield from self.update()
 
@@ -153,7 +162,7 @@ class LivePlotter(BasePlotter, AsyncStream):
                                 self.axes[plot.name].set_zlim3d(plot.z_range)
             if plots_updated:
                 self.has_updated = True
-            
+
             if self.has_updated:
                 try:
                     self.fig.canvas.draw()
@@ -165,9 +174,8 @@ class LivePlotter(BasePlotter, AsyncStream):
                     raise
 
                 self.has_updated = False
-                
-            yield from asyncio.sleep(LivePlotter.pause_time)
 
+            yield from asyncio.sleep(LivePlotter.pause_time)
 
     def pause(self):
         self.is_paused = True

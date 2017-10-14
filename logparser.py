@@ -137,7 +137,7 @@ class LogParser(AsyncStream):
             self.line_info["millisecond"])
 
         # make timestamp from unix epoch
-        self.line_info["timestamp"] = time.mktime(current_date.timetuple()) + current_date.microsecond / 1e6
+        self.line_info["timestamp"] = time.mktime(current_date.timetuple()) + current_date.microsecond / 1e3
 
         # convert string to logging integer code
         self.line_info["loglevel"] = logging.getLevelName(self.line_info["loglevelstr"])

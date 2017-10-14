@@ -8,6 +8,7 @@ from ..subscriptions import Subscription
 class DataStream:
     _exited = Event()  # signal to exit
     _log_info = {}  # information about the logger
+    initialized_stream_names = set()
 
     def __init__(self, enabled=True, log_level=None, name=None):
         """
@@ -27,6 +28,9 @@ class DataStream:
         self.enabled = enabled
 
         self.asyncio_loop = None  # asyncio event loop. Assigned by Robot
+
+        # note that this stream has been initialized (for checking if streams were actually passed to robot)
+        DataStream.initialized_stream_names.add(self.name)
 
         self._timestamp = None  # current time since epoch
         self.start_time = None  # stream start time. Can be set externally
@@ -222,6 +226,12 @@ class DataStream:
         """Remove a subscription requirement"""
         del self.required_subscriptions[tag]
 
+    def get_feed(self, tag):
+        return self.subscriptions[tag].get_feed()
+
+    def get_stream(self, tag):
+        return self.subscriptions[tag].get_stream()
+
     def is_subscribed(self, tag):
         """
         Check if this stream is subscribed to subscription that matches the tag.
@@ -305,7 +315,7 @@ class DataStream:
                 return False, message
         return True, message
 
-    def _check_subscription_messages(self, producer_stream, required_message_classes, message):
+    def _check_subscription_messages(self, producer_stream, required_tag, required_message_classes, message):
         satisfied = True
         if required_message_classes is not None:
             for service_tag, (service_fn, message_class) in producer_stream.subscription_services.items():
@@ -313,12 +323,13 @@ class DataStream:
                     continue
 
                 for required_message_class in required_message_classes:
-                    if type(required_message_class) == str:
-                        if message_class.__name__ != required_message_class:
-                            satisfied = False
-                    else:
-                        if message_class != required_message_class:
-                            satisfied = False
+                    if required_tag == service_tag:
+                        if type(required_message_class) == str:
+                            if message_class.__name__ != required_message_class:
+                                satisfied = False
+                        else:
+                            if message_class != required_message_class:
+                                satisfied = False
 
                     if not satisfied:
                         if type(required_message_class) == type:
@@ -369,10 +380,10 @@ class DataStream:
                 self._check_producer_attributes(producer_stream, required_attributes, message)
 
             producer_methods_match, message = \
-                self._check_producer_methods(producer_stream, required_attributes, message)
+                self._check_producer_methods(producer_stream, required_methods, message)
 
             messages_match, message = \
-                self._check_subscription_messages(producer_stream, required_message_classes, message)
+                self._check_subscription_messages(producer_stream, service_tag, required_message_classes, message)
 
             # throw an error if any of the above requirements failed
             satisfied = (
@@ -395,9 +406,16 @@ class DataStream:
                     else:
                         stream_class_requirement = stream_class.__name__
 
+                    if len(required_message_classes) == 1:
+                        required_message_classes_str = required_message_classes[0]
+                    else:
+                        required_message_classes_str = str(required_message_classes)
                     message += "\n%s requires the following subscription:\n" \
-                               "\tsubscription type: '%s'\n\ttag: '%s'\n\tproducer class: '%s'\n\tservice tag: '%s'" % (
-                                   self.name, subscription_class_requirement, tag, stream_class_requirement, service_tag
+                               "\tsubscription type: '%s'\n\ttag: '%s'\n\tproducer class: '%s'\n\tservice tag: '%s'\n" \
+                               "\tmessage type: '%s'" % (
+                                   self.name, subscription_class_requirement, tag,
+                                   stream_class_requirement, service_tag,
+                                   required_message_classes_str
                                )
 
                 raise ValueError("Required subscription not found! " + message)
@@ -446,7 +464,7 @@ class DataStream:
                     assert service == subscription.service
                     post_fn, message_class = self.subscription_services[service]
 
-                    if message_class != type(data):
+                    if message_class is not None and message_class != type(data):
                         raise ValueError("posted data of type '%s' does not match type '%s'" % (
                             type(data), message_class))
 
@@ -466,7 +484,7 @@ class DataStream:
                     assert service == subscription.service
                     post_fn, message_class = self.subscription_services[service]
 
-                    if message_class != type(data):
+                    if message_class is not None and message_class != type(data):
                         raise ValueError("posted data of type '%s' does not match type '%s'" % (
                             type(data), message_class))
 
@@ -496,13 +514,13 @@ class DataStream:
         if post_fn is None:
             post_fn = self.default_post_service
         assert callable(post_fn), "post_fn isn't a function pointer!! '%s'" % post_fn
-        assert type(message_class) == type, "message_class isn't a type!! '%s'" % message_class
+        assert type(message_class) == type or message_class is None, "message_class isn't a type!! '%s'" % message_class
 
         self.subscription_services[service_tag] = (post_fn, message_class)
         if suppress_unused_warning:
             self.service_suppressed_warnings.add(service_tag)
 
-    def adjust_service(self, service_tag, post_fn=None, message_class=None, suppress_unused_warning=False):
+    def adjust_service(self, service_tag="default", post_fn=None, message_class=None, suppress_unused_warning=False):
         old_post_fn, old_message_class = self.subscription_services[service_tag]
         if post_fn is not None:
             assert callable(post_fn), "post_fn isn't a function pointer!! '%s'" % post_fn

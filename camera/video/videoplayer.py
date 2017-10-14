@@ -11,7 +11,7 @@ class VideoPlayer(ThreadedStream):
     loaded_videos = {}
 
     def __init__(self, enabled=True, log_level=None, post_while_paused=False, **load_video_args):
-        super(VideoPlayer, self).__init__(enabled, None, log_level)
+        super(VideoPlayer, self).__init__(enabled, log_level)
 
         self.capture = None
         self.width = None

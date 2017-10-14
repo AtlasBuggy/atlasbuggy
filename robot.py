@@ -36,6 +36,7 @@ class Robot:
             self.loop = event_loop
         self.coroutine = None
         self.thread_streams = []
+        self.running_stream_names = set()
 
         # initialize the shared logger with this class' name
         self.logger = logging.getLogger(self.__class__.__name__)
@@ -116,8 +117,12 @@ class Robot:
         for stream in streams:
             if stream.enabled:
                 self.streams.append(stream)
+                self.running_stream_names.add(stream.name)
 
         self.logger.debug("Active streams: %s" % str(self.streams))
+        if len(DataStream.initialized_stream_names - self.running_stream_names) > 0:
+            message = str(tuple(DataStream.initialized_stream_names - self.running_stream_names))[1:-1]
+            self.logger.info("Not all initialized streams were added to Robot: %s" % message)
 
         try:
             if len(self.streams) > 0:
