@@ -98,20 +98,17 @@ ehthumbs.db
 Thumbs.db
 
 
+# large files #
+###############
+*.mp4
+*.avi
+
 
 # Directories #
 ###############
 .idea/
 .pioenvs/
 .sconsign.dblite/
-Images
-Images/
-Videos
-Videos/
-videos
-videos/
-images
-images/
 
 # Xcode Project Files #
 #######################
