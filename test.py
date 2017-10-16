@@ -12,20 +12,74 @@ class BasicOrchestrator(Orchestrator):
     async def loop(self):
         counter = 0
         while True:
-            print("counter:", counter)
+            self.logger.info("counter: %s" % counter)
             await asyncio.sleep(1.0)
             counter += 1
 
 
-class TestNode(Node):
+class BasicNode(Node):
     def __init__(self):
-        super(TestNode, self).__init__()
+        super(BasicNode, self).__init__()
 
     async def loop(self):
         counter = 0
         while True:
-            print("node counter:", counter)
+            self.logger.info("node counter: %s" % counter)
             await asyncio.sleep(1.0)
+            counter += 1
+
+
+class TestNode1(Node):
+    def __init__(self):
+        super(TestNode1, self).__init__()
+
+    async def loop(self):
+        counter = 0
+        while True:
+            self.logger.info("node counter: %s" % counter)
+            await asyncio.sleep(1.0)
+            counter += 1
+
+
+class TestNode2(Node):
+    def __init__(self):
+        super(TestNode2, self).__init__()
+
+    async def loop(self):
+        counter = 0
+        while True:
+            self.logger.info("node counter: %s" % counter)
+            await asyncio.sleep(0.5)
+            counter += 2
+
+
+class TestNode3(Node):
+    def __init__(self):
+        super(TestNode3, self).__init__()
+
+    async def loop(self):
+        counter = 0
+        while True:
+            self.logger.info("node counter: %s" % counter)
+            await asyncio.sleep(0.25)
+            counter += 4
+
+
+class MultiNodeOrchestrator(Orchestrator):
+    def __init__(self, event_loop):
+        super(MultiNodeOrchestrator, self).__init__(event_loop)
+
+        self.node1 = TestNode1()
+        self.node2 = TestNode2()
+        self.node3 = TestNode3()
+
+        self.add_nodes(self.node1, self.node2, self.node3)
+
+    async def loop(self):
+        counter = 0
+        while True:
+            self.logger.info("orchestrator counter: %s" % counter)
+            await asyncio.sleep(2.0)
             counter += 1
 
 
@@ -36,6 +90,7 @@ async def delayed_stop(seconds):
 
 class TestOrchestrator(unittest.TestCase):
     def test_nodeless_shutdown(self):
+        asyncio.set_event_loop(asyncio.new_event_loop())
         loop = asyncio.get_event_loop()
         orchestrator = BasicOrchestrator(loop)
 
@@ -44,11 +99,16 @@ class TestOrchestrator(unittest.TestCase):
             loop.run_until_complete(orchestrator.run())
         except KeyboardInterrupt:
             print("Interrupted")
+        finally:
+            loop.run_until_complete(orchestrator.teardown())
+
+        loop.close()
 
     def test_standard_shutdown(self):
+        asyncio.set_event_loop(asyncio.new_event_loop())
         loop = asyncio.get_event_loop()
         orchestrator = BasicOrchestrator(loop)
-        test_node = TestNode()
+        test_node = BasicNode()
 
         asyncio.ensure_future(delayed_stop(2))
         orchestrator.add_nodes(test_node)
@@ -57,6 +117,25 @@ class TestOrchestrator(unittest.TestCase):
             loop.run_until_complete(orchestrator.run())
         except KeyboardInterrupt:
             print("Interrupted")
+        finally:
+            loop.run_until_complete(orchestrator.teardown())
+
+        loop.close()
+
+    def test_multinode_shutdown(self):
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        loop = asyncio.get_event_loop()
+        orchestrator = MultiNodeOrchestrator(loop)
+        asyncio.ensure_future(delayed_stop(4))
+
+        try:
+            loop.run_until_complete(orchestrator.run())
+        except KeyboardInterrupt:
+            print("Interrupted")
+        finally:
+            loop.run_until_complete(orchestrator.teardown())
+
+        # loop.close()
 
 
 if __name__ == '__main__':
