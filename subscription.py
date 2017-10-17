@@ -13,6 +13,13 @@ class Subscription:
             queue_size = 0
         self.queue_size = queue_size
         self.queue = None
+        self.message_converter = None
+        self.is_required = True
+
+    def check_subscription(self):
+        if self.is_required:
+            if self.producer_node is None or self.consumer_node is None:
+                raise ValueError("Subscription not applied!! Please call subscribe() in your orchestrator class")
 
     def set_event_loop(self, event_loop):
         self.queue = asyncio.Queue(self.queue_size, loop=event_loop)
@@ -22,7 +29,9 @@ class Subscription:
         yield from self.queue.put(message)
 
     def get_queue(self):
+        self.check_subscription()
         return self.queue
 
     def get_producer(self):
+        self.check_subscription()
         return self.producer_node

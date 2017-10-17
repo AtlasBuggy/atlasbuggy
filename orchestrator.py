@@ -98,16 +98,25 @@ class Orchestrator:
             if task.cancelled():
                 self.logger.debug("Task '%s' was cancelled" % task)
             elif task.done() and task.exception() is not None:
+                self.logger.error(task.exception())
                 raise task.exception()
 
     # ----- subscription methods -----
 
-    def subscribe(self, producer, consumer, service="default"):
+    def subscribe(self, producer, consumer, service="default", message_converter=None):
         """Define a producer-consumer relationship between two nodes. """
+
+        if not producer.enabled:
+            self.logger.info("Producer '%s' isn't enabled! Ignoring consumer '%s' subscription" % (producer, consumer))
+            return
+        if not consumer.enabled:
+            self.logger.info("Consumer '%s' isn't enabled! Ignoring subscription to producer '%s'" % (consumer, producer))
+            return
+
         if producer not in self.nodes:
-            raise RuntimeError("Producer node wasn't added!! Call self.add_nodes(producer_instance)")
+            raise RuntimeError("Producer node wasn't added!! Call add_nodes(producer_instance) in orchestrator")
         if consumer not in self.nodes:
-            raise RuntimeError("Consumer node wasn't added!! Call self.add_nodes(consumer_instance)")
+            raise RuntimeError("Consumer node wasn't added!! Call add_nodes(consumer_instance) in orchestrator")
 
         if not isinstance(producer, Node):
             raise ValueError("Producer (of type '%s') is not of type Node" % str(type(producer)))
@@ -128,11 +137,17 @@ class Orchestrator:
         if matched_subscription is None:
             raise ValueError("No matching subscriptions found between '%s' and '%s'" % (producer, consumer))
 
+        if message_converter is not None and not callable(message_converter):
+            raise ValueError("Supplied message converter isn't a function!!")
+
         matched_subscription.producer_node = producer
         matched_subscription.consumer_node = consumer
         matched_subscription.set_event_loop(self.event_loop)
+        matched_subscription.message_converter = message_converter
         producer.append_subscription(matched_subscription)
 
+    def __str__(self):
+        return self.name
 
 def run_orchestrator(OrchestratorClass):
     loop = asyncio.get_event_loop()
