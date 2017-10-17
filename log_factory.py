@@ -3,7 +3,7 @@ import time
 import logging
 
 
-def make_logger(name, level, log_format=None, write=True, file_name=None, directory=None, custom_fields_fn=None):
+def make_logger(name, level, write=False, log_format=None, file_name=None, directory=None, custom_fields_fn=None):
     logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
 
