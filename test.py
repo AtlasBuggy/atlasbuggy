@@ -82,6 +82,11 @@ class MultiNodeOrchestrator(Orchestrator):
             await asyncio.sleep(2.0)
             counter += 1
 
+            if counter > 3:
+                self.logger.info("counter = 4. Shutting down")
+                self.halt()
+                return
+
 
 async def delayed_stop(seconds):
     await asyncio.sleep(seconds)
@@ -90,6 +95,7 @@ async def delayed_stop(seconds):
 
 class TestOrchestrator(unittest.TestCase):
     def test_nodeless_shutdown(self):
+        print("\n----- test_nodeless_shutdown -----")
         asyncio.set_event_loop(asyncio.new_event_loop())
         loop = asyncio.get_event_loop()
         orchestrator = BasicOrchestrator(loop)
@@ -100,11 +106,12 @@ class TestOrchestrator(unittest.TestCase):
         except KeyboardInterrupt:
             print("Interrupted")
         finally:
-            loop.run_until_complete(orchestrator.teardown())
+            loop.run_until_complete(orchestrator.halt())
 
         loop.close()
 
     def test_standard_shutdown(self):
+        print("\n----- test_standard_shutdown -----")
         asyncio.set_event_loop(asyncio.new_event_loop())
         loop = asyncio.get_event_loop()
         orchestrator = BasicOrchestrator(loop)
@@ -118,24 +125,25 @@ class TestOrchestrator(unittest.TestCase):
         except KeyboardInterrupt:
             print("Interrupted")
         finally:
-            loop.run_until_complete(orchestrator.teardown())
+            loop.run_until_complete(orchestrator.halt())
 
         loop.close()
 
-    def test_multinode_shutdown(self):
+    def test_multinode_controlled_stop(self):
+        print("\n----- test_multinode_controlled_stop -----")
+
         asyncio.set_event_loop(asyncio.new_event_loop())
         loop = asyncio.get_event_loop()
         orchestrator = MultiNodeOrchestrator(loop)
-        asyncio.ensure_future(delayed_stop(4))
 
         try:
             loop.run_until_complete(orchestrator.run())
         except KeyboardInterrupt:
             print("Interrupted")
         finally:
-            loop.run_until_complete(orchestrator.teardown())
+            loop.run_until_complete(orchestrator.halt())
 
-        # loop.close()
+        loop.close()
 
 
 if __name__ == '__main__':

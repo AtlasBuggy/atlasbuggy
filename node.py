@@ -12,15 +12,12 @@ class Node:
 
     @asyncio.coroutine
     def setup(self):
-        yield from asyncio.sleep(0.0)
         self.logger.info("setup")
 
     @asyncio.coroutine
     def loop(self):
-        yield from asyncio.sleep(0.0)
         self.logger.info("loop")
 
     @asyncio.coroutine
     def teardown(self):
-        yield from asyncio.sleep(0.0)
         self.logger.info("teardown")

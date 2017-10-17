@@ -13,6 +13,7 @@ class Orchestrator:
 
         self.nodes = []
         self.loop_tasks = []
+        self.halt_called = False
 
         self.event_loop.add_signal_handler(signal.SIGINT, self._stop_callback, self.event_loop)
 
@@ -30,13 +31,22 @@ class Orchestrator:
     def loop(self):
         self.logger.info("loop")
 
+    @asyncio.coroutine
     def teardown(self):
         self.logger.info("teardown")
+
+    def halt(self):
+        if self.halt_called:
+            self.logger.info("already halted")
+            return
+
+        self.halt_called = True
+        self.logger.info("halting")
         self._stop_callback(self.event_loop)
         if len(self.nodes) > 0:
-            teardown_tasks = []
+            teardown_tasks = [asyncio.ensure_future(self.teardown())]
             for node in self.nodes:
-                teardown_tasks.append(asyncio.async(node.teardown()))
+                teardown_tasks.append(asyncio.ensure_future(node.teardown()))
 
             return asyncio.wait(teardown_tasks)
         else:
@@ -44,14 +54,15 @@ class Orchestrator:
 
     def run(self):
         """First call each node's startup task then return the collected node coroutines to run indefinitely"""
-        setup_tasks = [asyncio.async(self.setup())]
+        setup_tasks = [asyncio.ensure_future(self.setup())]
+        self.halt_called = False
         for node in self.nodes:
-            setup_tasks.append(asyncio.async(node.setup()))
+            setup_tasks.append(asyncio.ensure_future(node.setup()))
         self.event_loop.run_until_complete(asyncio.wait(setup_tasks))
 
-        self.loop_tasks.append(asyncio.async(self.loop()))
+        self.loop_tasks.append(asyncio.ensure_future(self.loop()))
         for node in self.nodes:
-            setup_tasks.append(asyncio.async(node.loop()))
+            self.loop_tasks.append(asyncio.ensure_future(node.loop()))
 
         return asyncio.wait(self.loop_tasks, return_when=asyncio.FIRST_COMPLETED)
 
@@ -59,25 +70,3 @@ class Orchestrator:
         for task in self.loop_tasks:
             result = task.cancel()
             self.logger.info("Cancelling %s: %s" % (task, result))
-
-
-if __name__ == '__main__':
-    async def delayed_stop(seconds):
-        await asyncio.sleep(seconds)
-        raise KeyboardInterrupt
-
-
-    def test():
-        loop = asyncio.get_event_loop()
-        orchestrator = Orchestrator(loop)
-        asyncio.ensure_future(delayed_stop(4))
-
-        try:
-            loop.run_until_complete(orchestrator.run())
-        except KeyboardInterrupt:
-            print("Interrupted")
-        finally:
-            loop.run_until_complete(orchestrator.teardown())
-
-
-    test()
