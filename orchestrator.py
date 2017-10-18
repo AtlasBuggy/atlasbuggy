@@ -1,9 +1,10 @@
+import os
 import signal
 import logging
 import asyncio
 
-from log_factory import make_logger
-from node import Node
+from log.factory import make_logger
+from log.default import default_settings
 
 
 class Orchestrator:
@@ -11,7 +12,7 @@ class Orchestrator:
         self.event_loop = event_loop
         self.name = self.__class__.__name__
         if logger is None:
-            self.logger = make_logger(self.name, logging.INFO)
+            self.logger = make_logger(self.name, default_settings)
         else:
             self.logger = logger
 
@@ -21,9 +22,12 @@ class Orchestrator:
 
         self.event_loop.add_signal_handler(signal.SIGINT, self.cancel_loop_tasks, self.event_loop)
 
-    def make_logger(self, level=logging.INFO, write=False, log_format=None, file_name=None, directory=None,
-                    custom_fields_fn=None):
-        return make_logger(self.__class__.__name__, level, write, log_format, file_name, directory, custom_fields_fn)
+    @staticmethod
+    def set_default(**kwargs):
+        default_settings.update(kwargs)
+
+    def make_logger(self, *args, **kwargs):
+        return make_logger(self.__class__.__name__, default_settings, *args, **kwargs)
 
     def add_nodes(self, *nodes):
         """Add the tasks associated with each node to the event loop"""
@@ -110,18 +114,14 @@ class Orchestrator:
             self.logger.info("Producer '%s' isn't enabled! Ignoring consumer '%s' subscription" % (producer, consumer))
             return
         if not consumer.enabled:
-            self.logger.info("Consumer '%s' isn't enabled! Ignoring subscription to producer '%s'" % (consumer, producer))
+            self.logger.info(
+                "Consumer '%s' isn't enabled! Ignoring subscription to producer '%s'" % (consumer, producer))
             return
 
         if producer not in self.nodes:
             raise RuntimeError("Producer node wasn't added!! Call add_nodes(producer_instance) in orchestrator")
         if consumer not in self.nodes:
             raise RuntimeError("Consumer node wasn't added!! Call add_nodes(consumer_instance) in orchestrator")
-
-        if not isinstance(producer, Node):
-            raise ValueError("Producer (of type '%s') is not of type Node" % str(type(producer)))
-        if not isinstance(consumer, Node):
-            raise ValueError("Consumer (of type '%s') is not of type Node" % str(type(consumer)))
 
         matched_subscription = None
 
@@ -130,7 +130,6 @@ class Orchestrator:
             if service == subscription.requested_service:
                 if subscription.expected_producer_class is None or \
                         isinstance(producer, subscription.expected_producer_class):
-
                     matched_subscription = subscription
                     break
 
@@ -149,7 +148,9 @@ class Orchestrator:
     def __str__(self):
         return self.name
 
+
 def run_orchestrator(OrchestratorClass):
+    asyncio.set_event_loop(asyncio.new_event_loop())
     loop = asyncio.get_event_loop()
     orchestrator = OrchestratorClass(loop)
 
@@ -161,3 +162,4 @@ def run_orchestrator(OrchestratorClass):
     finally:
         orchestrator.logger.info("halting")
         loop.run_until_complete(orchestrator.halt())
+        loop.close()

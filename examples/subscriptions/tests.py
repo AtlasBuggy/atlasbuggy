@@ -1,3 +1,5 @@
+import unittest
+
 import time
 import asyncio
 from atlasbuggy import Orchestrator, Node, run_orchestrator
@@ -46,11 +48,34 @@ class MyOrchestrator(Orchestrator):
     def __init__(self, event_loop):
         super(MyOrchestrator, self).__init__(event_loop)
 
-        producer = ProducerNode()
-        consumer = ConsumerNode()
-
-        self.add_nodes(producer, consumer)
-        self.subscribe(producer, consumer)
+        self.producer = ProducerNode()
+        self.consumer = ConsumerNode()
 
 
-run_orchestrator(MyOrchestrator)
+class TestSubscriptions(unittest.TestCase):
+    def test_self_subscription(self):
+        print("test_self_subscription")
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        loop = asyncio.get_event_loop()
+        orchestrator = MyOrchestrator(loop)
+
+        orchestrator.add_nodes(orchestrator.producer, orchestrator.consumer)
+        try:
+            orchestrator.subscribe(orchestrator.producer, orchestrator.producer)
+        except ValueError:
+            print("made it!")
+
+    def test_no_nodes_added(self):
+        print("no_nodes_added")
+        asyncio.set_event_loop(asyncio.new_event_loop())
+        loop = asyncio.get_event_loop()
+        orchestrator = MyOrchestrator(loop)
+
+        try:
+            orchestrator.subscribe(orchestrator.producer, orchestrator.producer)
+        except RuntimeError:
+            print("made it!")
+
+
+if __name__ == '__main__':
+    unittest.main()

@@ -11,7 +11,8 @@ class ProducerNode(Node):
         while True:
             self.logger.info("loop: broadcasting time")
             producer_time = time.time()
-            await self.broadcast(producer_time)
+            self.broadcast_nowait((1, producer_time))
+            self.broadcast_nowait((2, producer_time))
             await asyncio.sleep(0.5)
             self.logger.info("producer time: %s" % producer_time)
 
@@ -20,7 +21,7 @@ class ConsumerNode(Node):
     def __init__(self, enabled=True):
         super(ConsumerNode, self).__init__(enabled)
 
-        self.producer_sub = self.define_subscription()
+        self.producer_sub = self.define_subscription(queue_size=1)
         self.producer_queue = None
         self.producer = None
 
@@ -33,13 +34,13 @@ class ConsumerNode(Node):
     async def loop(self):
         while True:
             self.logger.info("loop: getting time")
-            producer_time = await self.producer_queue.get()
+            index, producer_time = await self.producer_queue.get()
             consumer_time = time.time()
 
-            self.logger.info("producer time: %s, consumer time: %s, qsize: %s" % (
-                producer_time, consumer_time, self.producer_queue.qsize()))
+            self.logger.info("index: %s (len=%s), producer time: %s, consumer time: %s" % (
+                index, self.producer_queue.qsize(), producer_time, consumer_time))
             self.logger.info("time diff: %s" % (consumer_time - producer_time))
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(1.0)
 
 
 class MyOrchestrator(Orchestrator):

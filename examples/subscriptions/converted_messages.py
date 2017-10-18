@@ -1,3 +1,4 @@
+import os
 import time
 import random
 import asyncio
@@ -12,12 +13,18 @@ class ProducerMessage:
         self.y = y
         self.z = z
 
+    def __str__(self):
+        return "ProducerMessage(t=%s, x=%s, y=%s, z=%s)" % (self.timestamp, self.x, self.y, self.z)
+
 
 class ConsumerMessage:
     def __init__(self, timestamp, a=0.0, b=0.0):
         self.timestamp = timestamp
         self.a = a
         self.b = b
+
+    def __str__(self):
+        return "ConsumerMessage(t=%s, a=%s, b=%s)" % (self.timestamp, self.a, self.b)
 
 
 class ImmutableProducer(Node):
@@ -27,19 +34,19 @@ class ImmutableProducer(Node):
     async def loop(self):
         while True:
             producer_time = time.time()
-
-            await self.broadcast(ProducerMessage(
+            message = ProducerMessage(
                 producer_time,
                 random.random(), random.random(), random.random()
-            ))
+            )
+            await self.broadcast(message)
 
             await asyncio.sleep(0.5)
-            self.logger.info("producer time: %s" % producer_time)
+            self.logger.info("sending: %s" % message)
 
 
 class ImmutableConsumer(Node):
     def __init__(self, enabled=True):
-        super(ImmutableConsumer, self).__init__(enabled, self.make_logger(write=False))
+        super(ImmutableConsumer, self).__init__(enabled)
 
         self.producer_sub = self.define_subscription(message_type=ConsumerMessage)
         self.producer_queue = None
@@ -57,22 +64,23 @@ class ImmutableConsumer(Node):
             consumer_time = time.time()
 
             self.logger.info("time diff: %s" % (consumer_time - message.timestamp))
-            self.logger.info("a: %0.4f, b: %0.4f" % (message.a, message.b))
+            self.logger.info("receiving: %s" % message)
             await asyncio.sleep(0.5)
-
 
 
 class MyOrchestrator(Orchestrator):
     def __init__(self, event_loop):
-        super(MyOrchestrator, self).__init__(event_loop, self.make_logger(write=False))
+        self.set_default(write=True, file_name="demo.log", directory=os.path.join("logs", "demo", "%(name)s"))
+
+        super(MyOrchestrator, self).__init__(event_loop)
 
         producer = ImmutableProducer()
         consumer = ImmutableConsumer(enabled=True)
 
         self.add_nodes(producer, consumer)
 
-        # self.subscribe(producer, consumer, message_converter=self.good_message_converter)
-        self.subscribe(producer, consumer, message_converter=self.bad_message_converter)
+        self.subscribe(producer, consumer, message_converter=self.good_message_converter)
+        # self.subscribe(producer, consumer, message_converter=self.bad_message_converter)
 
     def good_message_converter(self, message: ProducerMessage):
         return ConsumerMessage(message.timestamp, message.x, message.y + message.z)
@@ -80,4 +88,6 @@ class MyOrchestrator(Orchestrator):
     def bad_message_converter(self, message: ProducerMessage):
         return 0.0
 
-run_orchestrator(MyOrchestrator)
+
+if __name__ == '__main__':
+    run_orchestrator(MyOrchestrator)
