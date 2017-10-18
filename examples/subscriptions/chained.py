@@ -1,6 +1,6 @@
 import time
 import asyncio
-from atlasbuggy import Orchestrator, Node, run_orchestrator
+from atlasbuggy import Orchestrator, Node, run
 
 
 class Node1(Node):
@@ -84,4 +84,4 @@ class MyOrchestrator(Orchestrator):
         #         await asyncio.sleep(0.0)  # cpu intensive
 
 
-run_orchestrator(MyOrchestrator)
+run(MyOrchestrator)

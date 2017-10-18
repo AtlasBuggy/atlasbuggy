@@ -33,6 +33,7 @@ class Orchestrator:
         """Add the tasks associated with each node to the event loop"""
         for node in nodes:
             if node.enabled:
+                node.event_loop = self.event_loop
                 self.nodes.append(node)
 
     # ----- event order methods -----
@@ -149,7 +150,7 @@ class Orchestrator:
         return self.name
 
 
-def run_orchestrator(OrchestratorClass):
+def run(OrchestratorClass):
     asyncio.set_event_loop(asyncio.new_event_loop())
     loop = asyncio.get_event_loop()
     orchestrator = OrchestratorClass(loop)

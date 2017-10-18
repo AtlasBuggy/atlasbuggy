@@ -3,7 +3,7 @@ import time
 import random
 import asyncio
 
-from atlasbuggy import Node, Orchestrator, run_orchestrator
+from atlasbuggy import Node, Orchestrator, run
 
 
 class ProducerMessage:
@@ -92,4 +92,4 @@ class MyOrchestrator(Orchestrator):
 
 
 if __name__ == '__main__':
-    run_orchestrator(MyOrchestrator)
+    run(MyOrchestrator)

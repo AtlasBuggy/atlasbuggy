@@ -2,7 +2,7 @@ import unittest
 
 import time
 import asyncio
-from atlasbuggy import Orchestrator, Node, run_orchestrator
+from atlasbuggy import Orchestrator, Node, run
 
 
 class ProducerNode(Node):

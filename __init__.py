@@ -1,2 +1,2 @@
-from orchestrator import Orchestrator, run_orchestrator
+from orchestrator import Orchestrator, run
 from node import Node

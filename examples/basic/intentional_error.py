@@ -1,5 +1,5 @@
 import asyncio
-from atlasbuggy import Orchestrator, Node, run_orchestrator
+from atlasbuggy import Orchestrator, Node, run
 
 
 class BasicOrchestrator(Orchestrator):
@@ -32,4 +32,4 @@ class BasicNode(Node):
             counter += 1
 
 
-run_orchestrator(BasicOrchestrator)
+run(BasicOrchestrator)

@@ -1,5 +1,5 @@
 import asyncio
-from atlasbuggy import Orchestrator, Node, run_orchestrator
+from atlasbuggy import Orchestrator, Node, run
 
 
 class Node1(Node):
@@ -60,4 +60,4 @@ class MultiNodeOrchestrator(Orchestrator):
                 # self.halt()  # halting or returning are valid options
                 return
 
-run_orchestrator(MultiNodeOrchestrator)
+run(MultiNodeOrchestrator)

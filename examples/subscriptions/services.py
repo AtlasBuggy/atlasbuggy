@@ -1,6 +1,6 @@
 import time
 import asyncio
-from atlasbuggy import Orchestrator, Node, run_orchestrator
+from atlasbuggy import Orchestrator, Node, run
 
 
 class ProducerNode(Node):
@@ -83,4 +83,4 @@ class MyOrchestrator(Orchestrator):
         self.subscribe(consumer2.producer_tag, producer, consumer2)
 
 
-run_orchestrator(MyOrchestrator)
+run(MyOrchestrator)

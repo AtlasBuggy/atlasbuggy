@@ -18,6 +18,8 @@ class Node:
         self.consumer_subs = []
         self.services = {}
 
+        self.event_loop = None  # assigned by the orchestrator when orchestrator.add_nodes is called
+
     def make_logger(self, *args, **kwargs):
         return make_logger(self.__class__.__name__, default_settings, *args, **kwargs)
 
@@ -77,7 +79,7 @@ class Node:
                         (matched_subscription.producer_node, matched_subscription.consumer_node))
 
     def define_subscription(self, tag, service="default", message_type=None, producer_type=None,
-                            queue_size=None, error_on_full_queue=False):
+                            queue_size=None, error_on_full_queue=True):
         subscription = Subscription(tag, service, message_type, producer_type, queue_size, error_on_full_queue)
         self.producer_subs.append(subscription)
         return subscription

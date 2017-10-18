@@ -48,4 +48,4 @@ class PlaybackOrchestrator(Orchestrator):
         self.subscribe(consumer.producer_tag, producer, consumer, message_converter=message_converter)
 
 
-run_orchestrator(PlaybackOrchestrator)
+run(PlaybackOrchestrator)

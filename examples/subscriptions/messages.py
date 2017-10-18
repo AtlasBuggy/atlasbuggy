@@ -1,7 +1,7 @@
 import time
 import random
 import asyncio
-from atlasbuggy import Orchestrator, Node, run_orchestrator
+from atlasbuggy import Orchestrator, Node, run
 
 DEMONSTRATE_ERROR = False
 
@@ -70,4 +70,4 @@ class MyOrchestrator(Orchestrator):
         self.subscribe(consumer.producer_tag, producer, consumer)
 
 
-run_orchestrator(MyOrchestrator)
+run(MyOrchestrator)

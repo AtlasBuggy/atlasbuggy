@@ -1,4 +1,3 @@
-import re
 
 from atlasbuggy.log.playback import PlaybackNode
 
@@ -66,4 +65,4 @@ class PlaybackOrchestrator(Orchestrator):
 
         print("took: %ss" % (self.t1 - self.t0))
 
-run_orchestrator(PlaybackOrchestrator)
+run(PlaybackOrchestrator)

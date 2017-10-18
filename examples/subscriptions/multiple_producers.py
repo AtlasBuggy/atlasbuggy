@@ -4,7 +4,7 @@ import time
 import random
 import asyncio
 
-from atlasbuggy import Node, Orchestrator, run_orchestrator
+from atlasbuggy import Node, Orchestrator, run
 
 
 class FastSensorMessage:
@@ -194,4 +194,4 @@ class MyOrchestrator(Orchestrator):
         print("took: %ss" % (self.t1 - self.t0))
 
 if __name__ == '__main__':
-    run_orchestrator(MyOrchestrator)
+    run(MyOrchestrator)
