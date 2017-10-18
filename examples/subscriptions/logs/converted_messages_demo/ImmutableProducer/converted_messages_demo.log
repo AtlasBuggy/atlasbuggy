@@ -1,13 +1,17 @@
-[ImmutableProducer @ factory.py:73][DEBUG] 2017-10-18 10:09:22,271: Logging to: logs/converted_messages_demo/ImmutableProducer/converted_messages_demo.log
-[ImmutableProducer @ node.py:28][INFO] 2017-10-18 10:09:22,272: setup
-[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 10:09:22,775: sending: ProducerMessage(t=1508335762.273669, x=0.05934761988663084, y=0.36226962289322917, z=0.29331619696863376)
-[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 10:09:23,279: sending: ProducerMessage(t=1508335762.775529, x=0.34702535443849225, y=0.04194765167552039, z=0.21371931745259265)
-[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 10:09:23,782: sending: ProducerMessage(t=1508335763.280997, x=0.45248073243822384, y=0.7411032574968466, z=0.7610010733543822)
-[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 10:09:24,287: sending: ProducerMessage(t=1508335763.782279, x=0.4563538184725707, y=0.19338062115433163, z=0.617276601818387)
-[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 10:09:24,792: sending: ProducerMessage(t=1508335764.288032, x=0.4914968529707062, y=0.9389446855999823, z=0.5251265135293572)
-[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 10:09:25,297: sending: ProducerMessage(t=1508335764.792432, x=0.4008457728703466, y=0.09935249111923505, z=0.8931931029433992)
-[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 10:09:25,802: sending: ProducerMessage(t=1508335765.297386, x=0.5021474156108305, y=0.9018208146103023, z=0.17981579437853457)
-[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 10:09:26,306: sending: ProducerMessage(t=1508335765.8023071, x=0.8656539963808961, y=0.5557600564966424, z=0.4688544149341939)
-[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 10:09:26,812: sending: ProducerMessage(t=1508335766.307188, x=0.5177127205186335, y=0.9016397365325316, z=0.15312858924364037)
-[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 10:09:27,317: sending: ProducerMessage(t=1508335766.8126872, x=0.805194373563802, y=0.2414843914727739, z=0.23822974910627837)
-[ImmutableProducer @ node.py:36][INFO] 2017-10-18 10:09:27,486: teardown
+[ImmutableProducer @ factory.py:73][DEBUG] 2017-10-18 11:05:15,630: Logging to: logs/converted_messages_demo/ImmutableProducer/converted_messages_demo.log
+[ImmutableProducer @ node.py:28][INFO] 2017-10-18 11:05:15,631: setup
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:16,134: sending: ProducerMessage(t=1508339115.6317172, x=0.9239403082001063, y=0.4065512063709642, z=0.7686883734411677)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:16,640: sending: ProducerMessage(t=1508339116.135157, x=0.19264677499409455, y=0.5490516227949499, z=0.10196193418190047)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:17,145: sending: ProducerMessage(t=1508339116.6408541, x=0.3194138326297702, y=0.08296099302209559, z=0.8460541328885058)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:17,651: sending: ProducerMessage(t=1508339117.145561, x=0.11758429764316602, y=0.8562527667398445, z=0.5067008267674948)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:18,155: sending: ProducerMessage(t=1508339117.651317, x=0.8800148843055127, y=0.8399247584154595, z=0.01541378327894627)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:18,659: sending: ProducerMessage(t=1508339118.155479, x=0.516029760381259, y=0.9519755914626016, z=0.6888653810675931)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:19,165: sending: ProducerMessage(t=1508339118.6598668, x=0.2752111145545566, y=0.2875894691562334, z=0.34087559503229337)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:19,671: sending: ProducerMessage(t=1508339119.165666, x=0.02876553692275341, y=0.1721232127756226, z=0.5163326972838407)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:20,174: sending: ProducerMessage(t=1508339119.671309, x=0.687150910368323, y=0.6820833183520298, z=0.6816513488541713)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:20,679: sending: ProducerMessage(t=1508339120.1745322, x=0.32886781838412704, y=0.8095623182104609, z=0.26846066192541196)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:21,185: sending: ProducerMessage(t=1508339120.679876, x=0.293355333927506, y=0.9504835362360052, z=0.8879827412825999)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:21,688: sending: ProducerMessage(t=1508339121.185625, x=0.23776747835930567, y=0.9168358881692258, z=0.742185958768091)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:22,194: sending: ProducerMessage(t=1508339121.689, x=0.41336667337156496, y=0.8910623887388756, z=0.627416397949167)
+[ImmutableProducer @ converted_messages.py:44][INFO] 2017-10-18 11:05:22,695: sending: ProducerMessage(t=1508339122.194546, x=0.23368278779341445, y=0.004650873846961945, z=0.739493562340418)
+[ImmutableProducer @ node.py:36][INFO] 2017-10-18 11:05:22,698: teardown

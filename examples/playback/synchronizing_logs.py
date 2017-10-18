@@ -16,7 +16,7 @@ class FastSensorPlayback(PlaybackNode):
 
     async def parse(self, line):
         message = FastSensorMessage.parse(line.message)
-        self.logger.warning("relative time: %s" % self.current_time())
+        # self.logger.warning("fast time: %s" % self.current_time())
         if message is not None:
             self.logger.info("recovered: %s" % message)
             await self.broadcast(message)
@@ -32,7 +32,7 @@ class SlowSensorPlayback(PlaybackNode):
 
     async def parse(self, line):
         message = SlowSensorMessage.parse(line.message)
-        self.logger.warning("relative time: %s" % self.current_time())
+        # self.logger.warning("\tslow time: %s" % self.current_time())
         if message is not None:
             self.logger.info("recovered: %s" % message)
             await self.broadcast(message)
@@ -42,7 +42,7 @@ class SlowSensorPlayback(PlaybackNode):
 
 class PlaybackOrchestrator(Orchestrator):
     def __init__(self, event_loop):
-        self.set_default(write=False, level=30)
+        self.set_default(write=False)
 
         super(PlaybackOrchestrator, self).__init__(event_loop)
 
@@ -55,5 +55,15 @@ class PlaybackOrchestrator(Orchestrator):
         self.subscribe(algorithm.fast_sensor_tag, fast_sensor, algorithm)
         self.subscribe(algorithm.slow_sensor_tag, slow_sensor, algorithm)
 
+        self.t0 = 0
+        self.t1 = 0
+
+    async def setup(self):
+        self.t0 = time.time()
+
+    async def teardown(self):
+        self.t1 = time.time()
+
+        print("took: %ss" % (self.t1 - self.t0))
 
 run_orchestrator(PlaybackOrchestrator)

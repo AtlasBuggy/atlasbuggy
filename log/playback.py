@@ -1,4 +1,5 @@
 import os
+import time
 import asyncio
 
 from node import Node
@@ -8,14 +9,17 @@ from log.default import default_settings
 
 
 class PlaybackNode(Node):
-    def __init__(self, *file_names, directory=None, realtime=True, enabled=True, logger=None):
+    central_clock = 0.0
+
+    def __init__(self, *file_names, directory=None, update_rate=None, enabled=True, logger=None):
         if logger is None:
             logger = make_logger(
                 self.__class__.__name__, default_settings, write=False,
-                log_format="[playback][%(name)s][%(levelname)s] %(asctime)s: %(message)s")
+                log_format="[Playback Node][%(name)s][%(levelname)s] %(asctime)s: %(message)s")
         super(PlaybackNode, self).__init__(enabled, logger)
 
-        self.realtime = realtime
+        self.update_rate = update_rate
+        self.start_time = time.time()
 
         self.parser = None
         if len(file_names) == 0:
@@ -35,9 +39,16 @@ class PlaybackNode(Node):
     @asyncio.coroutine
     def loop(self):
         for line in self.parser:
-            yield from self.parse(line)
-            if self.realtime:
-                yield from asyncio.sleep(self.parser.delta_t())
+            if self.update_rate is None:
+                parser_time = time.time() - self.start_time
+                if parser_time > self.current_time():
+                    yield from self.parse(line)
+                else:
+                    yield from asyncio.sleep(0.0)
+                    self.parser.skip()
+            else:
+                yield from self.parse(line)
+                yield from asyncio.sleep(self.update_rate)
 
     @asyncio.coroutine
     def parse(self, line):

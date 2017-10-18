@@ -12,7 +12,7 @@ class ImmutableProducerPlayback(PlaybackNode):
     def __init__(self, enabled=True):
         super(ImmutableProducerPlayback, self).__init__(
             "../subscriptions/logs/converted_messages_demo/ImmutableProducer/converted_messages_demo.log",
-            enabled=enabled, logger=self.make_logger(level=30))
+            enabled=enabled)
 
         self.message_regex = r"sending: ProducerMessage\(t=(\d.*), x=(\d.*), y=(\d.*), z=(\d.*)\)"
 

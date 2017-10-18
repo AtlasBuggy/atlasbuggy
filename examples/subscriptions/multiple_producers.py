@@ -153,6 +153,9 @@ class AlgorithmNode(Node):
                 fast_sensor_messages.append(await self.fast_sensor_queue.get())
 
             if len(fast_sensor_messages) > 1:
+                # 100 Hz / 10 Hz = 10 fast sensor messages to every 1 slow message
+                if len(fast_sensor_messages) != 10:
+                    self.logger.warning("Received %s fast sensor messages as opposed to 10!" % len(fast_sensor_messages))
                 self.logger.info("averaging fast %s messages" % len(fast_sensor_messages))
                 fast_sensor_messages[0].average(*fast_sensor_messages[1:])
 
@@ -179,6 +182,16 @@ class MyOrchestrator(Orchestrator):
         self.subscribe(algorithm.fast_sensor_tag, fast_sensor, algorithm)
         self.subscribe(algorithm.slow_sensor_tag, slow_sensor, algorithm)
 
+        self.t0 = 0
+        self.t1 = 0
+
+    async def setup(self):
+        self.t0 = time.time()
+
+    async def teardown(self):
+        self.t1 = time.time()
+
+        print("took: %ss" % (self.t1 - self.t0))
 
 if __name__ == '__main__':
     run_orchestrator(MyOrchestrator)

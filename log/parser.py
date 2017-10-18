@@ -126,8 +126,15 @@ class LogParser:
     def __iter__(self):
         return self
 
+    def skip(self):
+        self.current_index -= 1
+
     def current_time(self):
-        return self.lines[self.current_index].timestamp - self.start_time
+        if self.current_index >= len(self.lines):
+            current_index = len(self.lines) - 1
+        else:
+            current_index = self.current_index
+        return self.lines[current_index].timestamp - self.start_time
 
     def delta_t(self):
         current_index = self.current_index - 1
