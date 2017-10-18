@@ -10,20 +10,21 @@ except ImportError:
 
 class ImmutableProducerPlayback(PlaybackNode):
     def __init__(self, enabled=True):
-        super(ImmutableProducerPlayback, self).__init__("../subscriptions/logs/demo/ImmutableProducer/demo.log",
-                                                        enabled=enabled, logger=self.make_logger(level=30))
+        super(ImmutableProducerPlayback, self).__init__(
+            "../subscriptions/logs/converted_messages_demo/ImmutableProducer/converted_messages_demo.log",
+            enabled=enabled, logger=self.make_logger(level=30))
 
         self.message_regex = r"sending: ProducerMessage\(t=(\d.*), x=(\d.*), y=(\d.*), z=(\d.*)\)"
 
     async def parse(self, line):
         match = re.match(self.message_regex, line.message)
         if match is not None:
-            producer_time = float(match.group(1))
+            message_time = float(match.group(1))
             x = float(match.group(2))
             y = float(match.group(3))
             z = float(match.group(4))
 
-            message = ProducerMessage(producer_time, x, y, z)
+            message = ProducerMessage(message_time, x, y, z)
             self.logger.info("recovered: %s" % message)
             await self.broadcast(message)
         else:
@@ -44,7 +45,7 @@ class PlaybackOrchestrator(Orchestrator):
         consumer = ImmutableConsumer()
 
         self.add_nodes(producer, consumer)
-        self.subscribe(producer, consumer, message_converter=message_converter)
+        self.subscribe(consumer.producer_tag, producer, consumer, message_converter=message_converter)
 
 
 run_orchestrator(PlaybackOrchestrator)

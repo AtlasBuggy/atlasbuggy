@@ -22,7 +22,8 @@ class ConsumerNode(Node):
     def __init__(self, enabled=True):
         super(ConsumerNode, self).__init__(enabled)
 
-        self.producer_sub = self.define_subscription()
+        self.producer_tag = "producer"
+        self.producer_sub = self.define_subscription(self.producer_tag)
         self.producer_queue = None
         self.producer = None
 
@@ -44,6 +45,7 @@ class ConsumerNode(Node):
             await asyncio.sleep(0.5)
 
 
+
 class MyOrchestrator(Orchestrator):
     def __init__(self, event_loop):
         super(MyOrchestrator, self).__init__(event_loop)
@@ -61,7 +63,7 @@ class TestSubscriptions(unittest.TestCase):
 
         orchestrator.add_nodes(orchestrator.producer, orchestrator.consumer)
         try:
-            orchestrator.subscribe(orchestrator.producer, orchestrator.producer)
+            orchestrator.subscribe(orchestrator.consumer.producer_tag, orchestrator.producer, orchestrator.producer)
         except ValueError:
             print("made it!")
 
@@ -72,7 +74,7 @@ class TestSubscriptions(unittest.TestCase):
         orchestrator = MyOrchestrator(loop)
 
         try:
-            orchestrator.subscribe(orchestrator.producer, orchestrator.producer)
+            orchestrator.subscribe(orchestrator.consumer.producer_tag, orchestrator.producer, orchestrator.consumer)
         except RuntimeError:
             print("made it!")
 

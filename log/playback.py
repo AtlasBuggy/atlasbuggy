@@ -42,3 +42,6 @@ class PlaybackNode(Node):
     @asyncio.coroutine
     def parse(self, line):
         yield from self.broadcast(line)
+
+    def current_time(self):
+        return self.parser.current_time()

@@ -64,6 +64,7 @@ class LogParser:
 
         self.matches = re.finditer(regex, log_contents)
         self.lines = []
+        self.start_time = None
 
         for match_num, match in enumerate(self.matches):
             line = Line()
@@ -104,6 +105,8 @@ class LogParser:
         line.message = message
         line.full += message
         line.calculate_timestamp()
+        if self.start_time is None:
+            self.start_time = line.timestamp
 
     def sort(self, line_property="timestamp"):
         def _line_sort_fn(element):
@@ -122,6 +125,9 @@ class LogParser:
 
     def __iter__(self):
         return self
+
+    def current_time(self):
+        return self.lines[self.current_index].timestamp - self.start_time
 
     def delta_t(self):
         current_index = self.current_index - 1

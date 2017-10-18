@@ -13,7 +13,7 @@ class ProducerNode(Node):
             producer_time = time.time()
             self.broadcast_nowait((1, producer_time))
             self.broadcast_nowait((2, producer_time))
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.25)
             self.logger.info("producer time: %s" % producer_time)
 
 
@@ -21,7 +21,8 @@ class ConsumerNode(Node):
     def __init__(self, enabled=True):
         super(ConsumerNode, self).__init__(enabled)
 
-        self.producer_sub = self.define_subscription(queue_size=1)
+        self.producer_tag = "producer"
+        self.producer_sub = self.define_subscription(self.producer_tag, queue_size=1)
         self.producer_queue = None
         self.producer = None
 
@@ -51,7 +52,7 @@ class MyOrchestrator(Orchestrator):
         consumer = ConsumerNode()
 
         self.add_nodes(producer, consumer)
-        self.subscribe(producer, consumer)
+        self.subscribe(consumer.producer_tag, producer, consumer)
 
 
 run_orchestrator(MyOrchestrator)

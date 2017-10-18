@@ -38,7 +38,8 @@ class ConsumerNode(Node):
     def __init__(self, enabled=True):
         super(ConsumerNode, self).__init__(enabled, self.make_logger(write=False))
 
-        self.producer_sub = self.define_subscription(message_type=SomeMessage)
+        self.producer_tag = "producer"
+        self.producer_sub = self.define_subscription(self.producer_tag, message_type=SomeMessage)
         self.producer_queue = None
         self.producer = None
 
@@ -66,8 +67,7 @@ class MyOrchestrator(Orchestrator):
         consumer = ConsumerNode()
 
         self.add_nodes(producer, consumer)
-
-        self.subscribe(producer, consumer)
+        self.subscribe(consumer.producer_tag, producer, consumer)
 
 
 run_orchestrator(MyOrchestrator)

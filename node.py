@@ -16,6 +16,7 @@ class Node:
 
         self.producer_subs = []
         self.consumer_subs = []
+        self.services = {}
 
     def make_logger(self, *args, **kwargs):
         return make_logger(self.__class__.__name__, default_settings, *args, **kwargs)
@@ -71,13 +72,18 @@ class Node:
                 try:
                     matched_subscription.queue.put_nowait(message)
                 except asyncio.QueueFull:
-                    self.logger.info("queue full")
+                    self.logger.info(
+                        "Producer '%s' is trying to put a message on consumer '%s's queue, but it is full" %
+                        (matched_subscription.producer_node, matched_subscription.consumer_node))
 
-    def define_subscription(self, service="default", message_type=None, producer_type=None,
+    def define_subscription(self, tag, service="default", message_type=None, producer_type=None,
                             queue_size=None, error_on_full_queue=False):
-        subscription = Subscription(service, message_type, producer_type, queue_size, error_on_full_queue)
+        subscription = Subscription(tag, service, message_type, producer_type, queue_size, error_on_full_queue)
         self.producer_subs.append(subscription)
         return subscription
+
+    def define_service(self, service="default", message_type=None):
+        self.services[service] = message_type
 
     def append_subscription(self, subscription):
         self.consumer_subs.append(subscription)

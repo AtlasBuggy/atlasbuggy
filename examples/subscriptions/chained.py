@@ -19,7 +19,8 @@ class Node2(Node):
     def __init__(self, enabled=True):
         super(Node2, self).__init__(enabled)
 
-        self.producer_sub = self.define_subscription()
+        self.producer_tag = "producer"
+        self.producer_sub = self.define_subscription(self.producer_tag)
         self.producer_queue = None
         self.producer = None
 
@@ -44,7 +45,8 @@ class Node3(Node):
     def __init__(self, enabled=True):
         super(Node3, self).__init__(enabled)
 
-        self.producer_sub = self.define_subscription()
+        self.producer_tag = "producer"
+        self.producer_sub = self.define_subscription(self.producer_tag)
         self.producer_queue = None
         self.producer = None
 
@@ -74,8 +76,8 @@ class MyOrchestrator(Orchestrator):
 
         self.add_nodes(node1, node2, node3)
 
-        self.subscribe(node1, node2)
-        self.subscribe(node2, node3)
+        self.subscribe(node2.producer_tag, node1, node2)
+        self.subscribe(node3.producer_tag, node2, node3)
 
         # async def loop(self):
         #     while True:

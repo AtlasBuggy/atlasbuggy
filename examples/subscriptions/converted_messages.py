@@ -48,7 +48,8 @@ class ImmutableConsumer(Node):
     def __init__(self, enabled=True):
         super(ImmutableConsumer, self).__init__(enabled)
 
-        self.producer_sub = self.define_subscription(message_type=ConsumerMessage)
+        self.producer_tag = "producer"
+        self.producer_sub = self.define_subscription(self.producer_tag, message_type=ConsumerMessage)
         self.producer_queue = None
         self.producer = None
 
@@ -70,7 +71,8 @@ class ImmutableConsumer(Node):
 
 class MyOrchestrator(Orchestrator):
     def __init__(self, event_loop):
-        self.set_default(write=True, file_name="demo.log", directory=os.path.join("logs", "demo", "%(name)s"))
+        self.set_default(write=True, file_name="converted_messages_demo.log",
+                         directory=os.path.join("logs", "converted_messages_demo", "%(name)s"))
 
         super(MyOrchestrator, self).__init__(event_loop)
 
@@ -79,7 +81,7 @@ class MyOrchestrator(Orchestrator):
 
         self.add_nodes(producer, consumer)
 
-        self.subscribe(producer, consumer, message_converter=self.good_message_converter)
+        self.subscribe(consumer.producer_tagproducer, consumer, message_converter=self.good_message_converter)
         # self.subscribe(producer, consumer, message_converter=self.bad_message_converter)
 
     def good_message_converter(self, message: ProducerMessage):

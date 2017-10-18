@@ -2,8 +2,9 @@ import asyncio
 
 
 class Subscription:
-    def __init__(self, requested_service, expected_message_type, expected_producer_class, queue_size,
+    def __init__(self, tag, requested_service, expected_message_type, expected_producer_class, queue_size,
                  error_on_full_queue):
+        self.tag = tag
         self.requested_service = requested_service
         self.expected_message_type = expected_message_type
         self.expected_producer_class = expected_producer_class
