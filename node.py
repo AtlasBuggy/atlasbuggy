@@ -1,4 +1,5 @@
 import asyncio
+import logging
 
 from subscription import Subscription
 from log.factory import make_logger
@@ -8,7 +9,6 @@ from log.default import default_settings
 class Node:
     def __init__(self, enabled=True, logger=None):
         self.enabled = enabled
-        self.name = self.__class__.__name__
         if logger is None:
             self.logger = make_logger(self.name, default_settings)
         else:
@@ -20,8 +20,27 @@ class Node:
 
         self.event_loop = None  # assigned by the orchestrator when orchestrator.add_nodes is called
 
+        self.log_buffer_start = "[log buffer start]\n"
+        self.log_buffer_end = "[log buffer end]"
+        self.log_buffer = self.log_buffer_start
+        self.max_log_buf_size = 16384
+
+    @property
+    def name(self):
+        return self.__class__.__name__
+
     def make_logger(self, *args, **kwargs):
-        return make_logger(self.__class__.__name__, default_settings, *args, **kwargs)
+        return make_logger(self.name, default_settings, *args, **kwargs)
+
+    def log_to_buffer(self, level, timestamp, message):
+        self.log_buffer += "[%s, %s]: %s\n" % (logging.getLevelName(level), timestamp, message)
+        if len(self.log_buffer) > self.max_log_buf_size:
+            self.dump_log_buffer()
+
+    def dump_log_buffer(self):
+        self.log_buffer += self.log_buffer_end
+        self.logger.debug(self.log_buffer)
+        self.log_buffer = self.log_buffer_start
 
     # ----- event order methods -----
 
@@ -36,6 +55,9 @@ class Node:
     @asyncio.coroutine
     def teardown(self):
         self.logger.info("teardown")
+
+    def _internal_teardown(self):
+        self.dump_log_buffer()
 
     # ----- subscription methods -----
 

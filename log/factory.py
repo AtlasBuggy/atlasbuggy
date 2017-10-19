@@ -1,18 +1,27 @@
 import os
 import time
 import logging
+from logging import handlers
+import queue
 
 
 def make_logger(name, default_settings, level=None,
                 write=None, log_format=None, file_name=None, directory=None, custom_fields_fn=None):
-    logger = logging.getLogger(name)
-    logger.setLevel(logging.DEBUG)
+    # log_queue = queue.Queue(-1)  # no limit on size
+    # queue_handler = handlers.QueueHandler(log_queue)
 
     if level is None:
         level = default_settings["level"]
 
     print_handle = logging.StreamHandler()
     print_handle.setLevel(level)
+
+    # listener = handlers.QueueListener(log_queue, print_handle)
+
+    logger = logging.getLogger(name)
+    logger.setLevel(logging.DEBUG)
+
+    # logger.addHandler(queue_handler)
 
     if log_format is None:
         log_format = default_settings["log_format"]
@@ -72,4 +81,6 @@ def make_logger(name, default_settings, level=None,
 
         logger.debug("Logging to: %s" % log_path)
 
+
+    # listener.start()
     return logger

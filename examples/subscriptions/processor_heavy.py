@@ -1,4 +1,5 @@
 import time
+import random
 import asyncio
 import multiprocessing
 
@@ -26,27 +27,40 @@ class MainThreadHogger(Node):
             self.logger.info("producer time: %s" % producer_time)
 
 
+DEMO_EXCEPTION_IN_PROCESS = False
+
+
 class OffloadWithProcess(Node):
     def __init__(self, enabled=True):
         self.exit_event = multiprocessing.Event()
-        self.process_queue = multiprocessing.Queue()
+        self.read_queue = multiprocessing.Queue()
+        self.write_queue = multiprocessing.Queue()
         self.process = multiprocessing.Process(target=self.process_fn)
 
         super(OffloadWithProcess, self).__init__(enabled)
 
     def process_fn(self):
+        time_to_wait = 1
         while not self.exit_event.is_set():
             process_time = time.time()
 
             counter = 0
             t0 = time.time()
 
-            while time.time() - t0 < 1:
+            while time.time() - t0 < time_to_wait:
                 counter += 1
-                self.process_queue.put((process_time, counter))
-                time.sleep(0.0001)
+                self.read_queue.put((process_time, counter))
+                # time.sleep(0.0001)
+                time.sleep(time_to_wait / 5)
                 if self.exit_event.is_set():
                     break
+
+            while not self.write_queue.empty():
+                time_to_wait = self.write_queue.get()
+
+            if DEMO_EXCEPTION_IN_PROCESS:
+                self.exit_event.set()
+                raise Exception("Something bad happened!!")
 
             self.logger.info("Process put %s items on the pipe" % counter)
 
@@ -56,17 +70,24 @@ class OffloadWithProcess(Node):
     async def loop(self):
         message_num = 0
         while True:
+            if self.exit_event.is_set():
+                return
+
             counter = 0
-            while not self.process_queue.empty():
-                process_time, counter = self.process_queue.get()
+            while not self.read_queue.empty():
+                process_time, counter = self.read_queue.get()
                 producer_time = time.time()
                 self.broadcast_nowait((message_num, producer_time, process_time, counter))
                 counter += 1
                 message_num += 1
 
+            time_to_wait = random.random()
+            self.logger.info("set time to wait: %s" % time_to_wait)
+            self.write_queue.put(time_to_wait)
+
             if counter > 0:
                 self.logger.info("broadcast %s items, last num was %s" % (counter, message_num))
-            await asyncio.sleep(0.0)
+            await asyncio.sleep(0.5)
 
     async def teardown(self):
         self.logger.info("closing process")

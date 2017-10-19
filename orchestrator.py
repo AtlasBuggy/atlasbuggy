@@ -18,6 +18,7 @@ class Orchestrator:
 
         self.nodes = []
         self.loop_tasks = []
+        self.teardown_tasks = []
         self.exit_event = asyncio.Event(loop=event_loop)
 
         self.event_loop.add_signal_handler(signal.SIGINT, self.cancel_loop_tasks, self.event_loop)
@@ -57,19 +58,21 @@ class Orchestrator:
         """Shutdown all node and Orchestrator tasks"""
         if self.exit_event.is_set():
             self.logger.info("already halted")
-            return asyncio.sleep(0.0)
-        self.exit_event.set()
+            self.cancel_loop_tasks(self.event_loop)
 
-        self.logger.info("halting")
-        self.cancel_loop_tasks(self.event_loop)
-        if len(self.nodes) > 0:
-            teardown_tasks = [asyncio.ensure_future(self.teardown())]
-            for node in self.nodes:
-                teardown_tasks.append(asyncio.ensure_future(node.teardown()))
-
-            return asyncio.wait(teardown_tasks)
         else:
-            return asyncio.sleep(0.0)
+            self.exit_event.set()
+
+            self.logger.info("halting")
+            if len(self.nodes) > 0:
+                self.teardown_tasks = [asyncio.ensure_future(self.teardown())]
+                for node in self.nodes:
+                    self.teardown_tasks.append(asyncio.ensure_future(node.teardown()))
+                    node._internal_teardown()
+
+                return asyncio.wait(self.teardown_tasks)
+
+        return asyncio.sleep(0.0)
 
     def run(self):
         """First call each node's startup task then return the collected node coroutines to run indefinitely"""
@@ -162,5 +165,7 @@ def run(OrchestratorClass):
         orchestrator.logger.info("Interrupted by user")
     finally:
         orchestrator.logger.info("halting")
-        loop.run_until_complete(orchestrator.halt())
-        loop.close()
+
+    halt_task = orchestrator.halt()
+    loop.run_until_complete(halt_task)
+    loop.close()
