@@ -1,10 +1,9 @@
-import os
+import time
 import signal
-import logging
 import asyncio
 
-from log.factory import make_logger
-from log.default import default_settings
+from .log.factory import make_logger
+from .log.default import default_settings
 
 
 class Orchestrator:
@@ -22,6 +21,8 @@ class Orchestrator:
         self.exit_event = asyncio.Event(loop=event_loop)
 
         self.event_loop.add_signal_handler(signal.SIGINT, self.cancel_loop_tasks, self.event_loop)
+
+        self.start_time = time.time()
 
     @staticmethod
     def set_default(**kwargs):
@@ -58,19 +59,23 @@ class Orchestrator:
         """Shutdown all node and Orchestrator tasks"""
         if self.exit_event.is_set():
             self.logger.info("already halted")
-            self.cancel_loop_tasks(self.event_loop)
+            return
 
-        else:
-            self.exit_event.set()
+        self.exit_event.set()
 
-            self.logger.info("halting")
-            if len(self.nodes) > 0:
-                self.teardown_tasks = [asyncio.ensure_future(self.teardown())]
-                for node in self.nodes:
-                    self.teardown_tasks.append(asyncio.ensure_future(node.teardown()))
-                    node._internal_teardown()
+        self.cancel_loop_tasks(self.event_loop)
+        self.logger.info("halting")
 
-                return asyncio.wait(self.teardown_tasks)
+        end_time = time.time()
+        self.logger.info("Session took %ss to complete" % (end_time - self.start_time))
+
+        if len(self.nodes) > 0:
+            self.teardown_tasks = [asyncio.ensure_future(self.teardown())]
+            for node in self.nodes:
+                self.teardown_tasks.append(asyncio.ensure_future(node.teardown()))
+                node._internal_teardown()
+
+            return asyncio.wait(self.teardown_tasks)
 
         return asyncio.sleep(0.0)
 
@@ -132,10 +137,16 @@ class Orchestrator:
         # find a suitable subscription
         for subscription in consumer.producer_subs:
             if subscription.tag == tag:
-                if subscription.expected_producer_class is None or \
-                        isinstance(producer, subscription.expected_producer_class):
+                if subscription.expected_producer_classes is None:
                     matched_subscription = subscription
                     break
+                else:
+                    for expected_producer_class in subscription.expected_producer_classes:
+                        if isinstance(producer, expected_producer_class):
+                            matched_subscription = subscription
+                            break
+                    if matched_subscription is not None:
+                        break
 
         if matched_subscription is None:
             raise ValueError("No matching subscriptions found between '%s' and '%s'" % (producer, consumer))
@@ -164,7 +175,7 @@ def run(OrchestratorClass):
     except KeyboardInterrupt:
         orchestrator.logger.info("Interrupted by user")
     finally:
-        orchestrator.logger.info("halting")
+        orchestrator.logger.info("closing orchestrator")
 
     halt_task = orchestrator.halt()
     loop.run_until_complete(halt_task)

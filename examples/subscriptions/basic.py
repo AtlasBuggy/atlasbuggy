@@ -45,6 +45,7 @@ class ConsumerNode(Node):
 
 class MyOrchestrator(Orchestrator):
     def __init__(self, event_loop):
+        self.set_default(level=10)
         super(MyOrchestrator, self).__init__(event_loop)
 
         producer = ProducerNode()

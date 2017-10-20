@@ -7,7 +7,6 @@ from atlasbuggy import Orchestrator, Node, run
 
 class MyArduino(Arduino):
     def __init__(self, enabled=True):
-        self.buffer = ""
         super(MyArduino, self).__init__(
             self.name, enabled=enabled,
             logger=self.make_logger(level=30)
@@ -28,7 +27,7 @@ class MyArduino(Arduino):
                     self.logger.info("Start time: %s" % arduino_start_time)
                 else:
                     arduino_time, item1, item2 = [float(x) for x in packet.split("\t")]
-                    # self.log_to_buffer(20, time.time(), "t=%s, item1=%s, item2=%s" % (arduino_time, item1, item2))
+                    self.log_to_buffer(time.time(), "t=%s, item1=%s, item2=%s" % (arduino_time, item1, item2))
 
                     # if counter % 1000 == 0 and counter > 0:
                     #     self.logger.info(self.buffer)
@@ -80,7 +79,7 @@ class ConsumerNode(Node):
     async def teardown(self):
         # for message in self.messages:
         #     self.logger.info(message)
-        print(self.avg_time_sum / self.avg_count)
+        self.logger.info("average packet delay: %s" % (self.avg_time_sum / self.avg_count))
 
 
 class MyOrchestrator(Orchestrator):
@@ -94,4 +93,5 @@ class MyOrchestrator(Orchestrator):
         self.subscribe(consumer.producer_tag, my_arduino, consumer)
 
 
-run(MyOrchestrator)
+if __name__ == '__main__':
+    run(MyOrchestrator)

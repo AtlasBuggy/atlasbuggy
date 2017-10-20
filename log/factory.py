@@ -1,8 +1,6 @@
 import os
 import time
 import logging
-from logging import handlers
-import queue
 
 
 def make_logger(name, default_settings, level=None,

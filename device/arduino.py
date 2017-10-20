@@ -7,9 +7,21 @@ from .generic import Generic
 from .errors import *
 
 
-class Arduino(Generic):
-    ports = {}
+class PortsTable:
+    def __init__(self):
+        self.ports = {}
 
+    def length(self):
+        return len(self.ports)
+
+    def get(self, item):
+        return self.ports[item]
+
+    def set(self, key, value):
+        self.ports[key] = value
+
+
+class Arduino(Generic):
     # whoiam ID info
     whoiam_header = "iam"  # whoiam packets start with "iam"
     whoiam_ask = "whoareyou"
@@ -31,6 +43,8 @@ class Arduino(Generic):
 
     port_updates_per_second = 2000
 
+    ports = PortsTable()
+
     def __init__(self, whoiam, baud=115200, enabled=True, logger=None, *device_args, **device_kwargs):
         super(Arduino, self).__init__(enabled, logger)
 
@@ -40,13 +54,16 @@ class Arduino(Generic):
         if self.baud not in Arduino.default_rates:
             raise ValueError("Baud rate must be %s or %s. Supplied baud rate is %s" % (
                 str(Arduino.default_rates[0:-1])[1:-1], str(Arduino.default_rates[-1]), self.baud))
-        self.device = None
+        self.device_port = None
         self.device_args = device_args
         self.device_kwargs = device_kwargs
 
         self.protocol_packets = [Arduino.whoiam_header, Arduino.first_packet_header, Arduino.stop_packet_header]
 
-    def list_addresses(self):
+        self.configure_device()
+
+    @staticmethod
+    def list_addresses():
         com_ports = list_ports.comports()
 
         if len(com_ports) == 0:
@@ -57,57 +74,73 @@ class Arduino(Generic):
         addresses = []
         for port_no, description, address in com_ports:
             if 'USB' in address:
-                self.logger.info("Found suitable address: '%s'" % port_no)
                 addresses.append(port_no)
 
         return addresses
 
     def configure_device(self):
-        device_port = None
-        if len(Arduino.ports) == 0:
-            addresses = self.list_addresses()
+        if Arduino.ports.length() == 0:
+            self.logger.info("configuring for the first time. whoiam=%s" % self.whoiam)
+
+            addresses = Arduino.list_addresses()
+            self.logger.info("Found suitable addresses: '%s'" % addresses)
+
             if len(addresses) == 0:
                 raise RuntimeError("Found no valid Arduino addresses!!")
-            for address in addresses:
-                for baud in self.default_rates:
-                    self.logger.info("Polling address %s with baud %s" % (address, baud))
-                    device_port = DevicePort(address, baud, self.device_args, self.device_kwargs, self.logger)
-                    device_port.configure()
 
-                    if device_port.is_arduino:
-                        if self.whoiam == device_port.whoiam:
-                            self.first_packet = device_port.first_packet
-                            Arduino.ports[device_port.whoiam] = device_port
-                        break
+            Arduino.collect_all_devices(addresses, self.logger, *self.device_args, **self.device_kwargs)
 
-        if device_port is None:
+        self.logger.info("configuring done. Finding whoiam=%s" % self.whoiam)
+
+        device_port_info = Arduino.ports.get(self.whoiam)
+        device_port_info["logger"] = self.logger
+        self.device_port = DevicePort.reinit(device_port_info)
+
+        if self.device_port is None:
             raise RuntimeError("Failed to find arduino device named %s" % self.whoiam)
 
-        self.device = device_port
+        self.device_read_queue.put((-self.device_port.start_time, self.device_port.first_packet))
 
-        self.logger.debug("device named %s started at %s" % (self.whoiam, self.device.start_time))
-        self.device_read_queue.put((-self.device.start_time, self.first_packet))
+    @staticmethod
+    def collect_all_devices(addresses, logger, *device_args, **device_kwargs):
+        for address in addresses:
+            for baud in Arduino.default_rates:
+                device_port = DevicePort.init_configure(
+                    address, baud, device_args, device_kwargs, logger
+                )
+
+                if device_port.is_arduino:
+                    port_info = dict(
+                        whoiam=device_port.whoiam, address=device_port.address, baud=device_port.baud,
+                        device_args=device_port.device_args,
+                        device_kwargs=device_port.device_kwargs, device=device_port.device,
+                        start_time=device_port.start_time, first_packet=device_port.first_packet
+                    )
+                    logger.info("address '%s' has ID '%s'" % (device_port.address, device_port.whoiam))
+
+                    Arduino.ports.set(device_port.whoiam, port_info)
+                    break
 
     def poll_device(self):
-        self.device.write(Arduino.start_packet)
+        self.device_port.write(Arduino.start_packet)
 
         while self.device_active():
             time.sleep(1 / Arduino.port_updates_per_second)  # maintain a constant loop speed
 
-            if not self.device.is_open():
+            if not self.device_port.is_open():
                 self.stop_device()
                 raise DeviceClosedPrematurelyError("Serial port isn't open for some reason...")
-            in_waiting = self.device.in_waiting()
+            in_waiting = self.device_port.in_waiting()
             if in_waiting == 0:
                 continue
 
             # read every possible character available and split them into packets
-            packet_time, packets = self.device.read(in_waiting)
+            packet_time, packets = self.device_port.read(in_waiting)
             if packets is None:  # if the read failed
                 self.stop_device()
                 raise DeviceReadPacketError("Failed to read packets", self)
 
-            self.logger.debug("found %s packets at t=%s" % (len(packets), packet_time))
+            # self.logger.debug("found %s packets at t=%s" % (len(packets), packet_time))
 
             # put data found into the queue
             for packet in packets:
@@ -131,13 +164,14 @@ class Arduino(Generic):
 
             while not self.device_write_queue.empty():
                 packet = self.device_write_queue.get()
-                self.device.write(packet)
+                self.device_port.write(packet)
 
-        self.device.write(self.stop_packet)
+        self.device_port.write(self.stop_packet)
 
 
 class DevicePort:
-    def __init__(self, address, baud, device_args, device_kwargs, logger):
+    def __init__(self, address, baud, device_args, device_kwargs, logger, device=None, start_time=None,
+                 first_packet="", whoiam=""):
         self.address = address
         self.baud = baud
         self.device_args = device_args
@@ -146,17 +180,24 @@ class DevicePort:
         self.logger = logger
 
         self.is_arduino = False
-        self.whoiam = ""
-        self.first_packet = ""
-        self.device = None
-        self.start_time = None
+        self.whoiam = whoiam
+        self.first_packet = first_packet
+        self.device = device
+        self.start_time = start_time
 
         self.buffer = ''
 
+    @classmethod
+    def init_configure(cls, address, baud, device_args, device_kwargs, logger):
+        device_port = DevicePort(address, baud, device_args, device_kwargs, logger)
+        device_port.configure()
+
+        return device_port
+
     def configure(self):
         self.device = serial.Serial(self.address, self.baud, *self.device_args, **self.device_kwargs)
-        # time.sleep(2)  # wait for microcontroller to wake up
 
+        # wait for device to wake up:
         while self.in_waiting() < 0:
             time.sleep(0.001)
 
@@ -165,6 +206,10 @@ class DevicePort:
             self.first_packet = self.find_first_packet()
             if self.first_packet is not None:
                 self.is_arduino = True
+
+    @classmethod
+    def reinit(cls, kwargs):
+        return DevicePort(**kwargs)
 
     def find_whoiam(self):
         """
@@ -263,7 +308,7 @@ class DevicePort:
 
             prev_rounded_time = rounded_time
             rounded_time = int((time.time() - start_time) * 10)
-            if rounded_time > 5 and rounded_time % 3 == 0 and prev_rounded_time != rounded_time:
+            if rounded_time > Arduino.protocol_timeout and rounded_time % 3 == 0 and prev_rounded_time != rounded_time:
                 attempts += 1
                 self.logger.debug("Writing '%s' again" % ask_packet)
                 self.write(Arduino.stop_packet)

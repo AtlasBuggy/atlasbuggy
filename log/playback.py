@@ -2,10 +2,10 @@ import os
 import time
 import asyncio
 
-from node import Node
-from log.factory import make_logger
-from log.parser import LogParser
-from log.default import default_settings
+from ..node import Node
+from .factory import make_logger
+from .parser import LogParser
+from .default import default_settings
 
 
 class PlaybackNode(Node):

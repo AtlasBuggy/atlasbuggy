@@ -4,7 +4,6 @@ import logging
 import datetime
 
 
-
 class Line:
     def __init__(self):
         self.name = ""
@@ -145,4 +144,3 @@ class LogParser:
             return next_t - current_t
         else:
             return 0
-

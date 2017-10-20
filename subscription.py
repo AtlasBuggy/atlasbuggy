@@ -2,12 +2,12 @@ import asyncio
 
 
 class Subscription:
-    def __init__(self, tag, requested_service, expected_message_type, expected_producer_class, queue_size,
+    def __init__(self, tag, requested_service, expected_message_types, expected_producer_classes, queue_size,
                  error_on_full_queue):
         self.tag = tag
         self.requested_service = requested_service
-        self.expected_message_type = expected_message_type
-        self.expected_producer_class = expected_producer_class
+        self.expected_message_types = expected_message_types
+        self.expected_producer_classes = expected_producer_classes
         if queue_size is None:
             queue_size = 0
         self.queue_size = queue_size
@@ -18,6 +18,12 @@ class Subscription:
         self.queue = None
         self.message_converter = None
         self.is_required = True
+
+        if self.expected_message_types is not None and not hasattr(self.expected_message_types, "__iter__"):
+            self.expected_message_types = (self.expected_message_types,)
+
+        if self.expected_producer_classes is not None and not hasattr(self.expected_producer_classes, "__iter__"):
+            self.expected_producer_classes = (self.expected_producer_classes,)
 
     def check_subscription(self):
         if self.is_required:

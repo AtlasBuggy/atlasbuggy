@@ -1,9 +1,9 @@
 import asyncio
 import logging
 
-from subscription import Subscription
-from log.factory import make_logger
-from log.default import default_settings
+from .subscription import Subscription
+from .log.factory import make_logger
+from .log.default import default_settings
 
 
 class Node:
@@ -32,15 +32,21 @@ class Node:
     def make_logger(self, *args, **kwargs):
         return make_logger(self.name, default_settings, *args, **kwargs)
 
-    def log_to_buffer(self, level, timestamp, message):
+    def log_to_buffer(self, timestamp, message, level=logging.DEBUG):
         self.log_buffer += "[%s, %s]: %s\n" % (logging.getLevelName(level), timestamp, message)
         if len(self.log_buffer) > self.max_log_buf_size:
             self.dump_log_buffer()
 
     def dump_log_buffer(self):
-        self.log_buffer += self.log_buffer_end
-        self.logger.debug(self.log_buffer)
-        self.log_buffer = self.log_buffer_start
+        if len(self.log_buffer) > len(self.log_buffer_start):
+            self.log_buffer += self.log_buffer_end
+            self.logger.debug(self.log_buffer)
+
+            self.logger.info("logging message buffer (len=%s)" % len(self.log_buffer))
+
+            self.log_buffer = self.log_buffer_start
+
+
 
     # ----- event order methods -----
 
@@ -66,16 +72,21 @@ class Node:
 
     def _find_matching_subscription(self, message, service):
         for subscription in self.consumer_subs:
-            if subscription.expected_message_type is not None:
+            if subscription.expected_message_types is not None:
                 if subscription.message_converter is not None:
                     message = subscription.message_converter(message)
 
-                if not isinstance(message, subscription.expected_message_type):
+                satisfied = False
+                for expected_message_type in subscription.expected_message_types:
+                    if isinstance(message, expected_message_type):
+                        satisfied = True
+                        break
+                if not satisfied:
                     raise ValueError(
                         "Consumer node '%s' expects message type '%s' from producer '%s'. Got type '%s'" % (
-                            subscription.consumer_node, subscription.expected_message_type,
+                            subscription.consumer_node, subscription.expected_message_types,
                             subscription.producer_node, type(message)))
-            if subscription.requested_service == service:
+            if service == subscription.requested_service:
                 return subscription, message
 
     @asyncio.coroutine
