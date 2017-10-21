@@ -16,11 +16,11 @@ class PlotViewer(QWidget):
         self.layout = None
         self.plot_widget = pyg.PlotWidget()
 
-        self.init_UI(size, title)
+        self.init_ui(size, title)
         self.add_widgets(self.plot_widget)
         self.show()
 
-    def init_UI(self, size, title):
+    def init_ui(self, size, title):
         self.layout = QtGui.QGridLayout()
         self.setLayout(self.layout)
         self.resize(size[0], size[1])
@@ -51,18 +51,21 @@ class PlotterNode(Node):
             if(self.app.exec_() == 0):
                 self.running = False
 
-            x = np.random.normal(size=5000)
-            y = np.random.normal(size=5000)
-            self.plotter.plot(x, y)
+            if(self.running):
+                x = np.random.normal(size=1000)
+                y = np.random.normal(size=1000)
+                self.plot(self.plotter, x, y)
 
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(1)
 
-class Robot(Orchestrator):
+    def plot(self, plotter, x, y):
+        plotter.plot(x, y)
+
+class Plotter(Orchestrator):
     def __init__(self, event_loop):
-        super(Robot, self).__init__(event_loop)
+        super(Plotter, self).__init__(event_loop)
 
         self.plotter_node = PlotterNode()
-
         self.add_nodes(self.plotter_node)
 
     async def loop(self):
@@ -71,4 +74,4 @@ class Robot(Orchestrator):
                 return
             await asyncio.sleep(0.5)
 
-run(Robot)
+run(Plotter)
