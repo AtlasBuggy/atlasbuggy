@@ -180,7 +180,7 @@ class ConsumerNode(Node):
         super(ConsumerNode, self).__init__(enabled)
 
         self.producer_tag = "producer"
-        self.producer_sub = self.define_subscription(self.producer_tag, required_attributes=("start_time"))
+        self.producer_sub = self.define_subscription(self.producer_tag, required_attributes=("start_time",))
         self.producer_queue = None
         self.producer = None
 

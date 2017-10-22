@@ -106,7 +106,7 @@ class Node:
     def _find_matching_subscriptions(self, message, service):
         results = []
         for subscription in self.consumer_subs:
-            if not subscription.enabled:
+            if not subscription.enabled or subscription.queue is None:
                 continue
             if subscription.expected_message_types is not None:
                 if subscription.message_converter is not None:
@@ -124,6 +124,8 @@ class Node:
                             subscription.producer_node, type(message)))
             if service == subscription.requested_service:
                 results.append((subscription, message))
+        # if len(results) == 0:
+        #     self.logger.warning("Broadcasting to no one!")
         return results
 
     @asyncio.coroutine
@@ -145,6 +147,8 @@ class Node:
                                 matched_subscription.producer_node, matched_subscription.consumer_node
                             )
                         )
+        return len(results)
+
 
     def broadcast_nowait(self, message, service="default"):
         results = self._find_matching_subscriptions(message, service)
@@ -162,19 +166,25 @@ class Node:
                                 matched_subscription.producer_node, matched_subscription.consumer_node
                             )
                         )
+        return len(results)
 
     def define_subscription(self, tag, service="default",
                             is_required=True,
                             message_type=None,
                             producer_type=None,
-                            queue_size=None,
+                            queue_size=0,
                             error_on_full_queue=False,
                             required_attributes=None,
                             required_methods=None):
 
+        for subscription in self.producer_subs:
+            if tag == subscription.tag:
+                raise ValueError("Tag '%s' is already being used! "
+                                 "Did you call define_subscription with the same tag?" % tag)
         subscription = Subscription(tag, service, is_required, message_type, producer_type, queue_size, error_on_full_queue,
                                     required_attributes, required_methods)
         self.producer_subs.append(subscription)
+
         return subscription
 
     def is_subscribed(self, tag):

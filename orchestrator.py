@@ -134,7 +134,7 @@ class Orchestrator:
 
     # ----- subscription methods -----
 
-    def subscribe(self, tag, producer, consumer, message_converter=None):
+    def subscribe(self, producer, consumer, tag, message_converter=None):
         """Define a producer-consumer relationship between two nodes. """
 
         if not producer.enabled:
@@ -195,8 +195,8 @@ class Orchestrator:
         if message_converter is not None and not callable(message_converter):
             raise ValueError("Supplied message converter isn't a function!!")
 
-        matched_subscription.producer_node = producer
-        matched_subscription.consumer_node = consumer
+        self.logger.info("'%s' is subscribing to '%s' with the tag '%s'" % (consumer, producer, tag))
+        matched_subscription.set_nodes(producer, consumer)
         matched_subscription.set_event_loop(self.event_loop)
         matched_subscription.message_converter = message_converter
         consumer.subscription_tags.add(tag)

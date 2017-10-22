@@ -24,6 +24,5 @@ class ImageMessage(Message):
     def bytes_to_numpy(bytes_image):
         return cv2.imdecode(np.fromstring(bytes_image, dtype=np.uint8), 1)
 
-    @staticmethod
-    def numpy_to_bytes(numpy_image):
-        return cv2.imencode(".jpg", numpy_image)[1].tostring()
+    def numpy_to_bytes(self):
+        return cv2.imencode(".jpg", self.image)[1].tostring()

@@ -49,7 +49,11 @@ class Arduino(Generic):
 
         self.protocol_packets = [Arduino.whoiam_header, Arduino.first_packet_header, Arduino.stop_packet_header]
 
+    @asyncio.coroutine
+    def setup(self):
         self.configure_device()
+
+        yield from super(Arduino, self).setup()
 
     @staticmethod
     def list_addresses():
@@ -159,47 +163,48 @@ class Arduino(Generic):
                 self.stop_device()
                 raise DeviceClosedPrematurelyError("Serial port isn't open for some reason...")
             in_waiting = self.device_port.in_waiting()
-            if in_waiting == 0:
-                continue
+            if in_waiting > 0:
+                # read every possible character available and split them into packets
+                packet_time, packets = self.device_port.read(in_waiting)
+                if packets is None:  # if the read failed
+                    self.stop_device()
+                    raise DeviceReadPacketError("Failed to read packets", self)
 
-            # read every possible character available and split them into packets
-            packet_time, packets = self.device_port.read(in_waiting)
-            if packets is None:  # if the read failed
-                self.stop_device()
-                raise DeviceReadPacketError("Failed to read packets", self)
+                if len(packets) > 0:
+                    num_received += len(packets)
+                    total_received += len(packets)
+                    current_time = time.time()
+                    if current_time - notif_prev_time > notif_interval:
+                        self.logger.info(
+                            "found %s packets in %ss (avg=%0.1f packets/sec). "
+                            "%s received in total (avg=%0.1f packets/sec)" % (
+                                num_received,
+                                notif_interval,
+                                num_received / notif_interval,
+                                total_received,
+                                total_received / (current_time - notif_start_time))
+                        )
+                        num_received = 0
+                        notif_prev_time = current_time
 
-            if len(packets) > 0:
-                num_received += len(packets)
-                total_received += len(packets)
-                current_time = time.time()
-                if current_time - notif_prev_time > notif_interval:
-                    self.logger.info(
-                        "found %s packets in %ss (avg=%0.1f packets/sec). "
-                        "%s received in total (avg=%0.1f packets/sec)" % (
-                            num_received,
-                            notif_interval,
-                            num_received / notif_interval,
-                            total_received,
-                            total_received / (current_time - notif_start_time))
-                    )
-                    num_received = 0
-                    notif_prev_time = current_time
+                    packets[:] = [packet for packet in packets if
+                                  self.filter_packet(packet)]  # filters and modifies the packets buffer
+                    self.device_read_queue.put((packet_time, packets))
 
-                packets[:] = [packet for packet in packets if
-                              self.filter_packet(packet)]  # filters and modifies the packets buffer
-                self.device_read_queue.put((packet_time, packets))
-
-            if not self.device_write_queue.empty():
-                self.logger.debug("Write queue not empty")
             if current_pause_command is None:
-                while not self.device_write_queue.empty():
-                    packet = self.device_write_queue.get()
-                    if type(packet) == PauseCommand:
-                        current_pause_command = packet
-                    else:
-                        self.device_port.write(packet)
+                if not self.device_write_queue.empty():
+                    self.logger.debug("Write queue not empty")
+                    while not self.device_write_queue.empty():
+                        packet = self.device_write_queue.get()
+                        if type(packet) == PauseCommand:
+                            current_pause_command = packet
+                            current_pause_command.start()
+                            break
+                        else:
+                            self.device_port.write(packet)
             elif current_pause_command.expired():
                 current_pause_command = None
+                self.logger.debug("Timer expired")
 
         self.device_port.write(self.stop_packet)
 
@@ -240,6 +245,9 @@ class Arduino(Generic):
 class PauseCommand:
     def __init__(self, pause_time):
         self.pause_time = pause_time
+        self.start_time = 0.0
+
+    def start(self):
         self.start_time = time.time()
 
     def expired(self):
@@ -414,7 +422,7 @@ class DevicePort:
     def in_waiting(self):
         """
         Safely check the serial buffer.
-        :return: None if an OSError occurred, otherwise an integer value indicating the buffer size 
+        :return: None if an OSError occurred, otherwise an integer value indicating the buffer size
         """
         try:
             return self.device.inWaiting()
