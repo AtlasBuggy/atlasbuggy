@@ -288,8 +288,8 @@ class MyOrchestrator(Orchestrator):
 
         self.add_nodes(fast_sensor, slow_sensor, algorithm)
 
-        self.subscribe(algorithm.fast_sensor_tag, fast_sensor, algorithm)
-        self.subscribe(algorithm.slow_sensor_tag, slow_sensor, algorithm)
+        self.subscribe(fast_sensor, algorithm, algorithm.fast_sensor_tag)
+        self.subscribe(slow_sensor, algorithm, algorithm.slow_sensor_tag)
 
 
 if __name__ == '__main__':

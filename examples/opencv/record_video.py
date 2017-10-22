@@ -13,11 +13,11 @@ class MyOrchestrator(Orchestrator):
 
         self.camera = OpenCVCamera(capture_number=0)
         self.viewer = OpenCVViewer()
-        self.recorder = OpenCVRecorder("video_record_demo.avi", "videos", fps=40)
+        self.recorder = OpenCVRecorder("video_record_demo.avi", "videos")
         self.add_nodes(self.camera, self.viewer, self.recorder)
 
-        self.subscribe(self.recorder.capture_tag, self.camera, self.recorder)
-        self.subscribe(self.viewer.capture_tag, self.camera, self.viewer)
+        self.subscribe(self.camera, self.recorder, self.recorder.capture_tag)
+        self.subscribe(self.camera, self.viewer, self.viewer.capture_tag)
 
 
 run(MyOrchestrator)

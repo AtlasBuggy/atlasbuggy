@@ -92,13 +92,14 @@ class ConsumerNode(Node):
 
 class MyOrchestrator(Orchestrator):
     def __init__(self, event_loop):
-        super(MyOrchestrator, self).__init__(event_loop, self.make_logger(write=False))
+        self.set_logger(write=False)
+        super(MyOrchestrator, self).__init__(event_loop)
 
         producer = ProducerNode()
         consumer = ConsumerNode()
 
         self.add_nodes(producer, consumer)
-        self.subscribe(consumer.producer_tag, producer, consumer)
+        self.subscribe(producer, consumer, consumer.producer_tag)
 
 
 run(MyOrchestrator)

@@ -46,7 +46,7 @@ class PlaybackOrchestrator(Orchestrator):
         consumer = ImmutableConsumer()
 
         self.add_nodes(producer, consumer)
-        self.subscribe(consumer.producer_tag, producer, consumer, message_converter=message_converter)
+        self.subscribe(producer, consumer, consumer.producer_tag, message_converter=message_converter)
 
 
 run(PlaybackOrchestrator)

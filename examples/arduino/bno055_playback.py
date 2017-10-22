@@ -22,6 +22,7 @@ class BNO055Playback(PlaybackNode):
             print(message.euler.get_tuple())
             await self.broadcast(message)
         else:
+            # print("Message failed to parse:", line.message)
             self.logger.info(line.full)
             await asyncio.sleep(0.0)
 
@@ -34,7 +35,7 @@ class MyOrchestrator(Orchestrator):
         consumer = ConsumerNode()
 
         self.add_nodes(bno055, consumer)
-        self.subscribe(consumer.producer_tag, bno055, consumer)
+        self.subscribe(bno055, consumer, consumer.producer_tag)
 
 
 if __name__ == '__main__':

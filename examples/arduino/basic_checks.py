@@ -71,7 +71,7 @@ class MyOrchestrator(Orchestrator):
         consumer = ConsumerNode()
 
         self.add_nodes(my_arduino, consumer)
-        self.subscribe(consumer.producer_tag, my_arduino, consumer)
+        self.subscribe(my_arduino, consumer, consumer.producer_tag)
 
 
 if __name__ == '__main__':

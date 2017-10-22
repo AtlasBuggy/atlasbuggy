@@ -85,8 +85,8 @@ class MyOrchestrator(Orchestrator):
 
         self.add_nodes(producer, consumer)
 
-        self.subscribe(consumer.producer_tag, producer, consumer, message_converter=self.good_message_converter)
-        # self.subscribe(consumer.producer_tag, producer, consumer, message_converter=self.bad_message_converter)
+        self.subscribe(producer, consumer, consumer.producer_tag, message_converter=self.good_message_converter)
+        # self.subscribe(producer, consumer, consumer.producer_tag, message_converter=self.bad_message_converter)
 
     def good_message_converter(self, message: ProducerMessage):
         return ConsumerMessage(message.timestamp, message.n, message.x, message.y + message.z)

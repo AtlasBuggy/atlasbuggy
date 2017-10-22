@@ -79,8 +79,8 @@ class MyOrchestrator(Orchestrator):
 
         self.add_nodes(producer, consumer1, consumer2)
 
-        self.subscribe(consumer1.producer_tag, producer, consumer1)
-        self.subscribe(consumer2.producer_tag, producer, consumer2)
+        self.subscribe(producer, consumer1, consumer1.producer_tag)
+        self.subscribe(producer, consumer2, consumer2.producer_tag)
 
 
 run(MyOrchestrator)

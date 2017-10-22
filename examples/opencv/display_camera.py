@@ -10,6 +10,6 @@ class MyOrchestrator(Orchestrator):
         self.viewer = OpenCVViewer()
         self.add_nodes(self.camera, self.viewer)
 
-        self.subscribe(self.viewer.capture_tag, self.camera, self.viewer)
+        self.subscribe(self.camera, self.viewer, self.viewer.capture_tag)
 
 run(MyOrchestrator)

@@ -1,23 +1,25 @@
-[MyOrchestrator @ factory.py:85][DEBUG] 2017-10-22 12:13:44,845: Logging to: logs/multiple_producers_demo/MyOrchestrator/multiple_producers_demo.log
-[MyOrchestrator @ orchestrator.py:88][DEBUG] 2017-10-22 12:13:44,847: Adding setup tasks. Apply subscriptions
-[MyOrchestrator @ orchestrator.py:94][DEBUG] 2017-10-22 12:13:44,847: Running set up tasks (4)
-[MyOrchestrator @ orchestrator.py:97][DEBUG] 2017-10-22 12:13:44,848: Adding loop tasks
-[MyOrchestrator @ orchestrator.py:102][DEBUG] 2017-10-22 12:13:44,848: Running loop tasks (4)
-[MyOrchestrator @ orchestrator.py:108][DEBUG] 2017-10-22 12:13:46,950: 4 tasks to cancel
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 12:13:46,950: Cancelling <Task pending coro=<Orchestrator.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:53> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 12:13:46,951: Cancelling <Task cancelling coro=<FastSensor.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:97> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 12:13:46,951: Cancelling <Task cancelling coro=<SlowSensor.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:120> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 12:13:46,951: Cancelling <Task pending coro=<AlgorithmNode.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:160> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
-[MyOrchestrator @ orchestrator.py:210][INFO] 2017-10-22 12:13:46,951: loop finished
-[MyOrchestrator @ orchestrator.py:214][INFO] 2017-10-22 12:13:46,951: closing orchestrator
-[MyOrchestrator @ orchestrator.py:108][DEBUG] 2017-10-22 12:13:46,951: 4 tasks to cancel
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 12:13:46,951: Cancelling <Task cancelled coro=<Orchestrator.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:50>>: False
-[MyOrchestrator @ orchestrator.py:114][DEBUG] 2017-10-22 12:13:46,951: Task '<Task cancelled coro=<Orchestrator.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:50>>' was cancelled
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 12:13:46,951: Cancelling <Task cancelled coro=<FastSensor.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:81>>: False
-[MyOrchestrator @ orchestrator.py:114][DEBUG] 2017-10-22 12:13:46,951: Task '<Task cancelled coro=<FastSensor.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:81>>' was cancelled
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 12:13:46,951: Cancelling <Task cancelled coro=<SlowSensor.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:104>>: False
-[MyOrchestrator @ orchestrator.py:114][DEBUG] 2017-10-22 12:13:46,951: Task '<Task cancelled coro=<SlowSensor.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:104>>' was cancelled
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 12:13:46,952: Cancelling <Task cancelled coro=<AlgorithmNode.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:139>>: False
-[MyOrchestrator @ orchestrator.py:114][DEBUG] 2017-10-22 12:13:46,952: Task '<Task cancelled coro=<AlgorithmNode.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:139>>' was cancelled
-[MyOrchestrator @ orchestrator.py:69][INFO] 2017-10-22 12:13:46,952: halting
-[MyOrchestrator @ orchestrator.py:72][INFO] 2017-10-22 12:13:46,952: Session took 2.1062350273132324s to complete
+[MyOrchestrator @ factory.py:85][DEBUG] 2017-10-22 16:26:51,164: Logging to: logs/multiple_producers_demo/MyOrchestrator/multiple_producers_demo.log
+[MyOrchestrator @ orchestrator.py:215][INFO] 2017-10-22 16:26:51,165: 'AlgorithmNode' is subscribing to 'FastSensor' with the tag 'fast'
+[MyOrchestrator @ orchestrator.py:215][INFO] 2017-10-22 16:26:51,165: 'AlgorithmNode' is subscribing to 'SlowSensor' with the tag 'slow'
+[MyOrchestrator @ orchestrator.py:112][DEBUG] 2017-10-22 16:26:51,165: Adding setup tasks. Apply subscriptions
+[MyOrchestrator @ orchestrator.py:118][DEBUG] 2017-10-22 16:26:51,165: Running set up tasks (4)
+[MyOrchestrator @ orchestrator.py:121][DEBUG] 2017-10-22 16:26:51,165: Adding loop tasks
+[MyOrchestrator @ orchestrator.py:126][DEBUG] 2017-10-22 16:26:51,166: Running loop tasks (4)
+[MyOrchestrator @ orchestrator.py:132][DEBUG] 2017-10-22 16:26:53,287: 4 tasks to cancel
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:53,287: Cancelling <Task pending coro=<Orchestrator.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:77> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:53,288: Cancelling <Task cancelling coro=<FastSensor.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:97> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:53,288: Cancelling <Task cancelling coro=<SlowSensor.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:120> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:53,288: Cancelling <Task pending coro=<AlgorithmNode.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:160> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:234][INFO] 2017-10-22 16:26:53,288: loop finished
+[MyOrchestrator @ orchestrator.py:238][INFO] 2017-10-22 16:26:53,288: closing orchestrator
+[MyOrchestrator @ orchestrator.py:132][DEBUG] 2017-10-22 16:26:53,288: 4 tasks to cancel
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:53,288: Cancelling <Task cancelled coro=<Orchestrator.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:74>>: False
+[MyOrchestrator @ orchestrator.py:138][DEBUG] 2017-10-22 16:26:53,288: Task '<Task cancelled coro=<Orchestrator.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:74>>' was cancelled
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:53,288: Cancelling <Task cancelled coro=<FastSensor.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:81>>: False
+[MyOrchestrator @ orchestrator.py:138][DEBUG] 2017-10-22 16:26:53,288: Task '<Task cancelled coro=<FastSensor.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:81>>' was cancelled
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:53,288: Cancelling <Task cancelled coro=<SlowSensor.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:104>>: False
+[MyOrchestrator @ orchestrator.py:138][DEBUG] 2017-10-22 16:26:53,288: Task '<Task cancelled coro=<SlowSensor.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:104>>' was cancelled
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:53,288: Cancelling <Task cancelled coro=<AlgorithmNode.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:139>>: False
+[MyOrchestrator @ orchestrator.py:138][DEBUG] 2017-10-22 16:26:53,288: Task '<Task cancelled coro=<AlgorithmNode.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/multiple_producers.py:139>>' was cancelled
+[MyOrchestrator @ orchestrator.py:93][INFO] 2017-10-22 16:26:53,289: halting
+[MyOrchestrator @ orchestrator.py:96][INFO] 2017-10-22 16:26:53,289: Session took 2.1247658729553223s to complete

@@ -25,8 +25,8 @@ class MyOrchestrator(Orchestrator):
 
         self.add_nodes(self.video, self.viewer, self.video_log, self.pipeline)
 
-        self.subscribe(self.viewer.capture_tag, self.pipeline, self.viewer)
-        self.subscribe(self.video.playback_tag, self.video_log, self.video)
-        self.subscribe(self.pipeline.capture_tag, self.video, self.pipeline)
+        self.subscribe(self.pipeline, self.viewer, self.viewer.capture_tag)
+        self.subscribe(self.video_log, self.video, self.video.playback_tag)
+        self.subscribe(self.video, self.pipeline, self.pipeline.capture_tag)
 
 run(MyOrchestrator)

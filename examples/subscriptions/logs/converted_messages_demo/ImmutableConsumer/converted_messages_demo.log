@@ -1,15 +1,21 @@
-[ImmutableConsumer @ factory.py:85][DEBUG] 2017-10-22 14:05:10,755: Logging to: logs/converted_messages_demo/ImmutableConsumer/converted_messages_demo.log
-[ImmutableConsumer @ converted_messages.py:64][INFO] 2017-10-22 14:05:10,757: Got producer named 'ImmutableProducer'
-[ImmutableConsumer @ node.py:70][INFO] 2017-10-22 14:05:10,761: setup
-[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 14:05:10,765: time diff: 0.0004410743713378906
-[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 14:05:10,766: receiving: ConsumerMessage(t=1508695510.764854, n=0 a=0.9777829075366329, b=0.8166752636932519)
-[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 14:05:11,268: time diff: 0.0007457733154296875
-[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 14:05:11,269: receiving: ConsumerMessage(t=1508695511.2680895, n=1 a=0.5776049774291712, b=0.6922985646475693)
-[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 14:05:11,771: time diff: 0.0006926059722900391
-[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 14:05:11,772: receiving: ConsumerMessage(t=1508695511.7711163, n=2 a=0.5340431682712872, b=1.045223056390956)
-[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 14:05:12,274: time diff: 0.0007393360137939453
-[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 14:05:12,275: receiving: ConsumerMessage(t=1508695512.2738872, n=3 a=0.1711964993006494, b=0.547669375048055)
-[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 14:05:12,777: time diff: 0.0007381439208984375
-[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 14:05:12,778: receiving: ConsumerMessage(t=1508695512.7770107, n=4 a=0.11158231544900776, b=1.2091015556696039)
-[ImmutableConsumer @ node.py:83][INFO] 2017-10-22 14:05:13,082: Node took 2.326317071914673s to run
-[ImmutableConsumer @ node.py:78][INFO] 2017-10-22 14:05:13,085: teardown
+[ImmutableConsumer @ factory.py:85][DEBUG] 2017-10-22 16:26:27,612: Logging to: logs/converted_messages_demo/ImmutableConsumer/converted_messages_demo.log
+[ImmutableConsumer @ converted_messages.py:64][INFO] 2017-10-22 16:26:27,613: Got producer named 'ImmutableProducer'
+[ImmutableConsumer @ node.py:70][INFO] 2017-10-22 16:26:27,613: setup
+[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 16:26:27,614: time diff: 6.175041198730469e-05
+[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 16:26:27,614: receiving: ConsumerMessage(t=1508703987.614005, n=0 a=0.3280327553165603, b=0.7024691908392622)
+[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 16:26:28,115: time diff: 9.799003601074219e-05
+[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 16:26:28,116: receiving: ConsumerMessage(t=1508703988.115707, n=1 a=0.7337331206382159, b=1.1914561217559212)
+[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 16:26:28,617: time diff: 0.00011181831359863281
+[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 16:26:28,617: receiving: ConsumerMessage(t=1508703988.617645, n=2 a=0.8494243857091589, b=0.41309476684374613)
+[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 16:26:29,121: time diff: 0.00010967254638671875
+[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 16:26:29,122: receiving: ConsumerMessage(t=1508703989.1217742, n=3 a=0.3301553444437958, b=0.5544107442254751)
+[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 16:26:29,626: time diff: 9.489059448242188e-05
+[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 16:26:29,626: receiving: ConsumerMessage(t=1508703989.626306, n=4 a=0.4451178206814892, b=1.1824108269347842)
+[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 16:26:30,131: time diff: 9.799003601074219e-05
+[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 16:26:30,132: receiving: ConsumerMessage(t=1508703990.13186, n=5 a=0.32278692765068573, b=0.8807776732079382)
+[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 16:26:30,633: time diff: 7.414817810058594e-05
+[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 16:26:30,633: receiving: ConsumerMessage(t=1508703990.6336808, n=6 a=0.7399366924611179, b=1.325115955913452)
+[ImmutableConsumer @ converted_messages.py:71][INFO] 2017-10-22 16:26:31,135: time diff: 6.985664367675781e-05
+[ImmutableConsumer @ converted_messages.py:72][INFO] 2017-10-22 16:26:31,135: receiving: ConsumerMessage(t=1508703991.13503, n=7 a=0.9496747560046321, b=0.5418213635071728)
+[ImmutableConsumer @ node.py:83][INFO] 2017-10-22 16:26:31,158: Node took 3.545804023742676s to run
+[ImmutableConsumer @ node.py:78][INFO] 2017-10-22 16:26:31,159: teardown

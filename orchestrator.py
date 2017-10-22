@@ -9,9 +9,10 @@ from .log import default
 
 
 class Orchestrator:
-    def __init__(self, event_loop, logger=None):
+    def __init__(self, event_loop, name=None, logger=None):
         self.event_loop = event_loop
-        self.name = self.__class__.__name__
+        self._name = name
+
         if not self.is_logger_created():
             if logger is None:
                 self.logger, self.file_name, self.directory = make_logger(self.name, default.default_settings)
@@ -27,6 +28,22 @@ class Orchestrator:
         self.event_loop.add_signal_handler(signal.SIGINT, self.cancel_loop_tasks, self.event_loop)
 
         self.start_time = time.time()
+
+    @property
+    def name(self):
+        if not hasattr(self, "_name") or self._name is None:
+            return self.__class__.__name__
+        else:
+            return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    def set_logger(self, *args, **kwargs):
+        if self.is_logger_created():
+            raise ValueError("A logger was created for this node already. Call this before the call to super().")
+        self.logger, self.file_name, self.directory = make_logger(self.name, default.default_settings, *args, **kwargs)
 
     @staticmethod
     def set_default(**kwargs):

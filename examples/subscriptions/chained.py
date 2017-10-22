@@ -76,12 +76,8 @@ class MyOrchestrator(Orchestrator):
 
         self.add_nodes(node1, node2, node3)
 
-        self.subscribe(node2.producer_tag, node1, node2)
-        self.subscribe(node3.producer_tag, node2, node3)
-
-        # async def loop(self):
-        #     while True:
-        #         await asyncio.sleep(0.0)  # cpu intensive
+        self.subscribe(node1, node2, node2.producer_tag)
+        self.subscribe(node2, node3, node3.producer_tag)
 
 
 run(MyOrchestrator)

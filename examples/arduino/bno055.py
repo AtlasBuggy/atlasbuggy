@@ -122,22 +122,23 @@ class BNO055(Arduino):
     async def loop(self):
         arduino_start_time = self.start_time
         self.logger.info("initialization data: %s. Start time: %s" % (self.first_packet, arduino_start_time))
-
+        counter = 0
         while self.device_active():
             while not self.empty():
                 packet_time, packets = self.read()
 
                 for packet in packets:
-                    message = self.parse_packet(packet_time, packet)
+                    message = self.parse_packet(packet_time, packet, counter)
                     self.log_to_buffer(packet_time, message)
                     await self.broadcast(message)
+                    counter += 1
 
             await asyncio.sleep(0.0)
 
-    def parse_packet(self, packet_time, packet):
+    def parse_packet(self, packet_time, packet, packet_num):
         data = packet.split("\t")
         segment = ""
-        message = Bno055Message(time.time())
+        message = Bno055Message(time.time(), packet_num)
         message.packet_time = packet_time
         try:
             for segment in data:
@@ -223,7 +224,7 @@ class MyOrchestrator(Orchestrator):
         consumer = ConsumerNode()
 
         self.add_nodes(bno055, consumer)
-        self.subscribe(consumer.producer_tag, bno055, consumer)
+        self.subscribe(bno055, consumer, consumer.producer_tag)
 
 
 if __name__ == '__main__':
