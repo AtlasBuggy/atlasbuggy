@@ -49,11 +49,6 @@ class Orchestrator:
     def set_default(**kwargs):
         default.default_settings.update(kwargs)
 
-    def set_logger(self, *args, **kwargs):
-        if self.is_logger_created():
-            raise ValueError("A logger was created for this node already. Call this before the call to super().")
-        self.logger, self.file_name, self.directory = make_logger(self.name, default.default_settings, *args, **kwargs)
-
     def is_logger_created(self):
         return hasattr(self, "logger")
 
@@ -180,8 +175,8 @@ class Orchestrator:
                             missing_attributes.append(attribute_name)
 
                     if len(missing_attributes) > 0:
-                        raise ValueError("Producer '%s' is missing attributes requested by consumer '%s': '%s'" % (
-                            producer, consumer, missing_attributes
+                        raise ValueError("Producer '%s' is missing attributes requested by consumer '%s': %s" % (
+                            producer, consumer, str(missing_attributes)[1:-1]
                         ))
 
                 if subscription.required_methods is not None:
@@ -191,8 +186,8 @@ class Orchestrator:
                             missing_methods.append(method_name)
 
                     if len(missing_methods) > 0:
-                        raise ValueError("Producer '%s' is missing methods requested by consumer '%s': '%s'" % (
-                            producer, consumer, missing_methods
+                        raise ValueError("Producer '%s' is missing methods requested by consumer '%s': %s" % (
+                            producer, consumer, str(missing_methods)[1:-1]
                         ))
 
                 if subscription.expected_producer_classes is None:

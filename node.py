@@ -108,22 +108,24 @@ class Node:
         for subscription in self.consumer_subs:
             if not subscription.enabled or subscription.queue is None:
                 continue
-            if subscription.expected_message_types is not None:
-                if subscription.message_converter is not None:
-                    message = subscription.message_converter(message)
 
-                satisfied = False
-                for expected_message_type in subscription.expected_message_types:
-                    if isinstance(message, expected_message_type):
-                        satisfied = True
-                        break
-                if not satisfied:
-                    raise ValueError(
-                        "Consumer node '%s' expects message type '%s' from producer '%s'. Got type '%s'" % (
-                            subscription.consumer_node, subscription.expected_message_types,
-                            subscription.producer_node, type(message)))
             if service == subscription.requested_service:
+                if subscription.expected_message_types is not None:
+                    if subscription.message_converter is not None:
+                        message = subscription.message_converter(message)
+
+                    satisfied = False
+                    for expected_message_type in subscription.expected_message_types:
+                        if isinstance(message, expected_message_type):
+                            satisfied = True
+                            break
+                    if not satisfied:
+                        raise ValueError(
+                            "Consumer node '%s' expects message type '%s' from producer '%s'. Got type '%s'" % (
+                                subscription.consumer_node, subscription.expected_message_types,
+                                subscription.producer_node, type(message)))
                 results.append((subscription, message))
+
         # if len(results) == 0:
         #     self.logger.warning("Broadcasting to no one!")
         return results
@@ -148,7 +150,6 @@ class Node:
                             )
                         )
         return len(results)
-
 
     def broadcast_nowait(self, message, service="default"):
         results = self._find_matching_subscriptions(message, service)
@@ -181,7 +182,8 @@ class Node:
             if tag == subscription.tag:
                 raise ValueError("Tag '%s' is already being used! "
                                  "Did you call define_subscription with the same tag?" % tag)
-        subscription = Subscription(tag, service, is_required, message_type, producer_type, queue_size, error_on_full_queue,
+        subscription = Subscription(tag, service, is_required, message_type, producer_type, queue_size,
+                                    error_on_full_queue,
                                     required_attributes, required_methods)
         self.producer_subs.append(subscription)
 
