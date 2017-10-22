@@ -1,6 +1,7 @@
 import re
 import time
 import serial
+import asyncio
 from threading import Thread, Lock
 from serial.tools import list_ports
 
@@ -217,8 +218,9 @@ class Arduino(Generic):
     def write(self, packet):
         self.device_write_queue.put(packet)
 
-    async def teardown(self):
-        await super(Arduino, self).teardown()
+    @asyncio.coroutine
+    def teardown(self):
+        yield from super(Arduino, self).teardown()
         self.device_port.device.close()
 
 

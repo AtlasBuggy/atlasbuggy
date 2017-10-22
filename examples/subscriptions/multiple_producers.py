@@ -10,7 +10,7 @@ from atlasbuggy import Node, Orchestrator, Message, run
 class FastSensorMessage(Message):
     message_regex = r"sending: FastSensorMessage\(t=(\d.*), n=(\d*), x=(\d.*), y=(\d.*), z=(\d.*)\)"
 
-    def __init__(self, timestamp, x=0.0, y=0.0, z=0.0, n=None):
+    def __init__(self, timestamp, x, y, z, n):
         self.x = x
         self.y = y
         self.z = z
@@ -52,7 +52,7 @@ class FastSensorMessage(Message):
 class SlowSensorMessage(Message):
     message_regex = r"(sending: SlowSensorMessage\(t=([\d.]*)), n=(\d*), array=\[(?(1)(.+))\]\)"
 
-    def __init__(self, timestamp, array: list, n=None):
+    def __init__(self, timestamp, array: list, n):
         self.array = array
 
         super(SlowSensorMessage, self).__init__(timestamp, n)
@@ -81,13 +81,16 @@ class FastSensor(Node):
     async def loop(self):
         current_time = time.time()
         delta_t = 0.01
+        counter = 0
         while True:
             if time.time() > current_time + delta_t:  # simulate update rate of 100 Hz
                 current_time = time.time()
                 message = FastSensorMessage(
                     current_time,
-                    random.random(), random.random(), random.random()
+                    random.random(), random.random(), random.random(),
+                    counter
                 )
+                counter += 1
                 self.logger.info("sending: %s" % message)
                 await self.broadcast(message)
             else:
@@ -101,13 +104,16 @@ class SlowSensor(Node):
     async def loop(self):
         current_time = time.time()
         delta_t = 0.1
+        counter = 0
         while True:
             if time.time() > current_time + delta_t:  # simulate update rate of 10 Hz
                 current_time = time.time()
                 message = SlowSensorMessage(
                     time.time(),
-                    [random.randint(0, 2 ** 16) for _ in range(100)]
+                    [random.randint(0, 2 ** 16) for _ in range(100)],
+                    counter
                 )
+                counter += 1
                 self.logger.info("sending: %s" % message)
                 await self.broadcast(message)
             else:

@@ -1,17 +1,16 @@
 import re
+import time
 
 
 class Message:
-    _number = 0
     message_regex = r"Message\(t=(\d.*), n=(\d*)\)"
 
-    def __init__(self, timestamp, n=None):
-        self.timestamp = timestamp
-        if n is None:
-            self.n = Message._number
-            Message._number += 1
+    def __init__(self, timestamp=None, n=0):
+        if timestamp is None:
+            self.timestamp = time.time()
         else:
-            self.n = n
+            self.timestamp = timestamp
+        self.n = n
 
     @classmethod
     def parse(clc, message):

@@ -3,28 +3,30 @@ import time
 import random
 import asyncio
 
-from atlasbuggy import Node, Orchestrator, run
+from atlasbuggy import Node, Orchestrator, Message, run
 
 
-class ProducerMessage:
-    def __init__(self, timestamp, x=0.0, y=0.0, z=0.0):
+class ProducerMessage(Message):
+    def __init__(self, timestamp, n, x=0.0, y=0.0, z=0.0):
         self.timestamp = timestamp
         self.x = x
         self.y = y
         self.z = z
+        super(ProducerMessage, self).__init__(timestamp, n)
 
     def __str__(self):
-        return "ProducerMessage(t=%s, x=%s, y=%s, z=%s)" % (self.timestamp, self.x, self.y, self.z)
+        return "ProducerMessage(t=%s, n=%s x=%s, y=%s, z=%s)" % (self.timestamp, self.n, self.x, self.y, self.z)
 
 
-class ConsumerMessage:
-    def __init__(self, timestamp, a=0.0, b=0.0):
+class ConsumerMessage(Message):
+    def __init__(self, timestamp, n, a=0.0, b=0.0):
         self.timestamp = timestamp
         self.a = a
         self.b = b
+        super(ConsumerMessage, self).__init__(timestamp, n)
 
     def __str__(self):
-        return "ConsumerMessage(t=%s, a=%s, b=%s)" % (self.timestamp, self.a, self.b)
+        return "ConsumerMessage(t=%s, n=%s a=%s, b=%s)" % (self.timestamp, self.n, self.a, self.b)
 
 
 class ImmutableProducer(Node):
@@ -32,12 +34,14 @@ class ImmutableProducer(Node):
         super(ImmutableProducer, self).__init__(enabled)
 
     async def loop(self):
+        counter = 0
         while True:
             producer_time = time.time()
             message = ProducerMessage(
-                producer_time,
+                producer_time, counter,
                 random.random(), random.random(), random.random()
             )
+            counter += 1
             await self.broadcast(message)
 
             await asyncio.sleep(0.5)
@@ -85,7 +89,7 @@ class MyOrchestrator(Orchestrator):
         # self.subscribe(consumer.producer_tag, producer, consumer, message_converter=self.bad_message_converter)
 
     def good_message_converter(self, message: ProducerMessage):
-        return ConsumerMessage(message.timestamp, message.x, message.y + message.z)
+        return ConsumerMessage(message.timestamp, message.n, message.x, message.y + message.z)
 
     def bad_message_converter(self, message: ProducerMessage):
         return 0.0

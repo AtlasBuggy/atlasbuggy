@@ -12,9 +12,10 @@ def wrap_iter(iterable):
 
 
 class Subscription:
-    def __init__(self, tag, requested_service, expected_message_types, expected_producer_classes, queue_size,
+    def __init__(self, tag, requested_service, is_required, expected_message_types, expected_producer_classes, queue_size,
                  error_on_full_queue, required_attributes, required_methods):
         self.tag = tag
+        self.enabled = True
         self.requested_service = requested_service
         self.expected_message_types = expected_message_types
         self.expected_producer_classes = expected_producer_classes
@@ -29,7 +30,7 @@ class Subscription:
         self.consumer_node = None
         self.queue = None
         self.message_converter = None
-        self.is_required = True
+        self.is_required = is_required
 
         self.expected_message_types = wrap_iter(self.expected_message_types)
         self.expected_producer_classes = wrap_iter(self.expected_producer_classes)

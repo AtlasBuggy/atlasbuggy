@@ -1,3 +1,4 @@
+import asyncio
 from multiprocessing import Event, Queue, Process
 
 from ..node import Node
@@ -29,9 +30,11 @@ class Generic(Node):
     def poll_device(self):
         pass
 
-    async def setup(self):
+    @asyncio.coroutine
+    def setup(self):
         self.device_process.start()
 
-    async def teardown(self):
+    @asyncio.coroutine
+    def teardown(self):
         self.logger.info("Tearing down device")
         self.device_exit_event.set()

@@ -2,6 +2,8 @@ import time
 import asyncio
 from atlasbuggy import Orchestrator, Node, run
 
+DEMONSTRATE_ERROR = False
+
 
 class ProducerNode(Node):
     def __init__(self, enabled=True):
@@ -22,7 +24,8 @@ class ConsumerNode(Node):
         super(ConsumerNode, self).__init__(enabled)
 
         self.producer_tag = "producer"
-        self.producer_sub = self.define_subscription(self.producer_tag, queue_size=1)
+        self.producer_sub = self.define_subscription(self.producer_tag, queue_size=1,
+                                                     error_on_full_queue=DEMONSTRATE_ERROR)
         self.producer_queue = None
         self.producer = None
 

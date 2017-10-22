@@ -9,8 +9,8 @@ class MyArduino(Arduino):
     def __init__(self, enabled=True):
         super(MyArduino, self).__init__(
             self.name, enabled=enabled,
-            # logger=self.make_logger(level=30)
         )
+        # self.set_logger(level=30)
 
     async def loop(self):
         arduino_start_time = self.start_time

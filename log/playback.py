@@ -16,7 +16,7 @@ class PlaybackNode(Node):
             logger = make_logger(
                 self.__class__.__name__, default_settings, write=False,
                 log_format="[Playback Node][%(name)s][%(levelname)s] %(asctime)s: %(message)s")
-        super(PlaybackNode, self).__init__(enabled, logger)
+        super(PlaybackNode, self).__init__(enabled, logger=logger)
 
         self.update_rate = update_rate
 

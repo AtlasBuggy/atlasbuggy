@@ -12,9 +12,9 @@ class DiffBaudArduino(Arduino):
             self.name,
             baud=9600,
             enabled=enabled,
-            logger=self.make_logger(write=True, file_name="changing_baud_rate_demo.log",
-                                    directory=os.path.join("logs", "changing_baud_rate_demo", "%(name)s"))
         )
+        self.set_logger(write=True, file_name="changing_baud_rate_demo.log",
+                        directory=os.path.join("logs", "changing_baud_rate_demo", "%(name)s"))
         self.max_log_buf_size = 1024
 
     async def loop(self):

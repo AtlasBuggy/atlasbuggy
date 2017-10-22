@@ -148,6 +148,29 @@ class Orchestrator:
         # find a suitable subscription
         for subscription in consumer.producer_subs:
             if subscription.tag == tag:
+
+                if subscription.required_attributes is not None:
+                    missing_attributes = []
+                    for attribute_name in subscription.required_attributes:
+                        if not hasattr(producer, attribute_name):
+                            missing_attributes.append(attribute_name)
+
+                    if len(missing_attributes) > 0:
+                        raise ValueError("Producer '%s' is missing attributes requested by consumer '%s': '%s'" % (
+                            producer, consumer, missing_attributes
+                        ))
+
+                if subscription.required_methods is not None:
+                    missing_methods = []
+                    for method_name in subscription.required_methods:
+                        if not hasattr(producer, method_name) or not callable(getattr(producer, method_name)):
+                            missing_methods.append(method_name)
+
+                    if len(missing_methods) > 0:
+                        raise ValueError("Producer '%s' is missing methods requested by consumer '%s': '%s'" % (
+                            producer, consumer, missing_methods
+                        ))
+
                 if subscription.expected_producer_classes is None:
                     matched_subscription = subscription
                     break
@@ -159,28 +182,6 @@ class Orchestrator:
                     if matched_subscription is not None:
                         break
 
-            if subscription.required_attributes is not None:
-                missing_attributes = []
-                for attribute_name in subscription.required_attributes:
-                    if not hasattr(producer, attribute_name):
-                        missing_attributes.append(attribute_name)
-
-                if len(missing_attributes) > 0:
-                    raise ValueError("Producer '%s' is missing attributes requested by consumer '%s': '%s'" % (
-                        producer, consumer, missing_attributes
-                    ))
-
-            if subscription.required_methods is not None:
-                missing_methods= []
-                for method_name in subscription.required_methods:
-                    if not hasattr(producer, method_name) or not callable(getattr(producer, method_name)):
-                        missing_methods.append(method_name)
-
-                if len(missing_methods) > 0:
-                    raise ValueError("Producer '%s' is missing methods requested by consumer '%s': '%s'" % (
-                        producer, consumer, missing_methods
-                    ))
-
         if matched_subscription is None:
             raise ValueError("No matching subscriptions found between '%s' and '%s'" % (producer, consumer))
 
@@ -191,6 +192,8 @@ class Orchestrator:
         matched_subscription.consumer_node = consumer
         matched_subscription.set_event_loop(self.event_loop)
         matched_subscription.message_converter = message_converter
+        consumer.subscription_tags.add(tag)
+
         producer.append_subscription(matched_subscription)
 
     def __str__(self):

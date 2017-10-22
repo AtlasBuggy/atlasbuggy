@@ -8,15 +8,18 @@ from .log import default
 
 
 class Node:
-    def __init__(self, enabled=True, logger=None):
+    def __init__(self, enabled=True, name=None, logger=None):
         self.enabled = enabled
-        if logger is None:
-            self.logger = make_logger(self.name, default.default_settings)
-        else:
-            self.logger = logger
+        self._name = name
+        if not self.is_logger_created():
+            if logger is None:
+                self.logger = make_logger(self.name, default.default_settings)
+            else:
+                self.logger = logger
 
         self.producer_subs = []
         self.consumer_subs = []
+        self.subscription_tags = set()
         self.services = {}
 
         self.event_loop = None  # assigned by the orchestrator when orchestrator.add_nodes is called
@@ -28,10 +31,22 @@ class Node:
 
     @property
     def name(self):
-        return self.__class__.__name__
+        if not hasattr(self, "_name") or self._name is None:
+            return self.__class__.__name__
+        else:
+            return self._name
 
-    def make_logger(self, *args, **kwargs):
-        return make_logger(self.name, default.default_settings, *args, **kwargs)
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    def set_logger(self, *args, **kwargs):
+        if self.is_logger_created():
+            raise ValueError("A logger was created for this node already. Call this before the call to super().")
+        self.logger = make_logger(self.name, default.default_settings, *args, **kwargs)
+
+    def is_logger_created(self):
+        return hasattr(self, "logger")
 
     def log_to_buffer(self, timestamp, message, level=logging.DEBUG):
         self.log_buffer += "[%s, %s]: %s\n" % (logging.getLevelName(level), timestamp, message)
@@ -71,8 +86,27 @@ class Node:
     def take(self):
         pass
 
-    def _find_matching_subscription(self, message, service):
+    def producer_has_attributes(self, subscription, *attribute_names):
+        producer = subscription.get_producer()
+        for attribute_name in attribute_names:
+            if not hasattr(producer, attribute_name):
+                return False
+
+        return True
+
+    def producer_has_methods(self, subscription, *method_names):
+        producer = subscription.get_producer()
+        for method_name in method_names:
+            if not hasattr(producer, method_name) or not callable(getattr(producer, method_name)):
+                return False
+
+        return True
+
+    def _find_matching_subscriptions(self, message, service):
+        results = []
         for subscription in self.consumer_subs:
+            if not subscription.enabled:
+                continue
             if subscription.expected_message_types is not None:
                 if subscription.message_converter is not None:
                     message = subscription.message_converter(message)
@@ -88,36 +122,62 @@ class Node:
                             subscription.consumer_node, subscription.expected_message_types,
                             subscription.producer_node, type(message)))
             if service == subscription.requested_service:
-                return subscription, message
+                results.append((subscription, message))
+        return results
 
     @asyncio.coroutine
     def broadcast(self, message, service="default"):
-        matched_subscription, message = self._find_matching_subscription(message, service)
+        results = self._find_matching_subscriptions(message, service)
 
-        if matched_subscription is None:
+        if len(results) == 0:
             yield from asyncio.sleep(0.0)
         else:
-            yield from matched_subscription.queue.put(message)
+            for matched_subscription, message in results:
+                if matched_subscription.error_on_full_queue:
+                    yield from matched_subscription.queue.put(message)
+                else:
+                    try:
+                        yield from matched_subscription.queue.put(message)
+                    except asyncio.QueueFull:
+                        self.logger.info(
+                            "Producer '%s' is trying to put a message on consumer '%s's queue, but it is full" % (
+                                matched_subscription.producer_node, matched_subscription.consumer_node
+                            )
+                        )
 
     def broadcast_nowait(self, message, service="default"):
-        matched_subscription, message = self._find_matching_subscription(message, service)
-        if matched_subscription is not None:
-            if matched_subscription.error_on_full_queue:
-                matched_subscription.queue.put_nowait(message)
-            else:
-                try:
-                    matched_subscription.queue.put_nowait(message)
-                except asyncio.QueueFull:
-                    self.logger.info(
-                        "Producer '%s' is trying to put a message on consumer '%s's queue, but it is full" %
-                        (matched_subscription.producer_node, matched_subscription.consumer_node))
+        results = self._find_matching_subscriptions(message, service)
 
-    def define_subscription(self, tag, service="default", message_type=None, producer_type=None,
-                            queue_size=None, error_on_full_queue=True, required_attributes=None, required_methods=None):
-        subscription = Subscription(tag, service, message_type, producer_type, queue_size, error_on_full_queue,
+        if len(results) != 0:
+            for matched_subscription, message in results:
+                if matched_subscription.error_on_full_queue:
+                    matched_subscription.queue.put_nowait(message)
+                else:
+                    try:
+                        matched_subscription.queue.put_nowait(message)
+                    except asyncio.QueueFull:
+                        self.logger.info(
+                            "Producer '%s' is trying to put a message on consumer '%s's queue, but it is full" % (
+                                matched_subscription.producer_node, matched_subscription.consumer_node
+                            )
+                        )
+
+    def define_subscription(self, tag, service="default",
+                            is_required=True,
+                            message_type=None,
+                            producer_type=None,
+                            queue_size=None,
+                            error_on_full_queue=False,
+                            required_attributes=None,
+                            required_methods=None):
+
+        subscription = Subscription(tag, service, is_required, message_type, producer_type, queue_size, error_on_full_queue,
                                     required_attributes, required_methods)
         self.producer_subs.append(subscription)
         return subscription
+
+    def is_subscribed(self, tag):
+        return tag in self.subscription_tags
 
     def define_service(self, service="default", message_type=None):
         self.services[service] = message_type

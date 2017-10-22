@@ -121,7 +121,6 @@ class FastArduino(Arduino):
     def __init__(self, enabled=True):
         super(FastArduino, self).__init__(
             self.name, enabled=enabled,
-            # logger=self.make_logger(level=30)
         )
 
     async def loop(self):
@@ -152,7 +151,6 @@ class SlowArduino(Arduino):
     def __init__(self, enabled=True):
         super(SlowArduino, self).__init__(
             self.name, enabled=enabled,
-            # logger=self.make_logger(level=30)
         )
 
     async def loop(self):

@@ -4,7 +4,8 @@ import logging
 
 
 def make_logger(name, default_settings, level=None,
-                write=None, log_format=None, file_name=None, directory=None, custom_fields_fn=None):
+                write=None, log_format=None, file_name=None, directory=None, custom_fields_fn=None,
+                logger=None):
     # log_queue = queue.Queue(-1)  # no limit on size
     # queue_handler = handlers.QueueHandler(log_queue)
 
@@ -16,7 +17,8 @@ def make_logger(name, default_settings, level=None,
 
     # listener = handlers.QueueListener(log_queue, print_handle)
 
-    logger = logging.getLogger(name)
+    if logger is None:
+        logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
 
     # logger.addHandler(queue_handler)
