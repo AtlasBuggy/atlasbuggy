@@ -125,26 +125,26 @@ class FastArduino(Arduino):
         )
 
     async def loop(self):
+        arduino_start_time = self.start_time
+        message = FastArduinoMessage(
+            arduino_start_time=arduino_start_time
+        )
+        await self.broadcast([message])
+
         while self.device_active():
             while not self.device_read_queue.empty():
-                packet_time, packet = self.device_read_queue.get()
-                if packet_time < 0:
-                    arduino_start_time = -packet_time
-                    self.logger.info("initialization data: %s. Start time: %s" % (packet, arduino_start_time))
-
-                    self.logger.info("Start time: %s" % arduino_start_time)
-                    message = FastArduinoMessage(
-                        arduino_start_time=arduino_start_time
-                    )
-                else:
+                packet_time, packets = self.device_read_queue.get()
+                messages = []
+                for packet in packets:
                     arduino_time, item1, item2 = [float(x) for x in packet.split("\t")]
                     message = FastArduinoMessage(
                         packet_time, arduino_time / 1000,
                         item1, item2
                     )
 
-                self.log_to_buffer(packet_time, message)
-                await self.broadcast(message)
+                    messages.append(message)
+                self.log_to_buffer(packet_time, messages)
+                await self.broadcast(messages)
             await asyncio.sleep(0.0)
 
 
@@ -156,26 +156,24 @@ class SlowArduino(Arduino):
         )
 
     async def loop(self):
+        arduino_start_time = self.start_time
+        message = SlowArduinoMessage(
+            arduino_start_time=arduino_start_time
+        )
+        await self.broadcast(message)
+
         while self.device_active():
             while not self.device_read_queue.empty():
-                packet_time, packet = self.device_read_queue.get()
-                if packet_time < 0:
-                    arduino_start_time = -packet_time
-                    self.logger.info("initialization data: %s. Start time: %s" % (packet, arduino_start_time))
-
-                    self.logger.info("Start time: %s" % arduino_start_time)
-                    message = SlowArduinoMessage(
-                        arduino_start_time=arduino_start_time
-                    )
-                else:
+                packet_time, packets = self.device_read_queue.get()
+                for packet in packets:
                     arduino_time, array = packet.split(";")
                     array = [int(x) for x in array.split(",")]
                     message = SlowArduinoMessage(
                         packet_time, float(arduino_time) / 1000,
                         array
                     )
-                self.log_to_buffer(packet_time, message)
-                await self.broadcast(message)
+                    self.log_to_buffer(packet_time, message)
+                    await self.broadcast(message)
             await asyncio.sleep(0.0)
 
 
@@ -184,12 +182,16 @@ class AlgorithmNode(Node):
         super(AlgorithmNode, self).__init__(enabled)
 
         self.fast_sensor_tag = "fast"
-        self.fast_sensor_sub = self.define_subscription(self.fast_sensor_tag, message_type=FastArduinoMessage)
+        self.fast_sensor_sub = self.define_subscription(self.fast_sensor_tag, message_type=list,
+                                                        required_methods=("write",))
         self.fast_sensor_queue = None
+        self.fast_sensor = None
 
         self.slow_sensor_tag = "slow"
-        self.slow_sensor_sub = self.define_subscription(self.slow_sensor_tag, message_type=SlowArduinoMessage)
+        self.slow_sensor_sub = self.define_subscription(self.slow_sensor_tag, message_type=SlowArduinoMessage,
+                                                        required_methods=("write",))
         self.slow_sensor_queue = None
+        self.slow_sensor = None
 
         self.slow_avg_sum = 0
         self.slow_avg_count = 0
@@ -197,11 +199,23 @@ class AlgorithmNode(Node):
         self.fast_avg_sum = 0
         self.fast_avg_count = 0
 
+        self.slow_min_delay = None
+        self.slow_max_delay = None
+
+        self.fast_min_delay = None
+        self.fast_max_delay = None
+
     def take(self):
         self.fast_sensor_queue = self.fast_sensor_sub.get_queue()
         self.slow_sensor_queue = self.slow_sensor_sub.get_queue()
 
+        self.fast_sensor = self.fast_sensor_sub.get_producer()
+        self.slow_sensor = self.slow_sensor_sub.get_producer()
+
     async def loop(self):
+        fast_prev_time = time.time()
+        slow_prev_time = time.time()
+
         while True:
             fast_sensor_messages = []
             if self.fast_sensor_queue.empty():
@@ -209,25 +223,25 @@ class AlgorithmNode(Node):
                 continue
 
             while not self.fast_sensor_queue.empty():
-                message = await self.fast_sensor_queue.get()
+                messages = await self.fast_sensor_queue.get()
+                for message in messages:
+                    if message.is_initialization:
+                        self.logger.info("got initialization message: %s" % message)
+                    else:
+                        consumer_time = time.time()
+                        message_delay = consumer_time - message.timestamp
+                        fast_sensor_messages.append(message)
+                        self.fast_avg_sum += message_delay
+                        self.fast_avg_count += 1
+                        self.log_to_buffer(consumer_time, "got fast message: %s, delay: %s" % (message, message_delay))
 
-                if message.is_initialization:
-                    self.logger.info("got initialization message: %s" % message)
-                else:
-                    consumer_time = time.time()
-                    message_delay = consumer_time - message.timestamp
-                    fast_sensor_messages.append(message)
-                    self.fast_avg_sum += message_delay
-                    self.fast_avg_count += 1
-                    self.log_to_buffer(consumer_time, "got fast message: %s, delay: %s" % (message, message_delay))
+                        if self.fast_max_delay is None or message_delay > self.fast_max_delay:
+                            self.fast_max_delay = message_delay
+
+                        if self.fast_min_delay is None or message_delay < self.fast_min_delay:
+                            self.fast_min_delay = message_delay
 
             if len(fast_sensor_messages) > 1:
-                # 100 Hz / 10 Hz = 10 fast sensor messages to every 1 slow message
-                # if len(fast_sensor_messages) != 10:
-                #     self.logger.warning(
-                #         "Received %s fast sensor messages as opposed to 10!" % len(fast_sensor_messages))
-                self.logger.info("averaging fast %s messages" % len(fast_sensor_messages))
-
                 fast_sensor_messages[0].average(*fast_sensor_messages[1:])
                 fast_sensor_message = fast_sensor_messages[0]
                 consumer_time = time.time()
@@ -240,18 +254,34 @@ class AlgorithmNode(Node):
                 self.log_to_buffer(consumer_time,
                                    ("got slow message: %s, delay: %s" % (slow_sensor_message, message_delay)))
 
+                if self.slow_max_delay is None or message_delay > self.slow_max_delay:
+                    self.slow_max_delay = message_delay
+
+                if self.slow_min_delay is None or message_delay < self.slow_min_delay:
+                    self.slow_min_delay = message_delay
+
                 self.slow_avg_sum += message_delay
                 self.slow_avg_count += 1
 
+            if time.time() - fast_prev_time > 0.15:
+                self.fast_sensor.write("toggle")
+                fast_prev_time = time.time()
+
+            if time.time() - slow_prev_time > 0.15:
+                self.slow_sensor.write("toggle")
+                slow_prev_time = time.time()
+
     async def teardown(self):
-        self.logger.info("fast arduino avg delay: %s" % (self.fast_avg_sum / self.fast_avg_count))
-        self.logger.info("slow arduino avg delay: %s" % (self.slow_avg_sum / self.slow_avg_count))
+        self.logger.info("fast arduino avg delay: %s, max: %s, min: %s" % (
+            self.fast_avg_sum / self.fast_avg_count, self.fast_max_delay, self.fast_min_delay))
+        self.logger.info("slow arduino avg delay: %s, max: %s, min: %s" % (
+            self.slow_avg_sum / self.slow_avg_count, self.slow_max_delay, self.slow_min_delay))
 
 
 class MyOrchestrator(Orchestrator):
     def __init__(self, event_loop):
         self.set_default(write=True, file_name="multiple_arduinos_demo.log",
-                         directory=os.path.join("logs", "multiple_producers_demo", "%(name)s"))
+                         directory=os.path.join("logs", "multiple_arduinos_demo", "%(name)s"))
         super(MyOrchestrator, self).__init__(event_loop)
 
         fast_sensor = FastArduino()

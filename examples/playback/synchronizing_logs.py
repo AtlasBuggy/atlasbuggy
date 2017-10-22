@@ -1,10 +1,7 @@
 
 from atlasbuggy.log.playback import PlaybackNode
 
-try:
-    from examples.subscriptions.multiple_producers import *
-except ImportError:
-    from ..subscriptions.multiple_producers import *
+from atlasbuggy.examples.subscriptions.multiple_producers import *
 
 
 class FastSensorPlayback(PlaybackNode):

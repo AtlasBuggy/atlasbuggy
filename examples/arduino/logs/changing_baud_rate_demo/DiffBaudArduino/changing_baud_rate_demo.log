@@ -1,0 +1,318 @@
+[DiffBaudArduino @ factory.py:83][DEBUG] 2017-10-20 22:51:28,798: Logging to: logs/changing_baud_rate_demo/DiffBaudArduino/changing_baud_rate_demo.log
+[DiffBaudArduino @ arduino.py:70][INFO] 2017-10-20 22:51:28,800: configuring for the first time. whoiam=DiffBaudArduino
+[DiffBaudArduino @ arduino.py:73][INFO] 2017-10-20 22:51:28,802: Found suitable addresses: '['/dev/cu.usbserial-00001014', '/dev/cu.SLAB_USBtoUART']'
+[DiffBaudArduino @ arduino.py:287][DEBUG] 2017-10-20 22:51:28,807: Checking 'whoareyou' protocol
+[DiffBaudArduino @ arduino.py:287][DEBUG] 2017-10-20 22:51:28,807: Checking 'whoareyou' protocol
+[DiffBaudArduino @ arduino.py:318][DEBUG] 2017-10-20 22:51:28,822: Empty packet! Contained only \n
+[DiffBaudArduino @ arduino.py:331][DEBUG] 2017-10-20 22:51:29,408: Writing 'whoareyou' again
+[DiffBaudArduino @ arduino.py:331][DEBUG] 2017-10-20 22:51:29,408: Writing 'whoareyou' again
+[DiffBaudArduino @ arduino.py:331][DEBUG] 2017-10-20 22:51:29,707: Writing 'whoareyou' again
+[DiffBaudArduino @ arduino.py:331][DEBUG] 2017-10-20 22:51:29,708: Writing 'whoareyou' again
+[DiffBaudArduino @ arduino.py:318][DEBUG] 2017-10-20 22:51:29,911: Empty packet! Contained only \n
+[DiffBaudArduino @ arduino.py:321][DEBUG] 2017-10-20 22:51:29,911: received packet: 'iamDiffBaudArduino'
+[DiffBaudArduino @ arduino.py:321][DEBUG] 2017-10-20 22:51:29,911: received packet: 'iamMyArduino'
+[DiffBaudArduino @ arduino.py:250][DEBUG] 2017-10-20 22:51:29,911: Found ID 'DiffBaudArduino'
+[DiffBaudArduino @ arduino.py:250][DEBUG] 2017-10-20 22:51:29,911: Found ID 'MyArduino'
+[DiffBaudArduino @ arduino.py:287][DEBUG] 2017-10-20 22:51:29,911: Checking 'init?' protocol
+[DiffBaudArduino @ arduino.py:287][DEBUG] 2017-10-20 22:51:29,911: Checking 'init?' protocol
+[DiffBaudArduino @ arduino.py:321][DEBUG] 2017-10-20 22:51:30,013: received packet: 'init:0\t0\t0'
+[DiffBaudArduino @ arduino.py:272][DEBUG] 2017-10-20 22:51:30,013: sent initialization data: '0\t0\t0'
+[DiffBaudArduino @ arduino.py:120][INFO] 2017-10-20 22:51:30,013: address '/dev/cu.SLAB_USBtoUART' has ID 'MyArduino'
+[DiffBaudArduino @ arduino.py:321][DEBUG] 2017-10-20 22:51:30,023: received packet: 'init:0\t0\t0'
+[DiffBaudArduino @ arduino.py:272][DEBUG] 2017-10-20 22:51:30,023: sent initialization data: '0\t0\t0'
+[DiffBaudArduino @ arduino.py:120][INFO] 2017-10-20 22:51:30,023: address '/dev/cu.usbserial-00001014' has ID 'DiffBaudArduino'
+[DiffBaudArduino @ arduino.py:80][INFO] 2017-10-20 22:51:30,023: configuring done. Finding whoiam=DiffBaudArduino
+[DiffBaudArduino @ changing_baud_rate.py:23][INFO] 2017-10-20 22:51:30,026: initialization data: 0	0	0. Start time: 1508554288.822154
+[DiffBaudArduino @ arduino.py:132][INFO] 2017-10-20 22:51:30,038: Device named 'DiffBaudArduino' at '/dev/cu.usbserial-00001014' is now at baud rate '9600'
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:30,408: [log buffer start]
+[DEBUG, 1508554290.249887]: t=727.0, item1=0.0, item2=0.0
+[DEBUG, 1508554290.250199]: t=729.0, item1=1.0, item2=2.0
+[DEBUG, 1508554290.264705]: t=730.0, item1=2.0, item2=4.0
+[DEBUG, 1508554290.26484]: t=731.0, item1=3.0, item2=6.0
+[DEBUG, 1508554290.2801259]: t=733.0, item1=4.0, item2=8.0
+[DEBUG, 1508554290.280202]: t=734.0, item1=5.0, item2=10.0
+[DEBUG, 1508554290.296064]: t=735.0, item1=6.0, item2=12.0
+[DEBUG, 1508554290.312226]: t=736.0, item1=7.0, item2=14.0
+[DEBUG, 1508554290.3123]: t=738.0, item1=8.0, item2=16.0
+[DEBUG, 1508554290.328021]: t=740.0, item1=9.0, item2=18.0
+[DEBUG, 1508554290.32808]: t=749.0, item1=10.0, item2=20.0
+[DEBUG, 1508554290.3440351]: t=759.0, item1=11.0, item2=22.0
+[DEBUG, 1508554290.3600059]: t=770.0, item1=12.0, item2=24.0
+[DEBUG, 1508554290.360092]: t=780.0, item1=13.0, item2=26.0
+[DEBUG, 1508554290.376083]: t=791.0, item1=14.0, item2=28.0
+[DEBUG, 1508554290.392245]: t=801.0, item1=15.0, item2=30.0
+[DEBUG, 1508554290.392321]: t=812.0, item1=16.0, item2=32.0
+[DEBUG, 1508554290.408236]: t=822.0, item1=17.0, item2=34.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:30,408: logging message buffer (len=1099)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:30,584: [log buffer start]
+[DEBUG, 1508554290.4246469]: t=832.0, item1=18.0, item2=36.0
+[DEBUG, 1508554290.424705]: t=842.0, item1=19.0, item2=38.0
+[DEBUG, 1508554290.440508]: t=854.0, item1=20.0, item2=40.0
+[DEBUG, 1508554290.456494]: t=864.0, item1=21.0, item2=42.0
+[DEBUG, 1508554290.456575]: t=874.0, item1=22.0, item2=44.0
+[DEBUG, 1508554290.472456]: t=884.0, item1=23.0, item2=46.0
+[DEBUG, 1508554290.4883819]: t=894.0, item1=24.0, item2=48.0
+[DEBUG, 1508554290.488436]: t=905.0, item1=25.0, item2=50.0
+[DEBUG, 1508554290.5043762]: t=915.0, item1=26.0, item2=52.0
+[DEBUG, 1508554290.520192]: t=926.0, item1=27.0, item2=54.0
+[DEBUG, 1508554290.520262]: t=936.0, item1=28.0, item2=56.0
+[DEBUG, 1508554290.53691]: t=947.0, item1=29.0, item2=58.0
+[DEBUG, 1508554290.5369642]: t=957.0, item1=30.0, item2=60.0
+[DEBUG, 1508554290.5528588]: t=967.0, item1=31.0, item2=62.0
+[DEBUG, 1508554290.568841]: t=977.0, item1=32.0, item2=64.0
+[DEBUG, 1508554290.568892]: t=989.0, item1=33.0, item2=66.0
+[DEBUG, 1508554290.5846982]: t=999.0, item1=34.0, item2=68.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:30,584: logging message buffer (len=1060)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:30,777: [log buffer start]
+[DEBUG, 1508554290.6007]: t=1009.0, item1=35.0, item2=70.0
+[DEBUG, 1508554290.600757]: t=1020.0, item1=36.0, item2=72.0
+[DEBUG, 1508554290.616767]: t=1032.0, item1=37.0, item2=74.0
+[DEBUG, 1508554290.632812]: t=1043.0, item1=38.0, item2=76.0
+[DEBUG, 1508554290.6487129]: t=1055.0, item1=39.0, item2=78.0
+[DEBUG, 1508554290.648768]: t=1067.0, item1=40.0, item2=80.0
+[DEBUG, 1508554290.6648152]: t=1078.0, item1=41.0, item2=82.0
+[DEBUG, 1508554290.680752]: t=1089.0, item1=42.0, item2=84.0
+[DEBUG, 1508554290.680806]: t=1100.0, item1=43.0, item2=86.0
+[DEBUG, 1508554290.696813]: t=1112.0, item1=44.0, item2=88.0
+[DEBUG, 1508554290.7127922]: t=1124.0, item1=45.0, item2=90.0
+[DEBUG, 1508554290.7287612]: t=1135.0, item1=46.0, item2=92.0
+[DEBUG, 1508554290.728815]: t=1146.0, item1=47.0, item2=94.0
+[DEBUG, 1508554290.7447958]: t=1158.0, item1=48.0, item2=96.0
+[DEBUG, 1508554290.7609432]: t=1169.0, item1=49.0, item2=98.0
+[DEBUG, 1508554290.777247]: t=1180.0, item1=50.0, item2=100.0
+[DEBUG, 1508554290.7773252]: t=1193.0, item1=51.0, item2=102.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:30,777: logging message buffer (len=1079)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:31,001: [log buffer start]
+[DEBUG, 1508554290.792702]: t=1206.0, item1=52.0, item2=104.0
+[DEBUG, 1508554290.809056]: t=1218.0, item1=53.0, item2=106.0
+[DEBUG, 1508554290.825165]: t=1230.0, item1=54.0, item2=108.0
+[DEBUG, 1508554290.825227]: t=1243.0, item1=55.0, item2=110.0
+[DEBUG, 1508554290.84108]: t=1256.0, item1=56.0, item2=112.0
+[DEBUG, 1508554290.856896]: t=1268.0, item1=57.0, item2=114.0
+[DEBUG, 1508554290.872951]: t=1281.0, item1=58.0, item2=116.0
+[DEBUG, 1508554290.889002]: t=1293.0, item1=59.0, item2=118.0
+[DEBUG, 1508554290.8890612]: t=1305.0, item1=60.0, item2=120.0
+[DEBUG, 1508554290.904926]: t=1317.0, item1=61.0, item2=122.0
+[DEBUG, 1508554290.920817]: t=1331.0, item1=62.0, item2=124.0
+[DEBUG, 1508554290.936795]: t=1343.0, item1=63.0, item2=126.0
+[DEBUG, 1508554290.936853]: t=1355.0, item1=64.0, item2=128.0
+[DEBUG, 1508554290.95278]: t=1368.0, item1=65.0, item2=130.0
+[DEBUG, 1508554290.968915]: t=1380.0, item1=66.0, item2=132.0
+[DEBUG, 1508554290.9851892]: t=1393.0, item1=67.0, item2=134.0
+[DEBUG, 1508554291.001097]: t=1405.0, item1=68.0, item2=136.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:31,001: logging message buffer (len=1089)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:31,209: [log buffer start]
+[DEBUG, 1508554291.001451]: t=1418.0, item1=69.0, item2=138.0
+[DEBUG, 1508554291.0168908]: t=1430.0, item1=70.0, item2=140.0
+[DEBUG, 1508554291.033521]: t=1442.0, item1=71.0, item2=142.0
+[DEBUG, 1508554291.049319]: t=1456.0, item1=72.0, item2=144.0
+[DEBUG, 1508554291.049386]: t=1468.0, item1=73.0, item2=146.0
+[DEBUG, 1508554291.065247]: t=1480.0, item1=74.0, item2=148.0
+[DEBUG, 1508554291.081515]: t=1492.0, item1=75.0, item2=150.0
+[DEBUG, 1508554291.097721]: t=1505.0, item1=76.0, item2=152.0
+[DEBUG, 1508554291.113256]: t=1517.0, item1=77.0, item2=154.0
+[DEBUG, 1508554291.113317]: t=1530.0, item1=78.0, item2=156.0
+[DEBUG, 1508554291.129079]: t=1543.0, item1=79.0, item2=158.0
+[DEBUG, 1508554291.145112]: t=1555.0, item1=80.0, item2=160.0
+[DEBUG, 1508554291.1611898]: t=1567.0, item1=81.0, item2=162.0
+[DEBUG, 1508554291.161249]: t=1580.0, item1=82.0, item2=164.0
+[DEBUG, 1508554291.177721]: t=1593.0, item1=83.0, item2=166.0
+[DEBUG, 1508554291.193502]: t=1605.0, item1=84.0, item2=168.0
+[DEBUG, 1508554291.209713]: t=1617.0, item1=85.0, item2=170.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:31,209: logging message buffer (len=1091)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:31,417: [log buffer start]
+[DEBUG, 1508554291.2253141]: t=1630.0, item1=86.0, item2=172.0
+[DEBUG, 1508554291.225426]: t=1642.0, item1=87.0, item2=174.0
+[DEBUG, 1508554291.241869]: t=1655.0, item1=88.0, item2=176.0
+[DEBUG, 1508554291.257496]: t=1668.0, item1=89.0, item2=178.0
+[DEBUG, 1508554291.273762]: t=1680.0, item1=90.0, item2=180.0
+[DEBUG, 1508554291.273932]: t=1692.0, item1=91.0, item2=182.0
+[DEBUG, 1508554291.289818]: t=1704.0, item1=92.0, item2=184.0
+[DEBUG, 1508554291.305523]: t=1717.0, item1=93.0, item2=186.0
+[DEBUG, 1508554291.3218849]: t=1730.0, item1=94.0, item2=188.0
+[DEBUG, 1508554291.3379898]: t=1742.0, item1=95.0, item2=190.0
+[DEBUG, 1508554291.338062]: t=1755.0, item1=96.0, item2=192.0
+[DEBUG, 1508554291.3535922]: t=1767.0, item1=97.0, item2=194.0
+[DEBUG, 1508554291.369486]: t=1779.0, item1=98.0, item2=196.0
+[DEBUG, 1508554291.385582]: t=1793.0, item1=99.0, item2=198.0
+[DEBUG, 1508554291.40171]: t=1805.0, item1=100.0, item2=200.0
+[DEBUG, 1508554291.4017642]: t=1818.0, item1=101.0, item2=202.0
+[DEBUG, 1508554291.417871]: t=1831.0, item1=102.0, item2=204.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:31,418: logging message buffer (len=1096)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:31,642: [log buffer start]
+[DEBUG, 1508554291.4338849]: t=1845.0, item1=103.0, item2=206.0
+[DEBUG, 1508554291.449734]: t=1859.0, item1=104.0, item2=208.0
+[DEBUG, 1508554291.465871]: t=1872.0, item1=105.0, item2=210.0
+[DEBUG, 1508554291.481889]: t=1886.0, item1=106.0, item2=212.0
+[DEBUG, 1508554291.481956]: t=1899.0, item1=107.0, item2=214.0
+[DEBUG, 1508554291.497828]: t=1912.0, item1=108.0, item2=216.0
+[DEBUG, 1508554291.514163]: t=1927.0, item1=109.0, item2=218.0
+[DEBUG, 1508554291.529783]: t=1940.0, item1=110.0, item2=220.0
+[DEBUG, 1508554291.545992]: t=1953.0, item1=111.0, item2=222.0
+[DEBUG, 1508554291.562229]: t=1967.0, item1=112.0, item2=224.0
+[DEBUG, 1508554291.562288]: t=1980.0, item1=113.0, item2=226.0
+[DEBUG, 1508554291.5776498]: t=1994.0, item1=114.0, item2=228.0
+[DEBUG, 1508554291.5941892]: t=2008.0, item1=115.0, item2=230.0
+[DEBUG, 1508554291.610046]: t=2021.0, item1=116.0, item2=232.0
+[DEBUG, 1508554291.6261172]: t=2034.0, item1=117.0, item2=234.0
+[DEBUG, 1508554291.642133]: t=2048.0, item1=118.0, item2=236.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:31,642: logging message buffer (len=1047)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:31,850: [log buffer start]
+[DEBUG, 1508554291.658221]: t=2062.0, item1=119.0, item2=238.0
+[DEBUG, 1508554291.6582808]: t=2075.0, item1=120.0, item2=240.0
+[DEBUG, 1508554291.674091]: t=2088.0, item1=121.0, item2=242.0
+[DEBUG, 1508554291.690054]: t=2102.0, item1=122.0, item2=244.0
+[DEBUG, 1508554291.7061791]: t=2115.0, item1=123.0, item2=246.0
+[DEBUG, 1508554291.722094]: t=2129.0, item1=124.0, item2=248.0
+[DEBUG, 1508554291.7380118]: t=2143.0, item1=125.0, item2=250.0
+[DEBUG, 1508554291.738077]: t=2156.0, item1=126.0, item2=252.0
+[DEBUG, 1508554291.754251]: t=2169.0, item1=127.0, item2=254.0
+[DEBUG, 1508554291.7701938]: t=2183.0, item1=128.0, item2=256.0
+[DEBUG, 1508554291.7862551]: t=2197.0, item1=129.0, item2=258.0
+[DEBUG, 1508554291.8022761]: t=2210.0, item1=130.0, item2=260.0
+[DEBUG, 1508554291.8182971]: t=2224.0, item1=131.0, item2=262.0
+[DEBUG, 1508554291.818379]: t=2237.0, item1=132.0, item2=264.0
+[DEBUG, 1508554291.8346372]: t=2251.0, item1=133.0, item2=266.0
+[DEBUG, 1508554291.850867]: t=2265.0, item1=134.0, item2=268.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:31,851: logging message buffer (len=1051)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:32,074: [log buffer start]
+[DEBUG, 1508554291.866688]: t=2278.0, item1=135.0, item2=270.0
+[DEBUG, 1508554291.882659]: t=2291.0, item1=136.0, item2=272.0
+[DEBUG, 1508554291.898305]: t=2305.0, item1=137.0, item2=274.0
+[DEBUG, 1508554291.9144168]: t=2319.0, item1=138.0, item2=276.0
+[DEBUG, 1508554291.914478]: t=2332.0, item1=139.0, item2=278.0
+[DEBUG, 1508554291.930468]: t=2345.0, item1=140.0, item2=280.0
+[DEBUG, 1508554291.9464698]: t=2359.0, item1=141.0, item2=282.0
+[DEBUG, 1508554291.962514]: t=2372.0, item1=142.0, item2=284.0
+[DEBUG, 1508554291.978561]: t=2386.0, item1=143.0, item2=286.0
+[DEBUG, 1508554291.994694]: t=2400.0, item1=144.0, item2=288.0
+[DEBUG, 1508554291.994745]: t=2413.0, item1=145.0, item2=290.0
+[DEBUG, 1508554292.010729]: t=2426.0, item1=146.0, item2=292.0
+[DEBUG, 1508554292.026763]: t=2440.0, item1=147.0, item2=294.0
+[DEBUG, 1508554292.042827]: t=2454.0, item1=148.0, item2=296.0
+[DEBUG, 1508554292.058836]: t=2467.0, item1=149.0, item2=298.0
+[DEBUG, 1508554292.074852]: t=2481.0, item1=150.0, item2=300.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:32,075: logging message buffer (len=1045)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:32,282: [log buffer start]
+[DEBUG, 1508554292.090852]: t=2494.0, item1=151.0, item2=302.0
+[DEBUG, 1508554292.0909061]: t=2507.0, item1=152.0, item2=304.0
+[DEBUG, 1508554292.106421]: t=2522.0, item1=153.0, item2=306.0
+[DEBUG, 1508554292.122954]: t=2535.0, item1=154.0, item2=308.0
+[DEBUG, 1508554292.138946]: t=2548.0, item1=155.0, item2=310.0
+[DEBUG, 1508554292.155006]: t=2562.0, item1=156.0, item2=312.0
+[DEBUG, 1508554292.170979]: t=2575.0, item1=157.0, item2=314.0
+[DEBUG, 1508554292.1710458]: t=2589.0, item1=158.0, item2=316.0
+[DEBUG, 1508554292.186919]: t=2603.0, item1=159.0, item2=318.0
+[DEBUG, 1508554292.203056]: t=2616.0, item1=160.0, item2=320.0
+[DEBUG, 1508554292.219038]: t=2629.0, item1=161.0, item2=322.0
+[DEBUG, 1508554292.2352178]: t=2642.0, item1=162.0, item2=324.0
+[DEBUG, 1508554292.2505898]: t=2657.0, item1=163.0, item2=326.0
+[DEBUG, 1508554292.2506418]: t=2670.0, item1=164.0, item2=328.0
+[DEBUG, 1508554292.2673202]: t=2683.0, item1=165.0, item2=330.0
+[DEBUG, 1508554292.28266]: t=2697.0, item1=166.0, item2=332.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:32,282: logging message buffer (len=1048)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:32,507: [log buffer start]
+[DEBUG, 1508554292.299388]: t=2710.0, item1=167.0, item2=334.0
+[DEBUG, 1508554292.3147871]: t=2724.0, item1=168.0, item2=336.0
+[DEBUG, 1508554292.330851]: t=2738.0, item1=169.0, item2=338.0
+[DEBUG, 1508554292.3470578]: t=2751.0, item1=170.0, item2=340.0
+[DEBUG, 1508554292.3471072]: t=2764.0, item1=171.0, item2=342.0
+[DEBUG, 1508554292.363026]: t=2778.0, item1=172.0, item2=344.0
+[DEBUG, 1508554292.379106]: t=2792.0, item1=173.0, item2=346.0
+[DEBUG, 1508554292.395164]: t=2805.0, item1=174.0, item2=348.0
+[DEBUG, 1508554292.411156]: t=2819.0, item1=175.0, item2=350.0
+[DEBUG, 1508554292.42723]: t=2832.0, item1=176.0, item2=352.0
+[DEBUG, 1508554292.4272819]: t=2845.0, item1=177.0, item2=354.0
+[DEBUG, 1508554292.443153]: t=2860.0, item1=178.0, item2=356.0
+[DEBUG, 1508554292.459208]: t=2873.0, item1=179.0, item2=358.0
+[DEBUG, 1508554292.4751859]: t=2886.0, item1=180.0, item2=360.0
+[DEBUG, 1508554292.491273]: t=2899.0, item1=181.0, item2=362.0
+[DEBUG, 1508554292.507183]: t=2913.0, item1=182.0, item2=364.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:32,507: logging message buffer (len=1047)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:32,715: [log buffer start]
+[DEBUG, 1508554292.523443]: t=2927.0, item1=183.0, item2=366.0
+[DEBUG, 1508554292.523514]: t=2940.0, item1=184.0, item2=368.0
+[DEBUG, 1508554292.5395389]: t=2954.0, item1=185.0, item2=370.0
+[DEBUG, 1508554292.555585]: t=2967.0, item1=186.0, item2=372.0
+[DEBUG, 1508554292.571198]: t=2980.0, item1=187.0, item2=374.0
+[DEBUG, 1508554292.5870981]: t=2995.0, item1=188.0, item2=376.0
+[DEBUG, 1508554292.603621]: t=3008.0, item1=189.0, item2=378.0
+[DEBUG, 1508554292.6036701]: t=3021.0, item1=190.0, item2=380.0
+[DEBUG, 1508554292.619638]: t=3035.0, item1=191.0, item2=382.0
+[DEBUG, 1508554292.635669]: t=3048.0, item1=192.0, item2=384.0
+[DEBUG, 1508554292.651372]: t=3062.0, item1=193.0, item2=386.0
+[DEBUG, 1508554292.6673942]: t=3076.0, item1=194.0, item2=388.0
+[DEBUG, 1508554292.6835022]: t=3089.0, item1=195.0, item2=390.0
+[DEBUG, 1508554292.683582]: t=3102.0, item1=196.0, item2=392.0
+[DEBUG, 1508554292.699645]: t=3117.0, item1=197.0, item2=394.0
+[DEBUG, 1508554292.71569]: t=3130.0, item1=198.0, item2=396.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:32,715: logging message buffer (len=1047)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:32,940: [log buffer start]
+[DEBUG, 1508554292.731869]: t=3143.0, item1=199.0, item2=398.0
+[DEBUG, 1508554292.747499]: t=3156.0, item1=200.0, item2=400.0
+[DEBUG, 1508554292.7637079]: t=3170.0, item1=201.0, item2=402.0
+[DEBUG, 1508554292.77947]: t=3184.0, item1=202.0, item2=404.0
+[DEBUG, 1508554292.779569]: t=3197.0, item1=203.0, item2=406.0
+[DEBUG, 1508554292.795715]: t=3211.0, item1=204.0, item2=408.0
+[DEBUG, 1508554292.81191]: t=3224.0, item1=205.0, item2=410.0
+[DEBUG, 1508554292.8279989]: t=3237.0, item1=206.0, item2=412.0
+[DEBUG, 1508554292.843915]: t=3252.0, item1=207.0, item2=414.0
+[DEBUG, 1508554292.859658]: t=3265.0, item1=208.0, item2=416.0
+[DEBUG, 1508554292.859784]: t=3278.0, item1=209.0, item2=418.0
+[DEBUG, 1508554292.8757162]: t=3292.0, item1=210.0, item2=420.0
+[DEBUG, 1508554292.891646]: t=3305.0, item1=211.0, item2=422.0
+[DEBUG, 1508554292.9077709]: t=3319.0, item1=212.0, item2=424.0
+[DEBUG, 1508554292.9238558]: t=3333.0, item1=213.0, item2=426.0
+[DEBUG, 1508554292.939973]: t=3346.0, item1=214.0, item2=428.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:32,940: logging message buffer (len=1046)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:33,148: [log buffer start]
+[DEBUG, 1508554292.9402912]: t=3359.0, item1=215.0, item2=430.0
+[DEBUG, 1508554292.956185]: t=3373.0, item1=216.0, item2=432.0
+[DEBUG, 1508554292.972123]: t=3387.0, item1=217.0, item2=434.0
+[DEBUG, 1508554292.9880462]: t=3400.0, item1=218.0, item2=436.0
+[DEBUG, 1508554293.004076]: t=3414.0, item1=219.0, item2=438.0
+[DEBUG, 1508554293.0197408]: t=3427.0, item1=220.0, item2=440.0
+[DEBUG, 1508554293.035983]: t=3440.0, item1=221.0, item2=442.0
+[DEBUG, 1508554293.0360441]: t=3454.0, item1=222.0, item2=444.0
+[DEBUG, 1508554293.052164]: t=3468.0, item1=223.0, item2=446.0
+[DEBUG, 1508554293.0681129]: t=3481.0, item1=224.0, item2=448.0
+[DEBUG, 1508554293.084032]: t=3494.0, item1=225.0, item2=450.0
+[DEBUG, 1508554293.099749]: t=3508.0, item1=226.0, item2=452.0
+[DEBUG, 1508554293.11638]: t=3522.0, item1=227.0, item2=454.0
+[DEBUG, 1508554293.116436]: t=3535.0, item1=228.0, item2=456.0
+[DEBUG, 1508554293.1322072]: t=3549.0, item1=229.0, item2=458.0
+[DEBUG, 1508554293.148499]: t=3562.0, item1=230.0, item2=460.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:33,148: logging message buffer (len=1048)
+[DiffBaudArduino @ node.py:43][DEBUG] 2017-10-20 22:51:33,370: [log buffer start]
+[DEBUG, 1508554293.164489]: t=3575.0, item1=231.0, item2=462.0
+[DEBUG, 1508554293.1799629]: t=3590.0, item1=232.0, item2=464.0
+[DEBUG, 1508554293.196178]: t=3603.0, item1=233.0, item2=466.0
+[DEBUG, 1508554293.212162]: t=3616.0, item1=234.0, item2=468.0
+[DEBUG, 1508554293.212213]: t=3630.0, item1=235.0, item2=470.0
+[DEBUG, 1508554293.2281768]: t=3643.0, item1=236.0, item2=472.0
+[DEBUG, 1508554293.244173]: t=3657.0, item1=237.0, item2=474.0
+[DEBUG, 1508554293.260143]: t=3671.0, item1=238.0, item2=476.0
+[DEBUG, 1508554293.276264]: t=3684.0, item1=239.0, item2=478.0
+[DEBUG, 1508554293.2923782]: t=3697.0, item1=240.0, item2=480.0
+[DEBUG, 1508554293.292442]: t=3710.0, item1=241.0, item2=482.0
+[DEBUG, 1508554293.308383]: t=3725.0, item1=242.0, item2=484.0
+[DEBUG, 1508554293.324532]: t=3738.0, item1=243.0, item2=486.0
+[DEBUG, 1508554293.340585]: t=3751.0, item1=244.0, item2=488.0
+[DEBUG, 1508554293.356724]: t=3765.0, item1=245.0, item2=490.0
+[log buffer end]
+[DiffBaudArduino @ node.py:45][INFO] 2017-10-20 22:51:33,370: logging message buffer (len=983)
+[DiffBaudArduino @ generic.py:36][INFO] 2017-10-20 22:51:33,370: Tearing down device

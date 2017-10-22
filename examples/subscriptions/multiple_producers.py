@@ -4,24 +4,18 @@ import time
 import random
 import asyncio
 
-from atlasbuggy import Node, Orchestrator, run
+from atlasbuggy import Node, Orchestrator, Message, run
 
 
-class FastSensorMessage:
-    _number = 0
+class FastSensorMessage(Message):
     message_regex = r"sending: FastSensorMessage\(t=(\d.*), n=(\d*), x=(\d.*), y=(\d.*), z=(\d.*)\)"
 
     def __init__(self, timestamp, x=0.0, y=0.0, z=0.0, n=None):
-        self.timestamp = timestamp
         self.x = x
         self.y = y
         self.z = z
 
-        if n is None:
-            self.number = FastSensorMessage._number
-            FastSensorMessage._number += 1
-        else:
-            self.number = n
+        super(FastSensorMessage, self).__init__(timestamp, n)
 
     @classmethod
     def parse(clc, message):
@@ -39,7 +33,7 @@ class FastSensorMessage:
 
     def __str__(self):
         return "%s(t=%s, n=%s, x=%s, y=%s, z=%s)" % (
-            self.__class__.__name__, self.timestamp, self.number, self.x, self.y, self.z)
+            self.__class__.__name__, self.timestamp, self.n, self.x, self.y, self.z)
 
     def average(self, *others):
         length = len(others)
@@ -55,19 +49,13 @@ class FastSensorMessage:
         self.z /= length
 
 
-class SlowSensorMessage:
-    _number = 0
+class SlowSensorMessage(Message):
     message_regex = r"(sending: SlowSensorMessage\(t=([\d.]*)), n=(\d*), array=\[(?(1)(.+))\]\)"
 
     def __init__(self, timestamp, array: list, n=None):
-        self.timestamp = timestamp
         self.array = array
 
-        if n is None:
-            self.number = SlowSensorMessage._number
-            SlowSensorMessage._number += 1
-        else:
-            self.number = n
+        super(SlowSensorMessage, self).__init__(timestamp, n)
 
     @classmethod
     def parse(cls, message):
@@ -83,7 +71,7 @@ class SlowSensorMessage:
 
     def __str__(self):
         return "%s(t=%s, n=%s, array=%s)" % (
-            self.__class__.__name__, self.timestamp, self.number, self.array)
+            self.__class__.__name__, self.timestamp, self.n, self.array)
 
 
 class FastSensor(Node):
@@ -155,7 +143,8 @@ class AlgorithmNode(Node):
             if len(fast_sensor_messages) > 1:
                 # 100 Hz / 10 Hz = 10 fast sensor messages to every 1 slow message
                 if len(fast_sensor_messages) != 10:
-                    self.logger.warning("Received %s fast sensor messages as opposed to 10!" % len(fast_sensor_messages))
+                    self.logger.warning(
+                        "Received %s fast sensor messages as opposed to 10!" % len(fast_sensor_messages))
                 self.logger.info("averaging fast %s messages" % len(fast_sensor_messages))
                 fast_sensor_messages[0].average(*fast_sensor_messages[1:])
 
@@ -192,6 +181,7 @@ class MyOrchestrator(Orchestrator):
         self.t1 = time.time()
 
         print("took: %ss" % (self.t1 - self.t0))
+
 
 if __name__ == '__main__':
     run(MyOrchestrator)

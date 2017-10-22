@@ -1,16 +1,17 @@
+import time
 import asyncio
 import logging
 
 from .subscription import Subscription
 from .log.factory import make_logger
-from .log.default import default_settings
+from .log import default
 
 
 class Node:
     def __init__(self, enabled=True, logger=None):
         self.enabled = enabled
         if logger is None:
-            self.logger = make_logger(self.name, default_settings)
+            self.logger = make_logger(self.name, default.default_settings)
         else:
             self.logger = logger
 
@@ -20,17 +21,17 @@ class Node:
 
         self.event_loop = None  # assigned by the orchestrator when orchestrator.add_nodes is called
 
-        self.log_buffer_start = "[log buffer start]\n"
-        self.log_buffer_end = "[log buffer end]"
-        self.log_buffer = self.log_buffer_start
+        self.log_buffer = default.log_buffer_start
         self.max_log_buf_size = 16384
+
+        self.start_time = time.time()
 
     @property
     def name(self):
         return self.__class__.__name__
 
     def make_logger(self, *args, **kwargs):
-        return make_logger(self.name, default_settings, *args, **kwargs)
+        return make_logger(self.name, default.default_settings, *args, **kwargs)
 
     def log_to_buffer(self, timestamp, message, level=logging.DEBUG):
         self.log_buffer += "[%s, %s]: %s\n" % (logging.getLevelName(level), timestamp, message)
@@ -38,15 +39,13 @@ class Node:
             self.dump_log_buffer()
 
     def dump_log_buffer(self):
-        if len(self.log_buffer) > len(self.log_buffer_start):
-            self.log_buffer += self.log_buffer_end
+        if len(self.log_buffer) > len(default.log_buffer_start):
+            self.log_buffer += default.log_buffer_end
             self.logger.debug(self.log_buffer)
 
-            self.logger.info("logging message buffer (len=%s)" % len(self.log_buffer))
+            self.logger.debug("logging message buffer (len=%s)" % len(self.log_buffer))
 
-            self.log_buffer = self.log_buffer_start
-
-
+            self.log_buffer = default.log_buffer_start
 
     # ----- event order methods -----
 
@@ -64,6 +63,8 @@ class Node:
 
     def _internal_teardown(self):
         self.dump_log_buffer()
+        end_time = time.time()
+        self.logger.info("Node took %ss to run" % (end_time - self.start_time))
 
     # ----- subscription methods -----
 
@@ -112,8 +113,9 @@ class Node:
                         (matched_subscription.producer_node, matched_subscription.consumer_node))
 
     def define_subscription(self, tag, service="default", message_type=None, producer_type=None,
-                            queue_size=None, error_on_full_queue=True):
-        subscription = Subscription(tag, service, message_type, producer_type, queue_size, error_on_full_queue)
+                            queue_size=None, error_on_full_queue=True, required_attributes=None, required_methods=None):
+        subscription = Subscription(tag, service, message_type, producer_type, queue_size, error_on_full_queue,
+                                    required_attributes, required_methods)
         self.producer_subs.append(subscription)
         return subscription
 

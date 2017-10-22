@@ -9,7 +9,6 @@ class MyArduino(Arduino):
     def __init__(self, enabled=True):
         super(MyArduino, self).__init__(
             self.name, enabled=enabled,
-            # logger=self.make_logger(level=30)
         )
 
     async def loop(self):
@@ -34,7 +33,7 @@ class ConsumerNode(Node):
         super(ConsumerNode, self).__init__(enabled)
 
         self.producer_tag = "producer"
-        self.producer_sub = self.define_subscription(self.producer_tag)
+        self.producer_sub = self.define_subscription(self.producer_tag, required_methods=("write",))
         self.producer_queue = None
         self.producer = None
 
@@ -48,7 +47,7 @@ class ConsumerNode(Node):
         self.logger.info("Got producer named '%s'" % self.producer.name)
 
     async def loop(self):
-
+        prev_time = time.time()
         while True:
             while not self.producer_queue.empty():
                 counter, packet_time, arduino_time, arduino_start_time, item1, item2 = self.producer_queue.get_nowait()
@@ -58,6 +57,10 @@ class ConsumerNode(Node):
                 self.avg_count += 1
 
             await asyncio.sleep(0.0)
+
+            if time.time() - prev_time > 0.05:
+                self.producer.write("toggle")
+                prev_time = time.time()
 
     async def teardown(self):
         self.logger.info("average packet delay: %s" % (self.avg_time_sum / self.avg_count))

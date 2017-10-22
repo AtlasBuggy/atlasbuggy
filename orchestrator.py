@@ -1,6 +1,8 @@
+import sys
 import time
 import signal
 import asyncio
+import traceback
 
 from .log.factory import make_logger
 from .log.default import default_settings
@@ -111,8 +113,17 @@ class Orchestrator:
             if task.cancelled():
                 self.logger.debug("Task '%s' was cancelled" % task)
             elif task.done() and task.exception() is not None:
-                self.logger.error(task.exception())
-                raise task.exception()
+                try:
+                    raise task.exception()
+                except:
+                    info = sys.exc_info()
+                    stack_trace = traceback.format_exception(*info)
+                    self.logger.error("".join(stack_trace))
+
+                # exceptions.append(task.exception())
+
+        # for exception in exceptions:
+        #     traceback.print_exception(type(exception), exception, )
 
     # ----- subscription methods -----
 
@@ -147,6 +158,28 @@ class Orchestrator:
                             break
                     if matched_subscription is not None:
                         break
+
+            if subscription.required_attributes is not None:
+                missing_attributes = []
+                for attribute_name in subscription.required_attributes:
+                    if not hasattr(producer, attribute_name):
+                        missing_attributes.append(attribute_name)
+
+                if len(missing_attributes) > 0:
+                    raise ValueError("Producer '%s' is missing attributes requested by consumer '%s': '%s'" % (
+                        producer, consumer, missing_attributes
+                    ))
+
+            if subscription.required_methods is not None:
+                missing_methods= []
+                for method_name in subscription.required_methods:
+                    if not hasattr(producer, method_name) or not callable(getattr(producer, method_name)):
+                        missing_methods.append(method_name)
+
+                if len(missing_methods) > 0:
+                    raise ValueError("Producer '%s' is missing methods requested by consumer '%s': '%s'" % (
+                        producer, consumer, missing_methods
+                    ))
 
         if matched_subscription is None:
             raise ValueError("No matching subscriptions found between '%s' and '%s'" % (producer, consumer))

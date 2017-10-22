@@ -1,0 +1,26 @@
+[MyOrchestrator @ factory.py:83][DEBUG] 2017-10-21 20:44:14,065: Logging to: logs/bno055_demo/MyOrchestrator/bno055_demo.log
+[MyOrchestrator @ orchestrator.py:88][DEBUG] 2017-10-21 20:44:18,031: Adding setup tasks. Apply subscriptions
+[MyOrchestrator @ orchestrator.py:94][DEBUG] 2017-10-21 20:44:18,031: Running set up tasks (3)
+[MyOrchestrator @ orchestrator.py:48][INFO] 2017-10-21 20:44:18,031: setup
+[MyOrchestrator @ orchestrator.py:97][DEBUG] 2017-10-21 20:44:18,034: Adding loop tasks
+[MyOrchestrator @ orchestrator.py:102][DEBUG] 2017-10-21 20:44:18,034: Running loop tasks (3)
+[MyOrchestrator @ orchestrator.py:108][DEBUG] 2017-10-21 20:44:27,060: 3 tasks to cancel
+[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-21 20:44:27,060: Cancelling <Task pending coro=<Orchestrator.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:53> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-21 20:44:27,061: Cancelling <Task cancelling coro=<BNO055.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/arduino/bno055.py:135> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-21 20:44:27,061: Cancelling <Task pending coro=<ConsumerNode.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/arduino/bno055.py:201> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:108][DEBUG] 2017-10-21 20:44:27,061: 3 tasks to cancel
+[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-21 20:44:27,061: Cancelling <Task cancelling coro=<Orchestrator.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:53> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-21 20:44:27,061: Cancelling <Task cancelling coro=<BNO055.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/arduino/bno055.py:135> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-21 20:44:27,061: Cancelling <Task cancelling coro=<ConsumerNode.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/arduino/bno055.py:201> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:207][INFO] 2017-10-21 20:44:27,062: loop finished
+[MyOrchestrator @ orchestrator.py:211][INFO] 2017-10-21 20:44:27,062: closing orchestrator
+[MyOrchestrator @ orchestrator.py:108][DEBUG] 2017-10-21 20:44:27,062: 3 tasks to cancel
+[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-21 20:44:27,062: Cancelling <Task cancelled coro=<Orchestrator.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:50>>: False
+[MyOrchestrator @ orchestrator.py:114][DEBUG] 2017-10-21 20:44:27,062: Task '<Task cancelled coro=<Orchestrator.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:50>>' was cancelled
+[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-21 20:44:27,062: Cancelling <Task cancelled coro=<BNO055.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/arduino/bno055.py:122>>: False
+[MyOrchestrator @ orchestrator.py:114][DEBUG] 2017-10-21 20:44:27,062: Task '<Task cancelled coro=<BNO055.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/arduino/bno055.py:122>>' was cancelled
+[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-21 20:44:27,062: Cancelling <Task cancelled coro=<ConsumerNode.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/arduino/bno055.py:198>>: False
+[MyOrchestrator @ orchestrator.py:114][DEBUG] 2017-10-21 20:44:27,062: Task '<Task cancelled coro=<ConsumerNode.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/arduino/bno055.py:198>>' was cancelled
+[MyOrchestrator @ orchestrator.py:69][INFO] 2017-10-21 20:44:27,062: halting
+[MyOrchestrator @ orchestrator.py:72][INFO] 2017-10-21 20:44:27,062: Session took 12.997425079345703s to complete
+[MyOrchestrator @ orchestrator.py:58][INFO] 2017-10-21 20:44:27,063: teardown

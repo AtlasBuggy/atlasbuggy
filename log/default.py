@@ -1,6 +1,9 @@
 import os
 import logging
 
+log_buffer_start = "[log buffer start]\n"
+log_buffer_end = "[log buffer end]"
+
 
 class DefaultSettings:
     instance_made = False

@@ -19,6 +19,7 @@ class SomeMessage2:
         self.timestamp = timestamp
         self.a = a
 
+
 class SomeMessage3:
     def __init__(self, timestamp, a, b):
         self.timestamp = timestamp
@@ -51,7 +52,6 @@ class ProducerNode(Node):
                     counter
                 ))
             counter += 1
-
 
             await asyncio.sleep(0.5)
             self.logger.info("producer time: %s" % producer_time)

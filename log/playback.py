@@ -19,7 +19,6 @@ class PlaybackNode(Node):
         super(PlaybackNode, self).__init__(enabled, logger)
 
         self.update_rate = update_rate
-        self.start_time = time.time()
 
         self.parser = None
         if len(file_names) == 0:
@@ -36,8 +35,12 @@ class PlaybackNode(Node):
             else:
                 self.parser.append_log(new_parser)
 
+        self.logger.info("Found %s lines in directory: %s, files: %s" % (len(self.parser.lines), directory, file_names))
+
     @asyncio.coroutine
     def loop(self):
+        self.start_time = time.time()
+
         for line in self.parser:
             if self.update_rate is None:
                 parser_time = time.time() - self.start_time

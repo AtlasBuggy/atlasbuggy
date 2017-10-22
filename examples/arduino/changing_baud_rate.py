@@ -1,3 +1,4 @@
+import os
 import time
 import asyncio
 
@@ -5,12 +6,16 @@ from atlasbuggy.device import Arduino
 from atlasbuggy import Orchestrator, Node, run
 
 
-class MyArduino(Arduino):
+class DiffBaudArduino(Arduino):
     def __init__(self, enabled=True):
-        super(MyArduino, self).__init__(
-            self.name, enabled=enabled,
-            # logger=self.make_logger(level=30)
+        super(DiffBaudArduino, self).__init__(
+            self.name,
+            baud=9600,
+            enabled=enabled,
+            logger=self.make_logger(write=True, file_name="changing_baud_rate_demo.log",
+                                    directory=os.path.join("logs", "changing_baud_rate_demo", "%(name)s"))
         )
+        self.max_log_buf_size = 1024
 
     async def loop(self):
         arduino_start_time = self.start_time
@@ -67,7 +72,7 @@ class MyOrchestrator(Orchestrator):
     def __init__(self, event_loop):
         super(MyOrchestrator, self).__init__(event_loop)
 
-        my_arduino = MyArduino()
+        my_arduino = DiffBaudArduino()
         consumer = ConsumerNode()
 
         self.add_nodes(my_arduino, consumer)

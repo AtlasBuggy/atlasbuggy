@@ -1,15 +1,26 @@
 #include <Atlasbuggy.h>
 
-
-Atlasbuggy robot("SlowArduino");
-
-uint8_t array_len = 100;
+#define DIFFERENT_BAUD 9600
 
 
+Atlasbuggy robot("DiffBaudArduino");
 
+int item1 = 0;
+int item2 = 0;
+
+void setInit()
+{
+    String item1 = String(digitalRead(A0));
+    String item2 = String(digitalRead(A1));
+    String item3 = String(millis());
+
+    robot.setInitData(item1 + "\t" + item2 + "\t" + item3);
+}
 
 void setup() {
     robot.begin();
+
+    setInit();
 }
 
 void loop() {
@@ -17,10 +28,12 @@ void loop() {
     {
         int status = robot.readSerial();
         if (status == 2) {  // start event
-
+            setInit();
+            Serial.println("switching baud");
+            robot.changeBaud(DIFFERENT_BAUD);
         }
         else if (status == 1) {  // stop event
-
+            robot.changeBaud(DEFAULT_RATE);
         }
         if (status == 0) {  // user command
             String command = robot.getCommand();
@@ -39,14 +52,14 @@ void loop() {
     if (!robot.isPaused())
     {
         Serial.print(millis());
-        Serial.print(';');
-        for (uint8_t index = 0; index < array_len; index++) {
-            Serial.print(random(0x1000));
-            if (index < array_len - 1)
-                Serial.print(',');
-        }
+        Serial.print('\t');
+        Serial.print(item1);
+        Serial.print('\t');
+        Serial.print(item2);
         Serial.print('\n');
 
-        delay(5);
+        item1++;
+        item2 += 2;
+        delay(1);
     }
 }
