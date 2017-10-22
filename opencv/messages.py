@@ -5,7 +5,7 @@ from atlasbuggy.message import Message
 
 
 class ImageMessage(Message):
-    def __init__(self, image, timestamp=None, n=None, is_bytes=False):
+    def __init__(self, image, n, timestamp=None, is_bytes=False):
         if is_bytes:
             self.image = ImageMessage.bytes_to_numpy(image)
         else:

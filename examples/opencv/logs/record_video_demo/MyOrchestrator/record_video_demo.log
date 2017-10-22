@@ -1,16 +1,16 @@
-[MyOrchestrator @ factory.py:83][DEBUG] 2017-10-22 11:43:38,367: Logging to: logs/record_video_demo/MyOrchestrator/record_video_demo.log
-[MyOrchestrator @ orchestrator.py:88][DEBUG] 2017-10-22 11:43:38,415: Adding setup tasks. Apply subscriptions
-[MyOrchestrator @ orchestrator.py:94][DEBUG] 2017-10-22 11:43:38,415: Running set up tasks (4)
-[MyOrchestrator @ orchestrator.py:48][INFO] 2017-10-22 11:43:38,415: setup
-[MyOrchestrator @ orchestrator.py:97][DEBUG] 2017-10-22 11:43:39,051: Adding loop tasks
-[MyOrchestrator @ orchestrator.py:102][DEBUG] 2017-10-22 11:43:39,052: Running loop tasks (4)
-[MyOrchestrator @ orchestrator.py:210][INFO] 2017-10-22 11:43:45,725: loop finished
-[MyOrchestrator @ orchestrator.py:214][INFO] 2017-10-22 11:43:45,725: closing orchestrator
-[MyOrchestrator @ orchestrator.py:108][DEBUG] 2017-10-22 11:43:45,725: 4 tasks to cancel
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 11:43:45,725: Cancelling <Task cancelling coro=<Orchestrator.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:53> wait_for=<Future finished result=True>>: True
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 11:43:45,725: Cancelling <Task pending coro=<OpenCVCamera.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/opencv/camera.py:229> wait_for=<Future cancelled>>: True
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 11:43:45,726: Cancelling <Task finished coro=<OpenCVViewer.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/opencv/viewer.py:104> result=None>: False
-[MyOrchestrator @ orchestrator.py:111][DEBUG] 2017-10-22 11:43:45,726: Cancelling <Task pending coro=<OpenCVRecorder.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/opencv/recorder.py:150> wait_for=<Future cancelled>>: True
-[MyOrchestrator @ orchestrator.py:69][INFO] 2017-10-22 11:43:45,726: halting
-[MyOrchestrator @ orchestrator.py:72][INFO] 2017-10-22 11:43:45,726: Session took 7.358580112457275s to complete
-[MyOrchestrator @ orchestrator.py:58][INFO] 2017-10-22 11:43:45,726: teardown
+[MyOrchestrator @ factory.py:85][DEBUG] 2017-10-22 12:34:57,517: Logging to: logs/record_video_demo/MyOrchestrator/record_video_demo.log
+[MyOrchestrator @ orchestrator.py:95][DEBUG] 2017-10-22 12:34:57,564: Adding setup tasks. Apply subscriptions
+[MyOrchestrator @ orchestrator.py:101][DEBUG] 2017-10-22 12:34:57,564: Running set up tasks (4)
+[MyOrchestrator @ orchestrator.py:55][INFO] 2017-10-22 12:34:57,564: setup
+[MyOrchestrator @ orchestrator.py:104][DEBUG] 2017-10-22 12:34:58,137: Adding loop tasks
+[MyOrchestrator @ orchestrator.py:109][DEBUG] 2017-10-22 12:34:58,137: Running loop tasks (4)
+[MyOrchestrator @ orchestrator.py:217][INFO] 2017-10-22 12:35:00,805: loop finished
+[MyOrchestrator @ orchestrator.py:221][INFO] 2017-10-22 12:35:00,805: closing orchestrator
+[MyOrchestrator @ orchestrator.py:115][DEBUG] 2017-10-22 12:35:00,805: 4 tasks to cancel
+[MyOrchestrator @ orchestrator.py:118][DEBUG] 2017-10-22 12:35:00,805: Cancelling <Task cancelling coro=<Orchestrator.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:60> wait_for=<Future finished result=True>>: True
+[MyOrchestrator @ orchestrator.py:118][DEBUG] 2017-10-22 12:35:00,805: Cancelling <Task pending coro=<OpenCVCamera.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/opencv/camera.py:231> wait_for=<Future cancelled>>: True
+[MyOrchestrator @ orchestrator.py:118][DEBUG] 2017-10-22 12:35:00,805: Cancelling <Task finished coro=<OpenCVViewer.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/opencv/viewer.py:105> result=None>: False
+[MyOrchestrator @ orchestrator.py:118][DEBUG] 2017-10-22 12:35:00,806: Cancelling <Task pending coro=<OpenCVRecorder.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/opencv/recorder.py:150> wait_for=<Future cancelled>>: True
+[MyOrchestrator @ orchestrator.py:76][INFO] 2017-10-22 12:35:00,806: halting
+[MyOrchestrator @ orchestrator.py:79][INFO] 2017-10-22 12:35:00,806: Session took 3.2883360385894775s to complete
+[MyOrchestrator @ orchestrator.py:65][INFO] 2017-10-22 12:35:00,807: teardown

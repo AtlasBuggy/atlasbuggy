@@ -3,18 +3,14 @@ import time
 import asyncio
 
 from ..node import Node
-from .factory import make_logger
 from .parser import LogParser
-from .default import default_settings
 
 
 class PlaybackNode(Node):
     central_clock = 0.0
 
     def __init__(self, *file_names, directory=None, update_rate=None, enabled=True, logger=None):
-        if logger is None:
-            logger = make_logger(
-                self.__class__.__name__, default_settings, write=False,
+        self.set_logger(write=False,
                 log_format="[Playback Node][%(name)s][%(levelname)s] %(asctime)s: %(message)s")
         super(PlaybackNode, self).__init__(enabled, logger=logger)
 

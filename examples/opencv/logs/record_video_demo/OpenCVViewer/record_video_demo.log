@@ -1,117 +1,74 @@
-[OpenCVViewer @ factory.py:83][DEBUG] 2017-10-22 11:43:38,368: Logging to: logs/record_video_demo/OpenCVViewer/record_video_demo.log
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:39,173: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:39,173: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:39,273: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:39,273: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:39,370: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:39,370: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:39,464: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:39,464: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:39,562: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:39,563: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:39,664: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:39,665: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:39,767: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:39,767: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:39,881: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:39,881: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:39,991: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:39,991: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:40,096: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:40,096: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:40,204: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:40,204: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:40,312: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:40,312: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:40,417: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:40,417: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:40,526: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:40,526: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:40,641: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:40,641: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:40,751: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:40,751: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:40,859: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:40,859: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:40,970: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:40,970: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:41,132: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:41,133: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:41,246: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:41,246: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:41,356: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:41,356: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:41,475: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:41,476: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:41,586: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:41,586: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:41,696: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:41,697: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:42,071: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:42,071: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:42,177: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:42,177: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:42,290: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:42,290: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:42,402: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:42,402: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:42,512: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:42,512: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:42,624: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:42,625: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:42,741: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:42,741: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:42,851: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:42,851: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:42,964: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:42,964: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:43,078: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:43,078: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:43,189: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:43,189: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:43,304: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:43,304: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:43,417: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:43,417: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:43,532: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:43,532: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:43,649: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:43,649: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:43,762: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:43,762: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:43,880: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:43,880: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:43,996: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:43,996: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:44,110: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:44,110: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:44,226: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:44,226: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:44,342: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:44,343: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:44,459: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:44,459: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:44,573: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:44,573: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:44,692: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:44,693: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:44,807: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:44,807: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:44,922: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:44,922: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:45,036: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:45,036: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:45,155: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:45,155: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:45,271: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:45,272: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:45,384: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:45,384: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:45,499: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:45,499: Got frame
-[OpenCVViewer @ viewer.py:112][DEBUG] 2017-10-22 11:43:45,613: getting frame
-[OpenCVViewer @ viewer.py:117][DEBUG] 2017-10-22 11:43:45,613: Got frame
-[OpenCVViewer @ viewer.py:145][DEBUG] 2017-10-22 11:43:45,681: OpenCV key: '113'
-[OpenCVViewer @ viewer.py:155][INFO] 2017-10-22 11:43:45,681: Interpreted key: 'q'
-[OpenCVViewer @ node.py:76][INFO] 2017-10-22 11:43:45,726: Node took 7.358315944671631s to run
-[OpenCVViewer @ node.py:71][INFO] 2017-10-22 11:43:46,086: teardown
+[OpenCVViewer @ factory.py:85][DEBUG] 2017-10-22 12:34:57,518: Logging to: logs/record_video_demo/OpenCVViewer/record_video_demo.log
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:58,253: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:58,253: viewer delay: 0.09943294525146484s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:58,253: viewer image received: ImageMessage(t=1508690098.153867, n=0)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:58,360: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:58,360: viewer delay: 0.1723473072052002s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:58,360: viewer image received: ImageMessage(t=1508690098.188063, n=1)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:58,469: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:58,469: viewer delay: 0.1099402904510498s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:58,469: viewer image received: ImageMessage(t=1508690098.3594198, n=2)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:58,566: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:58,566: viewer delay: 0.10752296447753906s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:58,566: viewer image received: ImageMessage(t=1508690098.458894, n=3)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:58,667: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:58,667: viewer delay: 0.10768580436706543s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:58,667: viewer image received: ImageMessage(t=1508690098.559883, n=4)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:58,806: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:58,806: viewer delay: 0.1484668254852295s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:58,807: viewer image received: ImageMessage(t=1508690098.6584451, n=5)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:58,923: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:58,923: viewer delay: 0.13329386711120605s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:58,923: viewer image received: ImageMessage(t=1508690098.790179, n=6)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:59,025: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:59,025: viewer delay: 0.1268601417541504s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:59,025: viewer image received: ImageMessage(t=1508690098.898467, n=7)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:59,139: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:59,139: viewer delay: 0.13428878784179688s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:59,139: viewer image received: ImageMessage(t=1508690099.0049841, n=8)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:59,254: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:59,254: viewer delay: 0.13028478622436523s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:59,255: viewer image received: ImageMessage(t=1508690099.1245282, n=9)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:59,363: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:59,363: viewer delay: 0.12874078750610352s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:59,363: viewer image received: ImageMessage(t=1508690099.234838, n=10)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:59,473: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:59,473: viewer delay: 0.14879107475280762s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:59,474: viewer image received: ImageMessage(t=1508690099.325023, n=11)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:59,581: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:59,582: viewer delay: 0.11538410186767578s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:59,582: viewer image received: ImageMessage(t=1508690099.466764, n=12)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:59,695: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:59,695: viewer delay: 0.1308736801147461s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:59,695: viewer image received: ImageMessage(t=1508690099.5647502, n=13)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:59,803: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:59,803: viewer delay: 0.14104795455932617s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:59,804: viewer image received: ImageMessage(t=1508690099.662879, n=14)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:34:59,915: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:34:59,915: viewer delay: 0.15250205993652344s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:34:59,915: viewer image received: ImageMessage(t=1508690099.76298, n=15)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:35:00,023: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:35:00,023: viewer delay: 0.1265101432800293s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:35:00,024: viewer image received: ImageMessage(t=1508690099.89745, n=16)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:35:00,138: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:35:00,138: viewer delay: 0.14391493797302246s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:35:00,139: viewer image received: ImageMessage(t=1508690099.994975, n=17)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:35:00,251: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:35:00,252: viewer delay: 0.16156482696533203s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:35:00,252: viewer image received: ImageMessage(t=1508690100.0907981, n=18)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:35:00,370: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:35:00,371: viewer delay: 0.13951706886291504s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:35:00,371: viewer image received: ImageMessage(t=1508690100.231531, n=19)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:35:00,486: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:35:00,486: viewer delay: 0.15823698043823242s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:35:00,486: viewer image received: ImageMessage(t=1508690100.328313, n=20)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:35:00,597: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:35:00,597: viewer delay: 0.1362161636352539s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:35:00,597: viewer image received: ImageMessage(t=1508690100.461271, n=21)
+[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-22 12:35:00,713: getting frame
+[OpenCVViewer @ viewer.py:119][INFO] 2017-10-22 12:35:00,713: viewer delay: 0.14774179458618164s
+[OpenCVViewer @ viewer.py:120][INFO] 2017-10-22 12:35:00,713: viewer image received: ImageMessage(t=1508690100.5657191, n=22)
+[OpenCVViewer @ viewer.py:147][DEBUG] 2017-10-22 12:35:00,783: OpenCV key: '113'
+[OpenCVViewer @ viewer.py:157][INFO] 2017-10-22 12:35:00,783: Interpreted key: 'q'
+[OpenCVViewer @ node.py:83][INFO] 2017-10-22 12:35:00,806: Node took 3.2880940437316895s to run
+[OpenCVViewer @ node.py:78][INFO] 2017-10-22 12:35:01,165: teardown

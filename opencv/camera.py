@@ -215,6 +215,7 @@ class OpenCVCamera(Node):
 
     @asyncio.coroutine
     def loop(self):
+        counter = 0
         while True:
             success, self.frame = self.capture.read()
 
@@ -224,7 +225,8 @@ class OpenCVCamera(Node):
                 self.frame = cv2.resize(self.frame, (self.width, self.height))
             self.poll_for_fps()
 
-            message = ImageMessage(self.frame)
+            message = ImageMessage(self.frame, counter)
+            counter += 1
             self.logger.info(message)
             yield from self.broadcast(message)
 

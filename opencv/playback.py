@@ -19,4 +19,5 @@ class OpenCVVideoPlayback(PlaybackNode):
 
             yield from self.broadcast(frame_num)
         else:
+            self.logger.info("message not parsed: %s" % line.message)
             yield from asyncio.sleep(0.0)

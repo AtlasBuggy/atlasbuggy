@@ -13,9 +13,10 @@ class Node:
         self._name = name
         if not self.is_logger_created():
             if logger is None:
-                self.logger = make_logger(self.name, default.default_settings)
+                self.logger, self.file_name, self.directory = make_logger(self.name, default.default_settings)
             else:
                 self.logger = logger
+                self.file_name = self.directory = ""
 
         self.producer_subs = []
         self.consumer_subs = []
@@ -43,7 +44,7 @@ class Node:
     def set_logger(self, *args, **kwargs):
         if self.is_logger_created():
             raise ValueError("A logger was created for this node already. Call this before the call to super().")
-        self.logger = make_logger(self.name, default.default_settings, *args, **kwargs)
+        self.logger, self.file_name, self.directory = make_logger(self.name, default.default_settings, *args, **kwargs)
 
     def is_logger_created(self):
         return hasattr(self, "logger")

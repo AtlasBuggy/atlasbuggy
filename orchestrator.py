@@ -5,17 +5,19 @@ import asyncio
 import traceback
 
 from .log.factory import make_logger
-from .log.default import default_settings
+from .log import default
 
 
 class Orchestrator:
     def __init__(self, event_loop, logger=None):
         self.event_loop = event_loop
         self.name = self.__class__.__name__
-        if logger is None:
-            self.logger = make_logger(self.name, default_settings)
-        else:
-            self.logger = logger
+        if not self.is_logger_created():
+            if logger is None:
+                self.logger, self.file_name, self.directory = make_logger(self.name, default.default_settings)
+            else:
+                self.logger = logger
+                self.file_name = self.directory = ""
 
         self.nodes = []
         self.loop_tasks = []
@@ -28,10 +30,15 @@ class Orchestrator:
 
     @staticmethod
     def set_default(**kwargs):
-        default_settings.update(kwargs)
+        default.default_settings.update(kwargs)
 
-    def make_logger(self, *args, **kwargs):
-        return make_logger(self.__class__.__name__, default_settings, *args, **kwargs)
+    def set_logger(self, *args, **kwargs):
+        if self.is_logger_created():
+            raise ValueError("A logger was created for this node already. Call this before the call to super().")
+        self.logger, self.file_name, self.directory = make_logger(self.name, default.default_settings, *args, **kwargs)
+
+    def is_logger_created(self):
+        return hasattr(self, "logger")
 
     def add_nodes(self, *nodes):
         """Add the tasks associated with each node to the event loop"""

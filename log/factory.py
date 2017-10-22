@@ -85,4 +85,4 @@ def make_logger(name, default_settings, level=None,
         logger.debug("Logging to: %s" % log_path)
 
     # listener.start()
-    return logger
+    return logger, file_name, directory

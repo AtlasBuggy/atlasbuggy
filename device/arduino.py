@@ -148,6 +148,8 @@ class Arduino(Generic):
         total_received = 0
         notif_interval = 3
 
+        current_pause_command = None
+
         self.logger.info("Device has started!")
 
         while self.device_active():
@@ -189,9 +191,15 @@ class Arduino(Generic):
 
             if not self.device_write_queue.empty():
                 self.logger.debug("Write queue not empty")
-            while not self.device_write_queue.empty():
-                packet = self.device_write_queue.get()
-                self.device_port.write(packet)
+            if current_pause_command is None:
+                while not self.device_write_queue.empty():
+                    packet = self.device_write_queue.get()
+                    if type(packet) == PauseCommand:
+                        current_pause_command = packet
+                    else:
+                        self.device_port.write(packet)
+            elif current_pause_command.expired():
+                current_pause_command = None
 
         self.device_port.write(self.stop_packet)
 
@@ -217,11 +225,25 @@ class Arduino(Generic):
 
     def write(self, packet):
         self.device_write_queue.put(packet)
+        self.log_to_buffer(time.time(), "writing: " + str(packet))
+
+    def pause(self, pause_time):
+        self.device_write_queue.put(PauseCommand(pause_time))
+        self.log_to_buffer(time.time(), "pausing for %ss" % pause_time)
 
     @asyncio.coroutine
     def teardown(self):
         yield from super(Arduino, self).teardown()
         self.device_port.device.close()
+
+
+class PauseCommand:
+    def __init__(self, pause_time):
+        self.pause_time = pause_time
+        self.start_time = time.time()
+
+    def expired(self):
+        return time.time() - self.start_time > self.pause_time
 
 
 class DevicePort:

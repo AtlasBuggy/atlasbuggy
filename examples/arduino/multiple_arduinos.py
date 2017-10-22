@@ -131,8 +131,8 @@ class FastArduino(Arduino):
         await self.broadcast([message])
 
         while self.device_active():
-            while not self.device_read_queue.empty():
-                packet_time, packets = self.device_read_queue.get()
+            while not self.empty():
+                packet_time, packets = self.read()
                 messages = []
                 for packet in packets:
                     arduino_time, item1, item2 = [float(x) for x in packet.split("\t")]

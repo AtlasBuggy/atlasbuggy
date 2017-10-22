@@ -15,7 +15,7 @@ class ProducerMessage(Message):
         super(ProducerMessage, self).__init__(timestamp, n)
 
     def __str__(self):
-        return "ProducerMessage(t=%s, n=%s x=%s, y=%s, z=%s)" % (self.timestamp, self.n, self.x, self.y, self.z)
+        return "ProducerMessage(t=%s, n=%s, x=%s, y=%s, z=%s)" % (self.timestamp, self.n, self.x, self.y, self.z)
 
 
 class ConsumerMessage(Message):
