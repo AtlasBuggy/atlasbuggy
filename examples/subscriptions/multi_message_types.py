@@ -1,29 +1,33 @@
 import time
 import random
 import asyncio
-from atlasbuggy import Orchestrator, Node, run
+from atlasbuggy import Orchestrator, Node, Message, run
 
-DEMONSTRATE_ERROR = True
+DEMONSTRATE_ERROR = False
 
 
-class SomeMessage1:
-    def __init__(self, timestamp, x, y, z):
+class SomeMessage1(Message):
+    def __init__(self, timestamp, n, x, y, z):
         self.timestamp = timestamp
         self.x = x
         self.y = y
         self.z = z
+        super(SomeMessage1, self).__init__(timestamp, n)
 
 
-class SomeMessage2:
-    def __init__(self, timestamp, a):
+class SomeMessage2(Message):
+    def __init__(self, timestamp, n, a):
         self.timestamp = timestamp
         self.a = a
+        super(SomeMessage2, self).__init__(timestamp, n)
 
-class SomeMessage3:
-    def __init__(self, timestamp, a, b):
+
+class SomeMessage3(Message):
+    def __init__(self, timestamp, n, a, b):
         self.timestamp = timestamp
         self.a = a
         self.b = b
+        super(SomeMessage3, self).__init__(timestamp, n)
 
 
 class ProducerNode(Node):
@@ -37,21 +41,21 @@ class ProducerNode(Node):
 
             if counter % 2 == 0:
                 await self.broadcast(SomeMessage1(
-                    producer_time,
+                    producer_time, counter,
                     random.random(), random.random(), random.random()
                 ))
             elif DEMONSTRATE_ERROR and counter % 3 == 0:
+                self.logger.warning("demonstrating error!")
                 await self.broadcast(SomeMessage3(
-                    producer_time,
+                    producer_time, counter,
                     counter, random.random()
                 ))
             else:
                 await self.broadcast(SomeMessage2(
-                    producer_time,
+                    producer_time, counter,
                     counter
                 ))
             counter += 1
-
 
             await asyncio.sleep(0.5)
             self.logger.info("producer time: %s" % producer_time)
@@ -59,7 +63,8 @@ class ProducerNode(Node):
 
 class ConsumerNode(Node):
     def __init__(self, enabled=True):
-        super(ConsumerNode, self).__init__(enabled, self.make_logger(write=False))
+        self.set_logger(write=False)
+        super(ConsumerNode, self).__init__(enabled)
 
         self.producer_tag = "producer"
         self.producer_sub = self.define_subscription(self.producer_tag, message_type=(SomeMessage1, SomeMessage2))
@@ -79,21 +84,22 @@ class ConsumerNode(Node):
             self.logger.info("time diff: %s" % (consumer_time - message.timestamp))
 
             if type(message) == SomeMessage1:
-                self.logger.info("x: %0.4f, y: %0.4f, z: %0.4f" % (message.x, message.y, message.z))
+                self.logger.info("n: %s, x: %0.4f, y: %0.4f, z: %0.4f" % (message.n, message.x, message.y, message.z))
             else:
-                self.logger.info("a: %s" % message.a)
+                self.logger.info("n: %s, a: %s" % (message.n, message.a))
             await asyncio.sleep(0.5)
 
 
 class MyOrchestrator(Orchestrator):
     def __init__(self, event_loop):
-        super(MyOrchestrator, self).__init__(event_loop, self.make_logger(write=False))
+        self.set_logger(write=False)
+        super(MyOrchestrator, self).__init__(event_loop)
 
         producer = ProducerNode()
         consumer = ConsumerNode()
 
         self.add_nodes(producer, consumer)
-        self.subscribe(consumer.producer_tag, producer, consumer)
+        self.subscribe(producer, consumer, consumer.producer_tag)
 
 
 run(MyOrchestrator)

@@ -3,7 +3,7 @@
 
 Atlasbuggy robot("SlowArduino");
 
-uint8_t array_len = 20;
+uint8_t array_len = 100;
 
 
 

@@ -4,7 +4,8 @@ import logging
 
 
 def make_logger(name, default_settings, level=None,
-                write=None, log_format=None, file_name=None, directory=None, custom_fields_fn=None):
+                write=None, log_format=None, file_name=None, directory=None, custom_fields_fn=None,
+                logger=None):
     # log_queue = queue.Queue(-1)  # no limit on size
     # queue_handler = handlers.QueueHandler(log_queue)
 
@@ -16,7 +17,8 @@ def make_logger(name, default_settings, level=None,
 
     # listener = handlers.QueueListener(log_queue, print_handle)
 
-    logger = logging.getLogger(name)
+    if logger is None:
+        logger = logging.getLogger(name)
     logger.setLevel(logging.DEBUG)
 
     # logger.addHandler(queue_handler)
@@ -43,26 +45,29 @@ def make_logger(name, default_settings, level=None,
 
     # initialize a default log file name and directory if none are specified
     if file_name is None:
-        if "%" in default_settings["file_name"]:
-            file_name = time.strftime(default_settings["file_name"])
-        else:
-            file_name = default_settings["file_name"]
+        file_name = default_settings["file_name"]
 
         if directory is None:
             # only use default if both directory and file_name are None.
             # Assume file_name has the full path if directory is None
-            directory_format = default_settings["directory"]
-            directory_parts = []
+            directory = default_settings["directory"]
 
-            directory_format = os.path.normpath(directory_format)
-            for part in directory_format.split(os.sep):
-                if "%(name)s" in part:
-                    directory_parts.append(part % dict(name=name))
+    if "%" in file_name:
+        file_name = time.strftime(file_name)
 
-                elif "%" in directory_format:
-                    directory_parts.append(time.strftime(part))
+    directory_parts = []
+    directory = os.path.normpath(directory)
+    for part in directory.split(os.sep):
+        if "%(name)s" in part:
+            directory_parts.append(part % dict(name=name))
 
-            directory = os.path.join(*directory_parts)
+        elif "%" in directory:
+            directory_parts.append(time.strftime(part))
+
+        else:
+            directory_parts.append(part)
+
+    directory = os.path.join(*directory_parts)
 
     # make directory if writing a log, if directory evaluates True, and if the directory doesn't exist
     if write and directory and not os.path.isdir(directory):
@@ -79,6 +84,5 @@ def make_logger(name, default_settings, level=None,
 
         logger.debug("Logging to: %s" % log_path)
 
-
     # listener.start()
-    return logger
+    return logger, file_name, directory

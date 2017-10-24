@@ -4,7 +4,8 @@ from atlasbuggy import Orchestrator, Node, run
 
 class BasicOrchestrator(Orchestrator):
     def __init__(self, event_loop):
-        super(BasicOrchestrator, self).__init__(event_loop, self.make_logger(10, write=False))
+        self.set_logger(write=False, level=10)
+        super(BasicOrchestrator, self).__init__(event_loop)
 
         self.test_node = BasicNode()
         self.add_nodes(self.test_node)

@@ -3,7 +3,7 @@ import re
 from atlasbuggy.log.playback import PlaybackNode
 
 try:
-    from examples.subscriptions.converted_messages import *
+    from atlasbuggy.examples.subscriptions.converted_messages import *
 except ImportError:
     from ..subscriptions.converted_messages import *
 
@@ -14,7 +14,7 @@ class ImmutableProducerPlayback(PlaybackNode):
             "../subscriptions/logs/converted_messages_demo/ImmutableProducer/converted_messages_demo.log",
             enabled=enabled)
 
-        self.message_regex = r"sending: ProducerMessage\(t=(\d.*), x=(\d.*), y=(\d.*), z=(\d.*)\)"
+        self.message_regex = r"sending: ProducerMessage\(t=(\d.*), n=(\d*), x=(\d.*), y=(\d.*), z=(\d.*)\)"
 
     async def parse(self, line):
         match = re.match(self.message_regex, line.message)
@@ -28,6 +28,7 @@ class ImmutableProducerPlayback(PlaybackNode):
             self.logger.info("recovered: %s" % message)
             await self.broadcast(message)
         else:
+            self.logger.info("regex does not match message! %s" % line.message)
             await asyncio.sleep(0.0)
 
 
@@ -45,7 +46,7 @@ class PlaybackOrchestrator(Orchestrator):
         consumer = ImmutableConsumer()
 
         self.add_nodes(producer, consumer)
-        self.subscribe(consumer.producer_tag, producer, consumer, message_converter=message_converter)
+        self.subscribe(producer, consumer, consumer.producer_tag, message_converter=message_converter)
 
 
 run(PlaybackOrchestrator)

@@ -1,0 +1,7 @@
+[ConsumerNode @ factory.py:85][DEBUG] 2017-10-22 16:43:28,113: Logging to: logs/bno055_demo/ConsumerNode/bno055_demo.log
+[ConsumerNode @ bno055.py:197][INFO] 2017-10-22 16:43:28,114: Got producer named 'BNO055'
+[ConsumerNode @ node.py:70][INFO] 2017-10-22 16:43:31,671: setup
+[ConsumerNode @ node.py:83][INFO] 2017-10-22 16:43:47,100: Node took 18.98668599128723s to run
+[ConsumerNode @ bno055.py:212][INFO] 2017-10-22 16:43:47,101: average process delay: 0.0001781074601203258
+[ConsumerNode @ bno055.py:213][INFO] 2017-10-22 16:43:47,101: average packet delay: 0.0004400434195446485
+[ConsumerNode @ bno055.py:214][INFO] 2017-10-22 16:43:47,101: average arduino delay: 0.0010061247880067974

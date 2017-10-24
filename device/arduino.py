@@ -1,24 +1,12 @@
 import re
 import time
 import serial
+import asyncio
+from threading import Thread, Lock
 from serial.tools import list_ports
 
 from .generic import Generic
 from .errors import *
-
-
-class PortsTable:
-    def __init__(self):
-        self.ports = {}
-
-    def length(self):
-        return len(self.ports)
-
-    def get(self, item):
-        return self.ports[item]
-
-    def set(self, key, value):
-        self.ports[key] = value
 
 
 class Arduino(Generic):
@@ -38,29 +26,34 @@ class Arduino(Generic):
     # misc. device protocol
     protocol_timeout = 3  # seconds
     packet_end = "\n"  # what this microcontroller's packets end with
-    default_rates = [115200, 38400, 19200, 9600]
+    default_rate = 115200
     buffer_pattern = re.compile("([^\r\n\t\x20-\x7e]|_)+")
 
-    port_updates_per_second = 2000
+    port_updates_per_second = 100
 
-    ports = PortsTable()
+    ports = {}
+    table_lock = Lock()
+    config_errors = []
 
     def __init__(self, whoiam, baud=115200, enabled=True, logger=None, *device_args, **device_kwargs):
         super(Arduino, self).__init__(enabled, logger)
 
         self.whoiam = whoiam  # ID tag of the microcontroller
-        self.first_packet = None
         self.baud = baud
-        if self.baud not in Arduino.default_rates:
-            raise ValueError("Baud rate must be %s or %s. Supplied baud rate is %s" % (
-                str(Arduino.default_rates[0:-1])[1:-1], str(Arduino.default_rates[-1]), self.baud))
         self.device_port = None
         self.device_args = device_args
         self.device_kwargs = device_kwargs
 
+        self.start_time = 0.0
+        self.first_packet = None
+
         self.protocol_packets = [Arduino.whoiam_header, Arduino.first_packet_header, Arduino.stop_packet_header]
 
+    @asyncio.coroutine
+    def setup(self):
         self.configure_device()
+
+        yield from super(Arduino, self).setup()
 
     @staticmethod
     def list_addresses():
@@ -79,7 +72,7 @@ class Arduino(Generic):
         return addresses
 
     def configure_device(self):
-        if Arduino.ports.length() == 0:
+        if len(Arduino.ports) == 0:
             self.logger.info("configuring for the first time. whoiam=%s" % self.whoiam)
 
             addresses = Arduino.list_addresses()
@@ -92,37 +85,76 @@ class Arduino(Generic):
 
         self.logger.info("configuring done. Finding whoiam=%s" % self.whoiam)
 
-        device_port_info = Arduino.ports.get(self.whoiam)
+        device_port_info = Arduino.ports[self.whoiam]
         device_port_info["logger"] = self.logger
         self.device_port = DevicePort.reinit(device_port_info)
 
         if self.device_port is None:
             raise RuntimeError("Failed to find arduino device named %s" % self.whoiam)
 
-        self.device_read_queue.put((-self.device_port.start_time, self.device_port.first_packet))
+        self.first_packet = self.device_port.first_packet
+        self.start_time = self.device_port.start_time
 
-    @staticmethod
-    def collect_all_devices(addresses, logger, *device_args, **device_kwargs):
+    @classmethod
+    def collect_all_devices(cls, addresses, logger, *device_args, **device_kwargs):
+        tasks = []
         for address in addresses:
-            for baud in Arduino.default_rates:
-                device_port = DevicePort.init_configure(
-                    address, baud, device_args, device_kwargs, logger
-                )
+            config_task = Thread(target=cls.configure_devices_task, args=(address, device_args, device_kwargs, logger))
+            tasks.append((address, config_task))
+            config_task.start()
 
-                if device_port.is_arduino:
-                    port_info = dict(
-                        whoiam=device_port.whoiam, address=device_port.address, baud=device_port.baud,
-                        device_args=device_port.device_args,
-                        device_kwargs=device_port.device_kwargs, device=device_port.device,
-                        start_time=device_port.start_time, first_packet=device_port.first_packet
-                    )
-                    logger.info("address '%s' has ID '%s'" % (device_port.address, device_port.whoiam))
+        for address, task in tasks:
+            task.join()
 
-                    Arduino.ports.set(device_port.whoiam, port_info)
-                    break
+        if len(cls.config_errors) > 0:
+            raise RuntimeError(
+                "The following errors occurred while configuring devices:\n%s" % (str(cls.config_errors)[1:-1])
+            )
+
+    @classmethod
+    def configure_devices_task(cls, address, device_args, device_kwargs, logger):
+        try:
+            device_port = DevicePort.init_configure(
+                address, device_args, device_kwargs, logger
+            )
+        except BaseException as error:
+            logger.warning(error)
+            return
+
+        if device_port.is_arduino:
+            if device_port.whoiam in cls.ports:
+                cls.config_errors.append("Address '%s' has the same whoiam ID (%s) as address '%s'" % (
+                    device_port.address, device_port.whoiam, cls.ports[device_port.whoiam]["address"]))
+                return
+
+            port_info = dict(
+                whoiam=device_port.whoiam, address=device_port.address,
+                device_args=device_port.device_args,
+                device_kwargs=device_port.device_kwargs, device=device_port.device,
+                start_time=device_port.start_time, first_packet=device_port.first_packet
+            )
+            logger.info("address '%s' has ID '%s'" % (device_port.address, device_port.whoiam))
+
+            cls.ports[device_port.whoiam] = port_info
 
     def poll_device(self):
         self.device_port.write(Arduino.start_packet)
+
+        if self.baud != Arduino.default_rate:
+            time.sleep(0.01)  # wait for start packet to process
+            self.device_port.device.baudrate = self.baud
+            self.logger.info("Device named '%s' at '%s' is now at baud rate '%s'" % (
+                self.device_port.whoiam, self.device_port.address, self.baud))
+
+        notif_prev_time = time.time()
+        notif_start_time = time.time()
+        num_received = 0
+        total_received = 0
+        notif_interval = 3
+
+        current_pause_command = None
+
+        self.logger.info("Device has started!")
 
         while self.device_active():
             time.sleep(1 / Arduino.port_updates_per_second)  # maintain a constant loop speed
@@ -131,49 +163,101 @@ class Arduino(Generic):
                 self.stop_device()
                 raise DeviceClosedPrematurelyError("Serial port isn't open for some reason...")
             in_waiting = self.device_port.in_waiting()
-            if in_waiting == 0:
-                continue
+            if in_waiting > 0:
+                # read every possible character available and split them into packets
+                packet_time, packets = self.device_port.read(in_waiting)
+                if packets is None:  # if the read failed
+                    self.stop_device()
+                    raise DeviceReadPacketError("Failed to read packets", self)
 
-            # read every possible character available and split them into packets
-            packet_time, packets = self.device_port.read(in_waiting)
-            if packets is None:  # if the read failed
-                self.stop_device()
-                raise DeviceReadPacketError("Failed to read packets", self)
+                if len(packets) > 0:
+                    num_received += len(packets)
+                    total_received += len(packets)
+                    current_time = time.time()
+                    if current_time - notif_prev_time > notif_interval:
+                        self.logger.info(
+                            "found %s packets in %ss (avg=%0.1f packets/sec). "
+                            "%s received in total (avg=%0.1f packets/sec)" % (
+                                num_received,
+                                notif_interval,
+                                num_received / notif_interval,
+                                total_received,
+                                total_received / (current_time - notif_start_time))
+                        )
+                        num_received = 0
+                        notif_prev_time = current_time
 
-            # self.logger.debug("found %s packets at t=%s" % (len(packets), packet_time))
+                    packets[:] = [packet for packet in packets if
+                                  self.filter_packet(packet)]  # filters and modifies the packets buffer
+                    self.device_read_queue.put((packet_time, packets))
 
-            # put data found into the queue
-            for packet in packets:
-                put_on_queue = True
-
-                # check for protocol packet responses (responses to whoareyou, init?, start, stop)
-                for header in self.protocol_packets:
-                    if len(packet) >= len(header) and packet[:len(header)] == header:
-                        # the Arduino can signal to stop if it sends "stopping"
-                        if header == self.stop_packet_header:
-                            self.stop_device()
-                            raise DeviceClosedPrematurelyError(
-                                "Port signalled to exit (stop flag was found)", self)
+            if current_pause_command is None:
+                if not self.device_write_queue.empty():
+                    self.logger.debug("Write queue not empty")
+                    while not self.device_write_queue.empty():
+                        packet = self.device_write_queue.get()
+                        if type(packet) == PauseCommand:
+                            current_pause_command = packet
+                            current_pause_command.start()
+                            break
                         else:
-                            self.logger.warning("Misplaced protocol packet:", repr(packet))
-                        put_on_queue = False
-
-                if put_on_queue:
-                    self.device_read_queue.put((packet_time, packet))
-                    # start_time isn't used. The main process has its own initial time reference
-
-            while not self.device_write_queue.empty():
-                packet = self.device_write_queue.get()
-                self.device_port.write(packet)
+                            self.device_port.write(packet)
+            elif current_pause_command.expired():
+                current_pause_command = None
+                self.logger.debug("Timer expired")
 
         self.device_port.write(self.stop_packet)
 
+    def filter_packet(self, packet):
+        # check for protocol packet responses (responses to whoareyou, init?, start, stop)
+        for header in self.protocol_packets:
+            if len(packet) >= len(header) and packet[:len(header)] == header:
+                # the Arduino can signal to stop if it sends "stopping"
+                if header == self.stop_packet_header:
+                    self.stop_device()
+                    raise DeviceClosedPrematurelyError(
+                        "Port signalled to exit (stop flag was found)", self)
+                else:
+                    self.logger.warning("Misplaced protocol packet: %s" % repr(packet))
+                return False
+        return True
+
+    def read(self):
+        return self.device_read_queue.get()
+
+    def empty(self):
+        return self.device_read_queue.empty()
+
+    def write(self, packet):
+        self.device_write_queue.put(packet)
+        self.log_to_buffer(time.time(), "writing: " + str(packet))
+
+    def pause(self, pause_time):
+        self.device_write_queue.put(PauseCommand(pause_time))
+        self.log_to_buffer(time.time(), "pausing for %ss" % pause_time)
+
+    @asyncio.coroutine
+    def teardown(self):
+        yield from super(Arduino, self).teardown()
+        self.device_port.device.close()
+
+
+class PauseCommand:
+    def __init__(self, pause_time):
+        self.pause_time = pause_time
+        self.start_time = 0.0
+
+    def start(self):
+        self.start_time = time.time()
+
+    def expired(self):
+        return time.time() - self.start_time > self.pause_time
+
 
 class DevicePort:
-    def __init__(self, address, baud, device_args, device_kwargs, logger, device=None, start_time=None,
+    def __init__(self, address, device_args, device_kwargs, logger, device=None, start_time=None,
                  first_packet="", whoiam=""):
         self.address = address
-        self.baud = baud
         self.device_args = device_args
         self.device_kwargs = device_kwargs
 
@@ -188,18 +272,27 @@ class DevicePort:
         self.buffer = ''
 
     @classmethod
-    def init_configure(cls, address, baud, device_args, device_kwargs, logger):
-        device_port = DevicePort(address, baud, device_args, device_kwargs, logger)
+    def init_configure(cls, address, device_args, device_kwargs, logger):
+        device_port = DevicePort(address, device_args, device_kwargs, logger)
         device_port.configure()
 
         return device_port
 
     def configure(self):
-        self.device = serial.Serial(self.address, self.baud, *self.device_args, **self.device_kwargs)
+        self.device = serial.Serial(self.address, Arduino.default_rate, *self.device_args, **self.device_kwargs)
 
         # wait for device to wake up:
+        check_time = time.time()
         while self.in_waiting() < 0:
             time.sleep(0.001)
+
+            if time.time() - check_time > Arduino.protocol_timeout:
+                self.logger.info(
+                    "Waited for '%s' for %ss with no response..." % (self.address, Arduino.protocol_timeout)
+                )
+                return
+        self.logger.debug("%s is ready" % self.address)
+        time.sleep(1.59)  # wait for the device to boot (found by minimizing time difference of arduino and computer)
 
         self.whoiam = self.find_whoiam()
         if self.whoiam is not None:
@@ -290,7 +383,8 @@ class DevicePort:
 
                 # return None if read failed
                 if packets is None:
-                    raise RuntimeError("Serial read failed... Board never signalled ready")
+                    raise RuntimeError(
+                        "Serial read failed for address '%s'... Board never signalled ready" % self.address)
 
                 # if len(packets) > 0 and self.start_time is None:
 
@@ -307,7 +401,7 @@ class DevicePort:
                         abides_protocol = True
 
             prev_rounded_time = rounded_time
-            rounded_time = int((time.time() - start_time) * 10)
+            rounded_time = int((time.time() - start_time) * 5)
             if rounded_time > Arduino.protocol_timeout and rounded_time % 3 == 0 and prev_rounded_time != rounded_time:
                 attempts += 1
                 self.logger.debug("Writing '%s' again" % ask_packet)
@@ -316,7 +410,8 @@ class DevicePort:
 
             # return None if operation timed out
             if (time.time() - start_time) > Arduino.protocol_timeout:
-                raise RuntimeError("Didn't receive response for packet '%s'. Operation timed out." % ask_packet)
+                raise RuntimeError("Didn't receive response for packet '%s' on address '%s'. Operation timed out." % (
+                    ask_packet, self.address))
 
         return answer_packet  # when the while loop exits, abides_protocol must be True
 
@@ -327,7 +422,7 @@ class DevicePort:
     def in_waiting(self):
         """
         Safely check the serial buffer.
-        :return: None if an OSError occurred, otherwise an integer value indicating the buffer size 
+        :return: None if an OSError occurred, otherwise an integer value indicating the buffer size
         """
         try:
             return self.device.inWaiting()

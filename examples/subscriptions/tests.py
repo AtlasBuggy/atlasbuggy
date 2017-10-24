@@ -63,7 +63,7 @@ class TestSubscriptions(unittest.TestCase):
 
         orchestrator.add_nodes(orchestrator.producer, orchestrator.consumer)
         try:
-            orchestrator.subscribe(orchestrator.consumer.producer_tag, orchestrator.producer, orchestrator.producer)
+            orchestrator.subscribe(orchestrator.producer, orchestrator.producer, orchestrator.consumer.producer_tag)
         except ValueError:
             print("made it!")
 
@@ -74,7 +74,7 @@ class TestSubscriptions(unittest.TestCase):
         orchestrator = MyOrchestrator(loop)
 
         try:
-            orchestrator.subscribe(orchestrator.consumer.producer_tag, orchestrator.producer, orchestrator.consumer)
+            orchestrator.subscribe(orchestrator.producer, orchestrator.consumer, orchestrator.consumer.producer_tag)
         except RuntimeError:
             print("made it!")
 

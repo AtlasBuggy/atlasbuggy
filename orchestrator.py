@@ -1,19 +1,24 @@
+import sys
 import time
 import signal
 import asyncio
+import traceback
 
 from .log.factory import make_logger
-from .log.default import default_settings
+from .log import default
 
 
 class Orchestrator:
-    def __init__(self, event_loop, logger=None):
+    def __init__(self, event_loop, name=None, logger=None):
         self.event_loop = event_loop
-        self.name = self.__class__.__name__
-        if logger is None:
-            self.logger = make_logger(self.name, default_settings)
-        else:
-            self.logger = logger
+        self._name = name
+
+        if not self.is_logger_created():
+            if logger is None:
+                self.logger, self.file_name, self.directory = make_logger(self.name, default.default_settings)
+            else:
+                self.logger = logger
+                self.file_name = self.directory = ""
 
         self.nodes = []
         self.loop_tasks = []
@@ -24,12 +29,28 @@ class Orchestrator:
 
         self.start_time = time.time()
 
+    @property
+    def name(self):
+        if not hasattr(self, "_name") or self._name is None:
+            return self.__class__.__name__
+        else:
+            return self._name
+
+    @name.setter
+    def name(self, value):
+        self._name = value
+
+    def set_logger(self, *args, **kwargs):
+        if self.is_logger_created():
+            raise ValueError("A logger was created for this node already. Call this before the call to super().")
+        self.logger, self.file_name, self.directory = make_logger(self.name, default.default_settings, *args, **kwargs)
+
     @staticmethod
     def set_default(**kwargs):
-        default_settings.update(kwargs)
+        default.default_settings.update(kwargs)
 
-    def make_logger(self, *args, **kwargs):
-        return make_logger(self.__class__.__name__, default_settings, *args, **kwargs)
+    def is_logger_created(self):
+        return hasattr(self, "logger")
 
     def add_nodes(self, *nodes):
         """Add the tasks associated with each node to the event loop"""
@@ -111,12 +132,21 @@ class Orchestrator:
             if task.cancelled():
                 self.logger.debug("Task '%s' was cancelled" % task)
             elif task.done() and task.exception() is not None:
-                self.logger.error(task.exception())
-                raise task.exception()
+                try:
+                    raise task.exception()
+                except:
+                    info = sys.exc_info()
+                    stack_trace = traceback.format_exception(*info)
+                    self.logger.error("".join(stack_trace))
+
+                # exceptions.append(task.exception())
+
+        # for exception in exceptions:
+        #     traceback.print_exception(type(exception), exception, )
 
     # ----- subscription methods -----
 
-    def subscribe(self, tag, producer, consumer, message_converter=None):
+    def subscribe(self, producer, consumer, tag, message_converter=None):
         """Define a producer-consumer relationship between two nodes. """
 
         if not producer.enabled:
@@ -137,6 +167,29 @@ class Orchestrator:
         # find a suitable subscription
         for subscription in consumer.producer_subs:
             if subscription.tag == tag:
+
+                if subscription.required_attributes is not None:
+                    missing_attributes = []
+                    for attribute_name in subscription.required_attributes:
+                        if not hasattr(producer, attribute_name):
+                            missing_attributes.append(attribute_name)
+
+                    if len(missing_attributes) > 0:
+                        raise ValueError("Producer '%s' is missing attributes requested by consumer '%s': %s" % (
+                            producer, consumer, str(missing_attributes)[1:-1]
+                        ))
+
+                if subscription.required_methods is not None:
+                    missing_methods = []
+                    for method_name in subscription.required_methods:
+                        if not hasattr(producer, method_name) or not callable(getattr(producer, method_name)):
+                            missing_methods.append(method_name)
+
+                    if len(missing_methods) > 0:
+                        raise ValueError("Producer '%s' is missing methods requested by consumer '%s': %s" % (
+                            producer, consumer, str(missing_methods)[1:-1]
+                        ))
+
                 if subscription.expected_producer_classes is None:
                     matched_subscription = subscription
                     break
@@ -154,10 +207,12 @@ class Orchestrator:
         if message_converter is not None and not callable(message_converter):
             raise ValueError("Supplied message converter isn't a function!!")
 
-        matched_subscription.producer_node = producer
-        matched_subscription.consumer_node = consumer
+        self.logger.info("'%s' is subscribing to '%s' with the tag '%s'" % (consumer, producer, tag))
+        matched_subscription.set_nodes(producer, consumer)
         matched_subscription.set_event_loop(self.event_loop)
         matched_subscription.message_converter = message_converter
+        consumer.subscription_tags.add(tag)
+
         producer.append_subscription(matched_subscription)
 
     def __str__(self):

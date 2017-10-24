@@ -1,0 +1,572 @@
+[FastArduino @ factory.py:83][DEBUG] 2017-10-21 00:56:08,009: Logging to: logs/multiple_arduinos_demo/FastArduino/multiple_arduinos_demo.log
+[FastArduino @ arduino.py:71][INFO] 2017-10-21 00:56:08,011: configuring for the first time. whoiam=FastArduino
+[FastArduino @ arduino.py:74][INFO] 2017-10-21 00:56:08,013: Found suitable addresses: '['/dev/cu.usbserial-00002014', '/dev/cu.SLAB_USBtoUART']'
+[FastArduino @ arduino.py:299][DEBUG] 2017-10-21 00:56:08,018: Checking 'whoareyou' protocol
+[FastArduino @ arduino.py:299][DEBUG] 2017-10-21 00:56:08,019: Checking 'whoareyou' protocol
+[FastArduino @ arduino.py:343][DEBUG] 2017-10-21 00:56:08,619: Writing 'whoareyou' again
+[FastArduino @ arduino.py:343][DEBUG] 2017-10-21 00:56:08,619: Writing 'whoareyou' again
+[FastArduino @ arduino.py:343][DEBUG] 2017-10-21 00:56:08,919: Writing 'whoareyou' again
+[FastArduino @ arduino.py:343][DEBUG] 2017-10-21 00:56:08,919: Writing 'whoareyou' again
+[FastArduino @ arduino.py:330][DEBUG] 2017-10-21 00:56:09,122: Empty packet! Contained only \n
+[FastArduino @ arduino.py:330][DEBUG] 2017-10-21 00:56:09,122: Empty packet! Contained only \n
+[FastArduino @ arduino.py:333][DEBUG] 2017-10-21 00:56:09,122: received packet: 'iamFastArduino'
+[FastArduino @ arduino.py:262][DEBUG] 2017-10-21 00:56:09,122: Found ID 'FastArduino'
+[FastArduino @ arduino.py:299][DEBUG] 2017-10-21 00:56:09,123: Checking 'init?' protocol
+[FastArduino @ arduino.py:333][DEBUG] 2017-10-21 00:56:09,138: received packet: 'iamSlowArduino'
+[FastArduino @ arduino.py:262][DEBUG] 2017-10-21 00:56:09,138: Found ID 'SlowArduino'
+[FastArduino @ arduino.py:299][DEBUG] 2017-10-21 00:56:09,138: Checking 'init?' protocol
+[FastArduino @ arduino.py:333][DEBUG] 2017-10-21 00:56:09,224: received packet: 'init:'
+[FastArduino @ arduino.py:284][DEBUG] 2017-10-21 00:56:09,224: sent initialization data: ''
+[FastArduino @ arduino.py:131][INFO] 2017-10-21 00:56:09,225: address '/dev/cu.SLAB_USBtoUART' has ID 'FastArduino'
+[FastArduino @ arduino.py:333][DEBUG] 2017-10-21 00:56:09,250: received packet: 'init:'
+[FastArduino @ arduino.py:284][DEBUG] 2017-10-21 00:56:09,250: sent initialization data: ''
+[FastArduino @ arduino.py:131][INFO] 2017-10-21 00:56:09,250: address '/dev/cu.usbserial-00002014' has ID 'SlowArduino'
+[FastArduino @ arduino.py:81][INFO] 2017-10-21 00:56:09,250: configuring done. Finding whoiam=FastArduino
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,364: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,377: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,388: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,401: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,412: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,424: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,435: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,447: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,458: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,469: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,480: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,492: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,503: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,515: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,526: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,538: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,548: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,559: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,571: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,582: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,593: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,605: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,616: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,627: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,639: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,650: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,661: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,673: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,683: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,695: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,706: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,717: found 1 packets
+[FastArduino @ arduino.py:167][DEBUG] 2017-10-21 00:56:09,717: Write queue not empty
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,729: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,740: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,750: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,762: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,773: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,784: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,795: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,805: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,816: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,827: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,839: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,850: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,862: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,873: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,884: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,896: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,908: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,919: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,931: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,942: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,954: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,965: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,977: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,988: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:09,999: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,011: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,022: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,033: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,044: found 1 packets
+[FastArduino @ arduino.py:167][DEBUG] 2017-10-21 00:56:10,045: Write queue not empty
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,056: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,067: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,079: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,090: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,101: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,113: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,124: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,135: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,147: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,158: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,170: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,181: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,193: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,204: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,215: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,226: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,237: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,248: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,259: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,271: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,281: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,293: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,305: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,316: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,328: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,339: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,350: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,362: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,372: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,383: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,394: found 1 packets
+[FastArduino @ arduino.py:167][DEBUG] 2017-10-21 00:56:10,394: Write queue not empty
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,406: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,418: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,428: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,440: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,451: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,463: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,474: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,485: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,497: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,508: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,521: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,532: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,544: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,555: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,566: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,577: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,588: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,599: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,610: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,621: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,632: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,644: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,655: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,667: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,678: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,689: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,701: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,712: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,723: found 1 packets
+[FastArduino @ arduino.py:167][DEBUG] 2017-10-21 00:56:10,724: Write queue not empty
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,735: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,746: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,757: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,769: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,780: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,791: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,803: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,814: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,826: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,837: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,849: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,861: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,872: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,883: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,893: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,904: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,915: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,927: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,939: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,950: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,962: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,973: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,985: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:10,995: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,007: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,018: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,030: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,041: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,052: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,063: found 1 packets
+[FastArduino @ arduino.py:167][DEBUG] 2017-10-21 00:56:11,064: Write queue not empty
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,075: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,087: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,099: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,109: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,121: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,132: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,143: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,154: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,165: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,176: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,188: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,199: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,211: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,222: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,235: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,246: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,258: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,269: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,281: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,292: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,303: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,315: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,326: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,337: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,349: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,360: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,371: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,382: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,393: found 1 packets
+[FastArduino @ arduino.py:167][DEBUG] 2017-10-21 00:56:11,393: Write queue not empty
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,405: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,417: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,428: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,439: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,450: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,461: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,473: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,484: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,495: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,506: found 1 packets
+[FastArduino @ node.py:43][DEBUG] 2017-10-21 00:56:11,507: [log buffer start]
+[DEBUG, 1508561769.3647082]: [<__main__.FastArduinoMessage object at 0x109b2a6d8>]
+[DEBUG, 1508561769.3772001]: [<__main__.FastArduinoMessage object at 0x109b2a518>]
+[DEBUG, 1508561769.388375]: [<__main__.FastArduinoMessage object at 0x109b2a6a0>]
+[DEBUG, 1508561769.40099]: [<__main__.FastArduinoMessage object at 0x109b2a710>]
+[DEBUG, 1508561769.412606]: [<__main__.FastArduinoMessage object at 0x109b2a748>, <__main__.FastArduinoMessage object at 0x109b2a7b8>]
+[DEBUG, 1508561769.424118]: [<__main__.FastArduinoMessage object at 0x109b2a588>]
+[DEBUG, 1508561769.435096]: [<__main__.FastArduinoMessage object at 0x109b2a7f0>]
+[DEBUG, 1508561769.4470248]: [<__main__.FastArduinoMessage object at 0x109b2a828>]
+[DEBUG, 1508561769.4584792]: [<__main__.FastArduinoMessage object at 0x109b2a860>]
+[DEBUG, 1508561769.469027]: [<__main__.FastArduinoMessage object at 0x109b2a8d0>]
+[DEBUG, 1508561769.480542]: [<__main__.FastArduinoMessage object at 0x109b2a908>]
+[DEBUG, 1508561769.49215]: [<__main__.FastArduinoMessage object at 0x109b2a940>]
+[DEBUG, 1508561769.5037172]: [<__main__.FastArduinoMessage object at 0x109b2a978>]
+[DEBUG, 1508561769.515119]: [<__main__.FastArduinoMessage object at 0x109b2a9b0>]
+[DEBUG, 1508561769.52663]: [<__main__.FastArduinoMessage object at 0x109b2a9e8>, <__main__.FastArduinoMessage object at 0x109b2aa20>]
+[DEBUG, 1508561769.538183]: [<__main__.FastArduinoMessage object at 0x109b2aa58>]
+[DEBUG, 1508561769.548747]: [<__main__.FastArduinoMessage object at 0x109b2aa90>]
+[DEBUG, 1508561769.559924]: [<__main__.FastArduinoMessage object at 0x109b2aac8>]
+[DEBUG, 1508561769.570957]: [<__main__.FastArduinoMessage object at 0x109b2ab00>]
+[DEBUG, 1508561769.58247]: [<__main__.FastArduinoMessage object at 0x109b2ab38>]
+[DEBUG, 1508561769.593886]: [<__main__.FastArduinoMessage object at 0x109b2ab70>]
+[DEBUG, 1508561769.605371]: [<__main__.FastArduinoMessage object at 0x109b2aba8>]
+[DEBUG, 1508561769.616937]: [<__main__.FastArduinoMessage object at 0x109b2abe0>]
+[DEBUG, 1508561769.627392]: [<__main__.FastArduinoMessage object at 0x109b2ac18>]
+[DEBUG, 1508561769.639362]: [<__main__.FastArduinoMessage object at 0x109b2ac50>]
+[DEBUG, 1508561769.650178]: [<__main__.FastArduinoMessage object at 0x109b2ac88>, <__main__.FastArduinoMessage object at 0x109b2acc0>]
+[DEBUG, 1508561769.6617012]: [<__main__.FastArduinoMessage object at 0x109b2acf8>]
+[DEBUG, 1508561769.673182]: [<__main__.FastArduinoMessage object at 0x109b2ad30>]
+[DEBUG, 1508561769.683616]: [<__main__.FastArduinoMessage object at 0x109b2ad68>]
+[DEBUG, 1508561769.695174]: [<__main__.FastArduinoMessage object at 0x109b2ada0>]
+[DEBUG, 1508561769.706762]: [<__main__.FastArduinoMessage object at 0x109b2add8>]
+[DEBUG, 1508561769.7174451]: [<__main__.FastArduinoMessage object at 0x109b2a828>]
+[DEBUG, 1508561769.729331]: [<__main__.FastArduinoMessage object at 0x109b2a860>]
+[DEBUG, 1508561769.7399611]: [<__main__.FastArduinoMessage object at 0x109b2a8d0>]
+[DEBUG, 1508561769.750675]: [<__main__.FastArduinoMessage object at 0x109b2a908>]
+[DEBUG, 1508561769.76218]: [<__main__.FastArduinoMessage object at 0x109b2a748>]
+[DEBUG, 1508561769.773636]: [<__main__.FastArduinoMessage object at 0x109b2a6a0>]
+[DEBUG, 1508561769.7843132]: [<__main__.FastArduinoMessage object at 0x109b2a668>]
+[DEBUG, 1508561769.795375]: [<__main__.FastArduinoMessage object at 0x109b2a710>]
+[DEBUG, 1508561769.805836]: [<__main__.FastArduinoMessage object at 0x109b2a748>]
+[DEBUG, 1508561769.816897]: [<__main__.FastArduinoMessage object at 0x109b2a908>]
+[DEBUG, 1508561769.827806]: [<__main__.FastArduinoMessage object at 0x109b2a8d0>, <__main__.FastArduinoMessage object at 0x109b2a588>]
+[DEBUG, 1508561769.839377]: [<__main__.FastArduinoMessage object at 0x109b2a940>]
+[DEBUG, 1508561769.8508449]: [<__main__.FastArduinoMessage object at 0x109b2a978>]
+[DEBUG, 1508561769.862392]: [<__main__.FastArduinoMessage object at 0x109b2a9b0>]
+[DEBUG, 1508561769.873871]: [<__main__.FastArduinoMessage object at 0x109b2a9e8>]
+[DEBUG, 1508561769.884816]: [<__main__.FastArduinoMessage object at 0x109b2aa20>]
+[DEBUG, 1508561769.8963552]: [<__main__.FastArduinoMessage object at 0x109b2aa58>]
+[DEBUG, 1508561769.907973]: [<__main__.FastArduinoMessage object at 0x109b2aa90>]
+[DEBUG, 1508561769.9195719]: [<__main__.FastArduinoMessage object at 0x109b2aac8>]
+[DEBUG, 1508561769.9311202]: [<__main__.FastArduinoMessage object at 0x109b2ab00>]
+[DEBUG, 1508561769.942591]: [<__main__.FastArduinoMessage object at 0x109b2ab38>]
+[DEBUG, 1508561769.954164]: [<__main__.FastArduinoMessage object at 0x109b2ab70>, <__main__.FastArduinoMessage object at 0x109b2aba8>]
+[DEBUG, 1508561769.965733]: [<__main__.FastArduinoMessage object at 0x109b2abe0>]
+[DEBUG, 1508561769.977317]: [<__main__.FastArduinoMessage object at 0x109b2ac18>]
+[DEBUG, 1508561769.9881651]: [<__main__.FastArduinoMessage object at 0x109b2ac50>]
+[DEBUG, 1508561769.999619]: [<__main__.FastArduinoMessage object at 0x109b2ac88>]
+[DEBUG, 1508561770.011073]: [<__main__.FastArduinoMessage object at 0x109b2acc0>]
+[DEBUG, 1508561770.022527]: [<__main__.FastArduinoMessage object at 0x109b2acf8>]
+[DEBUG, 1508561770.0332348]: [<__main__.FastArduinoMessage object at 0x109b2ad30>]
+[DEBUG, 1508561770.04477]: [<__main__.FastArduinoMessage object at 0x109b2a978>]
+[DEBUG, 1508561770.056627]: [<__main__.FastArduinoMessage object at 0x109b2a9b0>]
+[DEBUG, 1508561770.067453]: [<__main__.FastArduinoMessage object at 0x109b2a9e8>]
+[DEBUG, 1508561770.079253]: [<__main__.FastArduinoMessage object at 0x109b2aa20>]
+[DEBUG, 1508561770.090128]: [<__main__.FastArduinoMessage object at 0x109b2a8d0>]
+[DEBUG, 1508561770.10169]: [<__main__.FastArduinoMessage object at 0x109b2a748>, <__main__.FastArduinoMessage object at 0x109b2a9e8>]
+[DEBUG, 1508561770.1131961]: [<__main__.FastArduinoMessage object at 0x109b2aa20>]
+[DEBUG, 1508561770.1242812]: [<__main__.FastArduinoMessage object at 0x109b2a710>]
+[DEBUG, 1508561770.13573]: [<__main__.FastArduinoMessage object at 0x109b2a630>]
+[DEBUG, 1508561770.14718]: [<__main__.FastArduinoMessage object at 0x109b2a940>]
+[DEBUG, 1508561770.15863]: [<__main__.FastArduinoMessage object at 0x109b2ad30>]
+[DEBUG, 1508561770.1702158]: [<__main__.FastArduinoMessage object at 0x109b2a588>]
+[DEBUG, 1508561770.181792]: [<__main__.FastArduinoMessage object at 0x109b2aa58>]
+[DEBUG, 1508561770.193263]: [<__main__.FastArduinoMessage object at 0x109b2aa90>]
+[DEBUG, 1508561770.204737]: [<__main__.FastArduinoMessage object at 0x109b2aac8>]
+[DEBUG, 1508561770.2153869]: [<__main__.FastArduinoMessage object at 0x109b2ab00>]
+[DEBUG, 1508561770.226442]: [<__main__.FastArduinoMessage object at 0x109b2ab38>, <__main__.FastArduinoMessage object at 0x109b2ab70>]
+[DEBUG, 1508561770.23697]: [<__main__.FastArduinoMessage object at 0x109b2aba8>]
+[DEBUG, 1508561770.248584]: [<__main__.FastArduinoMessage object at 0x109b2abe0>]
+[DEBUG, 1508561770.2596722]: [<__main__.FastArduinoMessage object at 0x109b2ac18>]
+[DEBUG, 1508561770.2712069]: [<__main__.FastArduinoMessage object at 0x109b2ac50>]
+[DEBUG, 1508561770.281952]: [<__main__.FastArduinoMessage object at 0x109b2ac88>]
+[DEBUG, 1508561770.29335]: [<__main__.FastArduinoMessage object at 0x109b2acc0>]
+[DEBUG, 1508561770.305156]: [<__main__.FastArduinoMessage object at 0x109b2acf8>]
+[DEBUG, 1508561770.316711]: [<__main__.FastArduinoMessage object at 0x109b2a860>]
+[DEBUG, 1508561770.328193]: [<__main__.FastArduinoMessage object at 0x109b2a518>]
+[DEBUG, 1508561770.339851]: [<__main__.FastArduinoMessage object at 0x109b2a4e0>]
+[DEBUG, 1508561770.350612]: [<__main__.FastArduinoMessage object at 0x109b2a668>]
+[DEBUG, 1508561770.362143]: [<__main__.FastArduinoMessage object at 0x109b2a828>]
+[DEBUG, 1508561770.372875]: [<__main__.FastArduinoMessage object at 0x109b2a7f0>]
+[DEBUG, 1508561770.3837671]: [<__main__.FastArduinoMessage object at 0x109b2aa90>, <__main__.FastArduinoMessage object at 0x109b2aac8>]
+[DEBUG, 1508561770.3945239]: [<__main__.FastArduinoMessage object at 0x109b2ad30>]
+[DEBUG, 1508561770.406585]: [<__main__.FastArduinoMessage object at 0x109b2ab38>]
+[DEBUG, 1508561770.4179919]: [<__main__.FastArduinoMessage object at 0x109b2a588>]
+[DEBUG, 1508561770.428821]: [<__main__.FastArduinoMessage object at 0x109b2ad30>]
+[DEBUG, 1508561770.440405]: [<__main__.FastArduinoMessage object at 0x109b2a630>]
+[DEBUG, 1508561770.4511292]: [<__main__.FastArduinoMessage object at 0x109b2a898>]
+[DEBUG, 1508561770.463285]: [<__main__.FastArduinoMessage object at 0x109b2add8>]
+[DEBUG, 1508561770.4742951]: [<__main__.FastArduinoMessage object at 0x109b2ad30>]
+[DEBUG, 1508561770.485872]: [<__main__.FastArduinoMessage object at 0x109b2a588>]
+[DEBUG, 1508561770.4973829]: [<__main__.FastArduinoMessage object at 0x109b2ab38>]
+[DEBUG, 1508561770.5088892]: [<__main__.FastArduinoMessage object at 0x109b2ab00>]
+[DEBUG, 1508561770.521045]: [<__main__.FastArduinoMessage object at 0x109b2ab70>, <__main__.FastArduinoMessage object at 0x109b2aba8>]
+[DEBUG, 1508561770.532821]: [<__main__.FastArduinoMessage object at 0x109b2abe0>]
+[DEBUG, 1508561770.544378]: [<__main__.FastArduinoMessage object at 0x109b2ac18>]
+[DEBUG, 1508561770.555375]: [<__main__.FastArduinoMessage object at 0x109b2ac50>]
+[DEBUG, 1508561770.56688]: [<__main__.FastArduinoMessage object at 0x109b2ac88>]
+[DEBUG, 1508561770.577569]: [<__main__.FastArduinoMessage object at 0x109b2acc0>]
+[DEBUG, 1508561770.588574]: [<__main__.FastArduinoMessage object at 0x109b2acf8>]
+[DEBUG, 1508561770.599639]: [<__main__.FastArduinoMessage object at 0x109b2a860>]
+[DEBUG, 1508561770.610728]: [<__main__.FastArduinoMessage object at 0x109b2a518>]
+[DEBUG, 1508561770.62178]: [<__main__.FastArduinoMessage object at 0x109b2a4e0>]
+[DEBUG, 1508561770.632847]: [<__main__.FastArduinoMessage object at 0x109b2a668>]
+[DEBUG, 1508561770.644352]: [<__main__.FastArduinoMessage object at 0x109b2a828>]
+[DEBUG, 1508561770.655749]: [<__main__.FastArduinoMessage object at 0x109b2a9b0>]
+[DEBUG, 1508561770.667347]: [<__main__.FastArduinoMessage object at 0x109b2a748>]
+[DEBUG, 1508561770.678814]: [<__main__.FastArduinoMessage object at 0x109b2a908>]
+[DEBUG, 1508561770.6896331]: [<__main__.FastArduinoMessage object at 0x109b2aa20>]
+[DEBUG, 1508561770.7012239]: [<__main__.FastArduinoMessage object at 0x109b2a6a0>, <__main__.FastArduinoMessage object at 0x109b2a8d0>]
+[DEBUG, 1508561770.712706]: [<__main__.FastArduinoMessage object at 0x109b2ad68>]
+[DEBUG, 1508561770.723555]: [<__main__.FastArduinoMessage object at 0x109b2aba8>]
+[DEBUG, 1508561770.735359]: [<__main__.FastArduinoMessage object at 0x109b2abe0>]
+[DEBUG, 1508561770.746939]: [<__main__.FastArduinoMessage object at 0x109b2ac18>]
+[DEBUG, 1508561770.757664]: [<__main__.FastArduinoMessage object at 0x109b2ac50>]
+[DEBUG, 1508561770.7691882]: [<__main__.FastArduinoMessage object at 0x109b2ab38>]
+[DEBUG, 1508561770.7805781]: [<__main__.FastArduinoMessage object at 0x109b2a7f0>]
+[DEBUG, 1508561770.79134]: [<__main__.FastArduinoMessage object at 0x109b2a9e8>]
+[DEBUG, 1508561770.8030689]: [<__main__.FastArduinoMessage object at 0x109b2a710>]
+[DEBUG, 1508561770.814806]: [<__main__.FastArduinoMessage object at 0x109b2a940>]
+[DEBUG, 1508561770.826263]: [<__main__.FastArduinoMessage object at 0x109b2a7f0>]
+[DEBUG, 1508561770.837374]: [<__main__.FastArduinoMessage object at 0x109b2ab38>]
+[DEBUG, 1508561770.849325]: [<__main__.FastArduinoMessage object at 0x109b2ac50>, <__main__.FastArduinoMessage object at 0x109b2ac18>]
+[DEBUG, 1508561770.860961]: [<__main__.FastArduinoMessage object at 0x109b2ab00>]
+[DEBUG, 1508561770.871948]: [<__main__.FastArduinoMessage object at 0x109b2ac88>]
+[DEBUG, 1508561770.8831239]: [<__main__.FastArduinoMessage object at 0x109b2acc0>]
+[DEBUG, 1508561770.893635]: [<__main__.FastArduinoMessage object at 0x109b2acf8>]
+[DEBUG, 1508561770.904667]: [<__main__.FastArduinoMessage object at 0x109b2a860>]
+[DEBUG, 1508561770.915533]: [<__main__.FastArduinoMessage object at 0x109b2a518>]
+[DEBUG, 1508561770.927197]: [<__main__.FastArduinoMessage object at 0x109b2a4e0>]
+[DEBUG, 1508561770.9390981]: [<__main__.FastArduinoMessage object at 0x109b2a668>]
+[DEBUG, 1508561770.950654]: [<__main__.FastArduinoMessage object at 0x109b2a828>]
+[DEBUG, 1508561770.962188]: [<__main__.FastArduinoMessage object at 0x109b2a9b0>]
+[DEBUG, 1508561770.9737651]: [<__main__.FastArduinoMessage object at 0x109b2a748>]
+[DEBUG, 1508561770.9849868]: [<__main__.FastArduinoMessage object at 0x109b2a908>]
+[DEBUG, 1508561770.995567]: [<__main__.FastArduinoMessage object at 0x109b2aa20>, <__main__.FastArduinoMessage object at 0x109b2a6a0>]
+[DEBUG, 1508561771.0071502]: [<__main__.FastArduinoMessage object at 0x109b2a8d0>]
+[DEBUG, 1508561771.018471]: [<__main__.FastArduinoMessage object at 0x109b2a978>]
+[DEBUG, 1508561771.030758]: [<__main__.FastArduinoMessage object at 0x109b2aa90>]
+[DEBUG, 1508561771.041585]: [<__main__.FastArduinoMessage object at 0x109b2aa58>]
+[DEBUG, 1508561771.052734]: [<__main__.FastArduinoMessage object at 0x109b2a898>]
+[DEBUG, 1508561771.0635679]: [<__main__.FastArduinoMessage object at 0x109b2ac88>]
+[DEBUG, 1508561771.0756118]: [<__main__.FastArduinoMessage object at 0x109b2acc0>]
+[DEBUG, 1508561771.087274]: [<__main__.FastArduinoMessage object at 0x109b2acf8>]
+[DEBUG, 1508561771.099033]: [<__main__.FastArduinoMessage object at 0x109b2a860>]
+[DEBUG, 1508561771.109598]: [<__main__.FastArduinoMessage object at 0x109b2ac50>]
+[DEBUG, 1508561771.121221]: [<__main__.FastArduinoMessage object at 0x109b2a7f0>]
+[DEBUG, 1508561771.132799]: [<__main__.FastArduinoMessage object at 0x109b2a588>]
+[DEBUG, 1508561771.1433668]: [<__main__.FastArduinoMessage object at 0x109b2a9e8>, <__main__.FastArduinoMessage object at 0x109b2ac50>]
+[DEBUG, 1508561771.15394]: [<__main__.FastArduinoMessage object at 0x109b2a860>]
+[DEBUG, 1508561771.165296]: [<__main__.FastArduinoMessage object at 0x109b2acf8>]
+[DEBUG, 1508561771.176794]: [<__main__.FastArduinoMessage object at 0x109b2ac18>]
+[DEBUG, 1508561771.1883159]: [<__main__.FastArduinoMessage object at 0x109b2a518>]
+[DEBUG, 1508561771.199888]: [<__main__.FastArduinoMessage object at 0x109b2a4e0>]
+[DEBUG, 1508561771.211405]: [<__main__.FastArduinoMessage object at 0x109b2a668>]
+[DEBUG, 1508561771.2224262]: [<__main__.FastArduinoMessage object at 0x109b2a828>]
+[DEBUG, 1508561771.235154]: [<__main__.FastArduinoMessage object at 0x109b2a9b0>]
+[DEBUG, 1508561771.246749]: [<__main__.FastArduinoMessage object at 0x109b2a748>]
+[DEBUG, 1508561771.258395]: [<__main__.FastArduinoMessage object at 0x109b2a908>]
+[DEBUG, 1508561771.269845]: [<__main__.FastArduinoMessage object at 0x109b2aa20>, <__main__.FastArduinoMessage object at 0x109b2a6a0>]
+[DEBUG, 1508561771.280972]: [<__main__.FastArduinoMessage object at 0x109b2a8d0>]
+[DEBUG, 1508561771.2925491]: [<__main__.FastArduinoMessage object at 0x109b2a978>]
+[DEBUG, 1508561771.3038888]: [<__main__.FastArduinoMessage object at 0x109b2aa90>]
+[DEBUG, 1508561771.315296]: [<__main__.FastArduinoMessage object at 0x109b2aa58>]
+[DEBUG, 1508561771.326234]: [<__main__.FastArduinoMessage object at 0x109b2abe0>]
+[DEBUG, 1508561771.3377202]: [<__main__.FastArduinoMessage object at 0x109b2add8>]
+[DEBUG, 1508561771.349215]: [<__main__.FastArduinoMessage object at 0x109b2ad30>]
+[DEBUG, 1508561771.360723]: [<__main__.FastArduinoMessage object at 0x109b2a710>]
+[DEBUG, 1508561771.371299]: [<__main__.FastArduinoMessage object at 0x109b2ad68>]
+[DEBUG, 1508561771.3821492]: [<__main__.FastArduinoMessage object at 0x109b2ab70>]
+[DEBUG, 1508561771.393286]: [<__main__.FastArduinoMessage object at 0x109b2a4e0>]
+[DEBUG, 1508561771.405455]: [<__main__.FastArduinoMessage object at 0x109b2a668>]
+[DEBUG, 1508561771.417071]: [<__main__.FastArduinoMessage object at 0x109b2a828>]
+[DEBUG, 1508561771.428351]: [<__main__.FastArduinoMessage object at 0x109b2a9b0>]
+[DEBUG, 1508561771.439251]: [<__main__.FastArduinoMessage object at 0x109b2acf8>, <__main__.FastArduinoMessage object at 0x109b2ac18>]
+[DEBUG, 1508561771.4507442]: [<__main__.FastArduinoMessage object at 0x109b2a828>]
+[DEBUG, 1508561771.4618702]: [<__main__.FastArduinoMessage object at 0x109b2a9e8>]
+[DEBUG, 1508561771.4733598]: [<__main__.FastArduinoMessage object at 0x109b2a7f0>]
+[DEBUG, 1508561771.484033]: [<__main__.FastArduinoMessage object at 0x109b2ac18>]
+[DEBUG, 1508561771.495092]: [<__main__.FastArduinoMessage object at 0x109b2aba8>]
+[DEBUG, 1508561771.5066931]: [<__main__.FastArduinoMessage object at 0x109b2a518>]
+[log buffer end]
+[FastArduino @ node.py:45][DEBUG] 2017-10-21 00:56:11,507: logging message buffer (len=16445)
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,517: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,528: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,539: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,550: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,562: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,573: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,585: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,596: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,607: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,618: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,629: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,641: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,652: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,663: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,674: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,685: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,696: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,707: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,718: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,730: found 1 packets
+[FastArduino @ arduino.py:167][DEBUG] 2017-10-21 00:56:11,730: Write queue not empty
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,741: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,752: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,764: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,775: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,787: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,797: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,809: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,821: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,832: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,843: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,854: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,866: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,877: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,887: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,898: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,909: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,920: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,931: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,943: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,954: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,966: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,976: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:11,987: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,008: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,018: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,030: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,042: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,053: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,065: found 1 packets
+[FastArduino @ arduino.py:167][DEBUG] 2017-10-21 00:56:12,065: Write queue not empty
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,077: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,088: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,100: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,111: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,122: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,134: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,145: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,157: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,168: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,180: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,191: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,203: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,214: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,225: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,235: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,247: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,258: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,269: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,280: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,292: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,303: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,313: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,324: found 2 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,336: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,347: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,359: found 1 packets
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,370: found 1 packets
+[FastArduino @ node.py:43][DEBUG] 2017-10-21 00:56:12,376: [log buffer start]
+[DEBUG, 1508561771.517341]: [<__main__.FastArduinoMessage object at 0x109b2ac88>]
+[DEBUG, 1508561771.5287838]: [<__main__.FastArduinoMessage object at 0x109b2a748>]
+[DEBUG, 1508561771.539265]: [<__main__.FastArduinoMessage object at 0x109b2a908>]
+[DEBUG, 1508561771.550737]: [<__main__.FastArduinoMessage object at 0x109b2aa20>]
+[DEBUG, 1508561771.562231]: [<__main__.FastArduinoMessage object at 0x109b2a6a0>]
+[DEBUG, 1508561771.573683]: [<__main__.FastArduinoMessage object at 0x109b2a8d0>]
+[DEBUG, 1508561771.585162]: [<__main__.FastArduinoMessage object at 0x109b2a978>]
+[DEBUG, 1508561771.596413]: [<__main__.FastArduinoMessage object at 0x109b2aa90>]
+[DEBUG, 1508561771.607275]: [<__main__.FastArduinoMessage object at 0x109b2aa58>]
+[DEBUG, 1508561771.61811]: [<__main__.FastArduinoMessage object at 0x109b2abe0>, <__main__.FastArduinoMessage object at 0x109b2add8>]
+[DEBUG, 1508561771.6296299]: [<__main__.FastArduinoMessage object at 0x109b2ad30>]
+[DEBUG, 1508561771.64115]: [<__main__.FastArduinoMessage object at 0x109b2a710>]
+[DEBUG, 1508561771.6525939]: [<__main__.FastArduinoMessage object at 0x109b2ad68>]
+[DEBUG, 1508561771.663281]: [<__main__.FastArduinoMessage object at 0x109b2acc0>]
+[DEBUG, 1508561771.674228]: [<__main__.FastArduinoMessage object at 0x109b2a940>]
+[DEBUG, 1508561771.6852841]: [<__main__.FastArduinoMessage object at 0x109b2a630>]
+[DEBUG, 1508561771.696884]: [<__main__.FastArduinoMessage object at 0x109b2a588>]
+[DEBUG, 1508561771.707583]: [<__main__.FastArduinoMessage object at 0x109b2ab38>]
+[DEBUG, 1508561771.71824]: [<__main__.FastArduinoMessage object at 0x109b2ab00>]
+[DEBUG, 1508561771.73006]: [<__main__.FastArduinoMessage object at 0x109b2a908>]
+[DEBUG, 1508561771.7412858]: [<__main__.FastArduinoMessage object at 0x109b2a6a0>]
+[DEBUG, 1508561771.75284]: [<__main__.FastArduinoMessage object at 0x109b2a8d0>]
+[DEBUG, 1508561771.764256]: [<__main__.FastArduinoMessage object at 0x109b2a978>]
+[DEBUG, 1508561771.775855]: [<__main__.FastArduinoMessage object at 0x109b2a518>]
+[DEBUG, 1508561771.7869382]: [<__main__.FastArduinoMessage object at 0x109b2a828>]
+[DEBUG, 1508561771.797586]: [<__main__.FastArduinoMessage object at 0x109b2ab70>, <__main__.FastArduinoMessage object at 0x109b2a978>]
+[DEBUG, 1508561771.8094752]: [<__main__.FastArduinoMessage object at 0x109b2a518>]
+[DEBUG, 1508561771.820966]: [<__main__.FastArduinoMessage object at 0x109b2a7f0>]
+[DEBUG, 1508561771.8325498]: [<__main__.FastArduinoMessage object at 0x109b2a860>]
+[DEBUG, 1508561771.843287]: [<__main__.FastArduinoMessage object at 0x109b2ac18>]
+[DEBUG, 1508561771.854818]: [<__main__.FastArduinoMessage object at 0x109b2a4e0>]
+[DEBUG, 1508561771.866294]: [<__main__.FastArduinoMessage object at 0x109b2a8d0>]
+[DEBUG, 1508561771.876999]: [<__main__.FastArduinoMessage object at 0x109b2aa20>]
+[DEBUG, 1508561771.887636]: [<__main__.FastArduinoMessage object at 0x109b2aa90>]
+[DEBUG, 1508561771.8985522]: [<__main__.FastArduinoMessage object at 0x109b2aa58>]
+[DEBUG, 1508561771.909625]: [<__main__.FastArduinoMessage object at 0x109b2abe0>]
+[DEBUG, 1508561771.920683]: [<__main__.FastArduinoMessage object at 0x109b2add8>]
+[DEBUG, 1508561771.9313018]: [<__main__.FastArduinoMessage object at 0x109b2ad30>]
+[DEBUG, 1508561771.943216]: [<__main__.FastArduinoMessage object at 0x109b2a710>]
+[DEBUG, 1508561771.954782]: [<__main__.FastArduinoMessage object at 0x109b2ad68>]
+[DEBUG, 1508561771.966092]: [<__main__.FastArduinoMessage object at 0x109b2acc0>, <__main__.FastArduinoMessage object at 0x109b2a940>]
+[DEBUG, 1508561771.976628]: [<__main__.FastArduinoMessage object at 0x109b2a630>]
+[DEBUG, 1508561771.987183]: [<__main__.FastArduinoMessage object at 0x109b2a588>]
+[DEBUG, 1508561772.0082638]: [<__main__.FastArduinoMessage object at 0x109b2ab38>]
+[DEBUG, 1508561772.0188491]: [<__main__.FastArduinoMessage object at 0x109b2a668>, <__main__.FastArduinoMessage object at 0x109b2acf8>]
+[DEBUG, 1508561772.0307431]: [<__main__.FastArduinoMessage object at 0x109b2a898>]
+[DEBUG, 1508561772.042357]: [<__main__.FastArduinoMessage object at 0x109b2a9e8>]
+[DEBUG, 1508561772.053827]: [<__main__.FastArduinoMessage object at 0x109b2ac50>]
+[DEBUG, 1508561772.065151]: [<__main__.FastArduinoMessage object at 0x109b2aa90>]
+[DEBUG, 1508561772.0772831]: [<__main__.FastArduinoMessage object at 0x109b2aa58>]
+[DEBUG, 1508561772.0887492]: [<__main__.FastArduinoMessage object at 0x109b2abe0>]
+[DEBUG, 1508561772.1004539]: [<__main__.FastArduinoMessage object at 0x109b2add8>]
+[DEBUG, 1508561772.1110551]: [<__main__.FastArduinoMessage object at 0x109b2a4e0>]
+[DEBUG, 1508561772.1226392]: [<__main__.FastArduinoMessage object at 0x109b2a908>]
+[DEBUG, 1508561772.134197]: [<__main__.FastArduinoMessage object at 0x109b2a748>]
+[DEBUG, 1508561772.145539]: [<__main__.FastArduinoMessage object at 0x109b2ac50>]
+[DEBUG, 1508561772.157142]: [<__main__.FastArduinoMessage object at 0x109b2a4e0>, <__main__.FastArduinoMessage object at 0x109b2add8>]
+[DEBUG, 1508561772.168703]: [<__main__.FastArduinoMessage object at 0x109b2abe0>]
+[DEBUG, 1508561772.1802409]: [<__main__.FastArduinoMessage object at 0x109b2a8d0>]
+[DEBUG, 1508561772.1914759]: [<__main__.FastArduinoMessage object at 0x109b2ad30>]
+[DEBUG, 1508561772.20303]: [<__main__.FastArduinoMessage object at 0x109b2a710>]
+[DEBUG, 1508561772.2143638]: [<__main__.FastArduinoMessage object at 0x109b2ad68>]
+[DEBUG, 1508561772.22501]: [<__main__.FastArduinoMessage object at 0x109b2acc0>]
+[DEBUG, 1508561772.235898]: [<__main__.FastArduinoMessage object at 0x109b2a940>]
+[DEBUG, 1508561772.2473128]: [<__main__.FastArduinoMessage object at 0x109b2a630>]
+[DEBUG, 1508561772.257971]: [<__main__.FastArduinoMessage object at 0x109b2a588>]
+[DEBUG, 1508561772.2689228]: [<__main__.FastArduinoMessage object at 0x109b2ab38>]
+[DEBUG, 1508561772.280899]: [<__main__.FastArduinoMessage object at 0x109b2a668>]
+[DEBUG, 1508561772.29249]: [<__main__.FastArduinoMessage object at 0x109b2acf8>]
+[DEBUG, 1508561772.303103]: [<__main__.FastArduinoMessage object at 0x109b2a898>]
+[DEBUG, 1508561772.313884]: [<__main__.FastArduinoMessage object at 0x109b2a9e8>]
+[DEBUG, 1508561772.324713]: [<__main__.FastArduinoMessage object at 0x109b2a6a0>, <__main__.FastArduinoMessage object at 0x109b2ab70>]
+[DEBUG, 1508561772.336153]: [<__main__.FastArduinoMessage object at 0x109b2ac88>]
+[DEBUG, 1508561772.347588]: [<__main__.FastArduinoMessage object at 0x109b2a518>]
+[DEBUG, 1508561772.359197]: [<__main__.FastArduinoMessage object at 0x109b2ab00>]
+[DEBUG, 1508561772.370844]: [<__main__.FastArduinoMessage object at 0x109b2aba8>]
+[log buffer end]
+[FastArduino @ node.py:45][DEBUG] 2017-10-21 00:56:12,376: logging message buffer (len=6600)
+[FastArduino @ generic.py:36][INFO] 2017-10-21 00:56:12,377: Tearing down device
+[FastArduino @ arduino.py:160][DEBUG] 2017-10-21 00:56:12,381: found 1 packets

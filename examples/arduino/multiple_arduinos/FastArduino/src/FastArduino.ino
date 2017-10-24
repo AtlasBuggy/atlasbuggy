@@ -46,6 +46,6 @@ void loop() {
 
         item1++;
         item2 += 2;
-        delay(1);
+        delay(10);
     }
 }

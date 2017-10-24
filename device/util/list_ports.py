@@ -3,7 +3,7 @@ import logging
 try:
     from ..arduino import Arduino
 except ValueError:
-    from device.arduino import Arduino
+    from atlasbuggy.device.arduino import Arduino
 
 addresses = Arduino.list_addresses()
 

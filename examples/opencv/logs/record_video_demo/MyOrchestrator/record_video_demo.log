@@ -1,0 +1,18 @@
+[MyOrchestrator @ factory.py:85][DEBUG] 2017-10-22 16:33:32,675: Logging to: logs/record_video_demo/MyOrchestrator/record_video_demo.log
+[MyOrchestrator @ orchestrator.py:215][INFO] 2017-10-22 16:33:32,734: 'OpenCVRecorder-video_record_demo' is subscribing to 'OpenCVCamera' with the tag 'capture'
+[MyOrchestrator @ orchestrator.py:215][INFO] 2017-10-22 16:33:32,734: 'OpenCVViewer' is subscribing to 'OpenCVCamera' with the tag 'capture'
+[MyOrchestrator @ orchestrator.py:112][DEBUG] 2017-10-22 16:33:32,734: Adding setup tasks. Apply subscriptions
+[MyOrchestrator @ orchestrator.py:118][DEBUG] 2017-10-22 16:33:32,734: Running set up tasks (4)
+[MyOrchestrator @ orchestrator.py:72][INFO] 2017-10-22 16:33:32,735: setup
+[MyOrchestrator @ orchestrator.py:121][DEBUG] 2017-10-22 16:33:33,316: Adding loop tasks
+[MyOrchestrator @ orchestrator.py:126][DEBUG] 2017-10-22 16:33:33,317: Running loop tasks (4)
+[MyOrchestrator @ orchestrator.py:234][INFO] 2017-10-22 16:33:37,094: loop finished
+[MyOrchestrator @ orchestrator.py:238][INFO] 2017-10-22 16:33:37,094: closing orchestrator
+[MyOrchestrator @ orchestrator.py:132][DEBUG] 2017-10-22 16:33:37,095: 4 tasks to cancel
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:33:37,095: Cancelling <Task cancelling coro=<Orchestrator.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:77> wait_for=<Future finished result=True>>: True
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:33:37,095: Cancelling <Task pending coro=<OpenCVCamera.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/opencv/camera.py:231> wait_for=<Future cancelled>>: True
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:33:37,095: Cancelling <Task finished coro=<OpenCVViewer.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/opencv/viewer.py:105> result=None>: False
+[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:33:37,095: Cancelling <Task pending coro=<OpenCVRecorder.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/opencv/recorder.py:150> wait_for=<Future cancelled>>: True
+[MyOrchestrator @ orchestrator.py:93][INFO] 2017-10-22 16:33:37,095: halting
+[MyOrchestrator @ orchestrator.py:96][INFO] 2017-10-22 16:33:37,095: Session took 4.420112133026123s to complete
+[MyOrchestrator @ orchestrator.py:82][INFO] 2017-10-22 16:33:37,095: teardown
