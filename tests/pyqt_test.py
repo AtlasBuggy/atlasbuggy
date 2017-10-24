@@ -14,8 +14,12 @@ class PlotViewer(QWidget):
         super(PlotViewer, self).__init__();
 
         self.layout = None
+        self.widget_counter = 0
+
+        # basic plot widget
         self.plot_widget = pyg.PlotWidget()
 
+        # initialize QWidget and show
         self.init_ui(size, title)
         self.add_widgets(self.plot_widget)
         self.show()
@@ -29,6 +33,7 @@ class PlotViewer(QWidget):
     def add_widgets(self, *widgets):
         for i, widget in enumerate(widgets):
             self.layout.addWidget(widget, 0, i)
+            self.widget_counter += 1
 
     def plot(self, x, y, pen=None, symbol=None):
         if (symbol != None):
@@ -48,14 +53,10 @@ class PlotterNode(Node):
 
     async def loop(self):
         while True:
-            if(self.app.exec_() == 0):
-                self.running = False
-
             if(self.running):
                 x = np.random.normal(size=1000)
                 y = np.random.normal(size=1000)
                 self.plot(self.plotter, x, y)
-
             await asyncio.sleep(1)
 
     def plot(self, plotter, x, y):
