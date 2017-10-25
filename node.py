@@ -21,7 +21,9 @@ class Node:
         self.producer_subs = []
         self.consumer_subs = []
         self.subscription_tags = set()
-        self.services = {}
+        self.services = {
+            "default": None
+        }
 
         self.event_loop = None  # assigned by the orchestrator when orchestrator.add_nodes is called
 
@@ -29,6 +31,8 @@ class Node:
         self.max_log_buf_size = 16384
 
         self.start_time = time.time()
+
+        self.enable_loop_fn = True
 
     @property
     def name(self):

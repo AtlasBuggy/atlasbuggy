@@ -116,7 +116,8 @@ class Orchestrator:
         self.logger.debug("Adding loop tasks")
         self.loop_tasks.append(asyncio.ensure_future(self.loop()))
         for node in self.nodes:
-            self.loop_tasks.append(asyncio.ensure_future(node.loop()))
+            if node.enable_loop_fn:
+                self.loop_tasks.append(asyncio.ensure_future(node.loop()))
 
         self.logger.debug("Running loop tasks (%s)" % (len(self.loop_tasks)))
         return asyncio.wait(self.loop_tasks, return_when=asyncio.FIRST_COMPLETED)
@@ -146,6 +147,49 @@ class Orchestrator:
 
     # ----- subscription methods -----
 
+    def _check_services(self, subscription, producer, consumer, tag):
+        if subscription.requested_service not in producer.services:
+            raise ValueError("Consumer '%s' is requesting a service '%s' with tag '%s' "
+                             "which producer '%s' does not provide" % (
+                consumer, subscription.requested_service, tag, producer
+            ))
+
+    def _check_attributes(self, subscription, producer, consumer):
+        if subscription.required_attributes is not None:
+            missing_attributes = []
+            for attribute_name in subscription.required_attributes:
+                if not hasattr(producer, attribute_name):
+                    missing_attributes.append(attribute_name)
+
+            if len(missing_attributes) > 0:
+                raise ValueError("Producer '%s' is missing attributes requested by consumer '%s': %s" % (
+                    producer, consumer, str(missing_attributes)[1:-1]
+                ))
+
+    def _check_methods(self, subscription, producer, consumer):
+        if subscription.required_methods is not None:
+            missing_methods = []
+            for method_name in subscription.required_methods:
+                if not hasattr(producer, method_name) or not callable(getattr(producer, method_name)):
+                    missing_methods.append(method_name)
+
+            if len(missing_methods) > 0:
+                raise ValueError("Producer '%s' is missing methods requested by consumer '%s': %s" % (
+                    producer, consumer, str(missing_methods)[1:-1]
+                ))
+
+    def _check_producer_type(self, subscription, producer, consumer):
+        if subscription.expected_producer_classes is not None:
+            satisfied = False
+            for expected_producer_class in subscription.expected_producer_classes:
+                if isinstance(producer, expected_producer_class):
+                    satisfied = True
+
+            if not satisfied:
+                raise ValueError("Producer '%s' is not of the expected type(s) %s that consumer '%s' requested" % (
+                    producer, subscription.expected_producer_classes, consumer
+                ))
+
     def subscribe(self, producer, consumer, tag, message_converter=None):
         """Define a producer-consumer relationship between two nodes. """
 
@@ -167,39 +211,12 @@ class Orchestrator:
         # find a suitable subscription
         for subscription in consumer.producer_subs:
             if subscription.tag == tag:
+                self._check_services(subscription, producer, consumer, tag)
+                self._check_attributes(subscription, producer, consumer)
+                self._check_methods(subscription, producer, consumer)
+                self._check_producer_type(subscription, producer, consumer)
 
-                if subscription.required_attributes is not None:
-                    missing_attributes = []
-                    for attribute_name in subscription.required_attributes:
-                        if not hasattr(producer, attribute_name):
-                            missing_attributes.append(attribute_name)
-
-                    if len(missing_attributes) > 0:
-                        raise ValueError("Producer '%s' is missing attributes requested by consumer '%s': %s" % (
-                            producer, consumer, str(missing_attributes)[1:-1]
-                        ))
-
-                if subscription.required_methods is not None:
-                    missing_methods = []
-                    for method_name in subscription.required_methods:
-                        if not hasattr(producer, method_name) or not callable(getattr(producer, method_name)):
-                            missing_methods.append(method_name)
-
-                    if len(missing_methods) > 0:
-                        raise ValueError("Producer '%s' is missing methods requested by consumer '%s': %s" % (
-                            producer, consumer, str(missing_methods)[1:-1]
-                        ))
-
-                if subscription.expected_producer_classes is None:
-                    matched_subscription = subscription
-                    break
-                else:
-                    for expected_producer_class in subscription.expected_producer_classes:
-                        if isinstance(producer, expected_producer_class):
-                            matched_subscription = subscription
-                            break
-                    if matched_subscription is not None:
-                        break
+                matched_subscription = subscription
 
         if matched_subscription is None:
             raise ValueError("No matching subscriptions found between '%s' and '%s'" % (producer, consumer))

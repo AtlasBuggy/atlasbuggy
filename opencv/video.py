@@ -197,7 +197,7 @@ class OpenCVVideo(Node):
                 self.frame, (self.resize_width, self.resize_height), interpolation=cv2.INTER_NEAREST
             )
 
-        message = ImageMessage(self.frame, time.time(), self.current_frame_num())
+        message = ImageMessage(self.frame, self.current_frame_num(), time.time())
         self.logger.info("video image received: %s" % message)
         yield from self.broadcast(message)
         yield from asyncio.sleep(self.delay)

@@ -6,7 +6,7 @@ from atlasbuggy.opencv import OpenCVViewer, OpenCVVideo, OpenCVVideoPlayback, Op
 
 class MyPipeline(OpenCVPipeline):
     def __init__(self, enabled=True, logger=None):
-        super(MyPipeline, self).__init__(enabled, logger)
+        super(MyPipeline, self).__init__(enabled, logger=logger)
 
     def pipeline(self, image):
         image = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)

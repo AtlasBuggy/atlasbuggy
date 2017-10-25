@@ -13,8 +13,8 @@ class Message:
         self.n = n
 
     @classmethod
-    def parse(clc, message):
-        match = re.match(clc.message_regex, message)
+    def parse(cls, message):
+        match = re.match(cls.message_regex, message)
         if match is not None:
             message_time = float(match.group(1))
             n = int(match.group(2))

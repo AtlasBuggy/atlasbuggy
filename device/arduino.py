@@ -222,16 +222,6 @@ class Arduino(Generic):
                 return False
         return True
 
-    def read(self):
-        return self.device_read_queue.get()
-
-    def empty(self):
-        return self.device_read_queue.empty()
-
-    def write(self, packet):
-        self.device_write_queue.put(packet)
-        self.log_to_buffer(time.time(), "writing: " + str(packet))
-
     def pause(self, pause_time):
         self.device_write_queue.put(PauseCommand(pause_time))
         self.log_to_buffer(time.time(), "pausing for %ss" % pause_time)

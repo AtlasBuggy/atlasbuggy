@@ -95,8 +95,8 @@ class Bno055Message(Message):
         return string
 
     @classmethod
-    def parse(clc, message):
-        match = re.match(clc.message_regex, message)
+    def parse(cls, message):
+        match = re.match(cls.message_regex, message)
         if match is not None:
             message = Bno055Message(float(match.group(1)), int(match.group(4)))
             message.packet_time = float(match.group(2))
