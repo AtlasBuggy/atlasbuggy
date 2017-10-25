@@ -18,7 +18,7 @@ class FastSensorMessage(Message):
         super(FastSensorMessage, self).__init__(timestamp, n)
 
     @classmethod
-    def parse(clc, message):
+    def parse(cls, message):
         match = re.match(clc.message_regex, message)
         if match is not None:
             message_time = float(match.group(1))

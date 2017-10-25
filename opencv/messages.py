@@ -6,6 +6,8 @@ from atlasbuggy.message import Message
 
 class ImageMessage(Message):
     def __init__(self, image, n, timestamp=None, is_bytes=False):
+        assert type(n) == int
+        assert timestamp is None or type(timestamp) == float
         if is_bytes:
             self.image = ImageMessage.bytes_to_numpy(image)
         else:

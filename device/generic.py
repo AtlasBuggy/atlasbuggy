@@ -28,7 +28,30 @@ class Generic(Node):
         self.device_exit_event.set()
 
     def poll_device(self):
-        pass
+        """
+        example implementation:
+        
+        while self.device_active():
+            ... poll sensor(s) ...
+            
+            self.device_read_queue.put((current_time, data))
+            
+            if not self.device_write_queue.empty():
+                while not self.device_write_queue.empty():
+                    data = self.device_write_queue.get()
+                    ... send data ...
+        
+        """
+        raise NotImplementedError("Please override this method")
+
+    def write(self, packet):
+        self.device_write_queue.put(packet)
+
+    def read(self):
+        return self.device_read_queue.get()
+
+    def empty(self):
+        return self.device_read_queue.empty()
 
     @asyncio.coroutine
     def setup(self):

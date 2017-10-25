@@ -1,23 +1,23 @@
-[MyOrchestrator @ factory.py:85][DEBUG] 2017-10-22 16:26:27,612: Logging to: logs/converted_messages_demo/MyOrchestrator/converted_messages_demo.log
-[MyOrchestrator @ orchestrator.py:215][INFO] 2017-10-22 16:26:27,612: 'ImmutableConsumer' is subscribing to 'ImmutableProducer' with the tag 'producer'
-[MyOrchestrator @ orchestrator.py:112][DEBUG] 2017-10-22 16:26:27,613: Adding setup tasks. Apply subscriptions
-[MyOrchestrator @ orchestrator.py:118][DEBUG] 2017-10-22 16:26:27,613: Running set up tasks (3)
-[MyOrchestrator @ orchestrator.py:72][INFO] 2017-10-22 16:26:27,613: setup
-[MyOrchestrator @ orchestrator.py:121][DEBUG] 2017-10-22 16:26:27,613: Adding loop tasks
-[MyOrchestrator @ orchestrator.py:126][DEBUG] 2017-10-22 16:26:27,613: Running loop tasks (3)
-[MyOrchestrator @ orchestrator.py:132][DEBUG] 2017-10-22 16:26:31,156: 3 tasks to cancel
-[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:31,157: Cancelling <Task pending coro=<Orchestrator.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:77> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
-[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:31,157: Cancelling <Task pending coro=<ImmutableProducer.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:47> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
-[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:31,157: Cancelling <Task pending coro=<ImmutableConsumer.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:73> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
-[MyOrchestrator @ orchestrator.py:234][INFO] 2017-10-22 16:26:31,157: loop finished
-[MyOrchestrator @ orchestrator.py:238][INFO] 2017-10-22 16:26:31,157: closing orchestrator
-[MyOrchestrator @ orchestrator.py:132][DEBUG] 2017-10-22 16:26:31,157: 3 tasks to cancel
-[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:31,157: Cancelling <Task cancelled coro=<Orchestrator.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:74>>: False
-[MyOrchestrator @ orchestrator.py:138][DEBUG] 2017-10-22 16:26:31,158: Task '<Task cancelled coro=<Orchestrator.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:74>>' was cancelled
-[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:31,158: Cancelling <Task cancelled coro=<ImmutableProducer.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:36>>: False
-[MyOrchestrator @ orchestrator.py:138][DEBUG] 2017-10-22 16:26:31,158: Task '<Task cancelled coro=<ImmutableProducer.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:36>>' was cancelled
-[MyOrchestrator @ orchestrator.py:135][DEBUG] 2017-10-22 16:26:31,158: Cancelling <Task cancelled coro=<ImmutableConsumer.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:66>>: False
-[MyOrchestrator @ orchestrator.py:138][DEBUG] 2017-10-22 16:26:31,158: Task '<Task cancelled coro=<ImmutableConsumer.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:66>>' was cancelled
-[MyOrchestrator @ orchestrator.py:93][INFO] 2017-10-22 16:26:31,158: halting
-[MyOrchestrator @ orchestrator.py:96][INFO] 2017-10-22 16:26:31,158: Session took 3.5461690425872803s to complete
-[MyOrchestrator @ orchestrator.py:82][INFO] 2017-10-22 16:26:31,158: teardown
+[MyOrchestrator @ factory.py:85][DEBUG] 2017-10-23 12:42:57,263: Logging to: logs/converted_messages_demo/MyOrchestrator/converted_messages_demo.log
+[MyOrchestrator @ orchestrator.py:226][INFO] 2017-10-23 12:42:57,263: 'ImmutableConsumer' is subscribing to 'ImmutableProducer' with the tag 'producer'
+[MyOrchestrator @ orchestrator.py:107][DEBUG] 2017-10-23 12:42:57,263: Adding setup tasks. Apply subscriptions
+[MyOrchestrator @ orchestrator.py:113][DEBUG] 2017-10-23 12:42:57,264: Running set up tasks (3)
+[MyOrchestrator @ orchestrator.py:67][INFO] 2017-10-23 12:42:57,264: setup
+[MyOrchestrator @ orchestrator.py:116][DEBUG] 2017-10-23 12:42:57,264: Adding loop tasks
+[MyOrchestrator @ orchestrator.py:121][DEBUG] 2017-10-23 12:42:57,264: Running loop tasks (3)
+[MyOrchestrator @ orchestrator.py:127][DEBUG] 2017-10-23 12:42:58,773: 3 tasks to cancel
+[MyOrchestrator @ orchestrator.py:130][DEBUG] 2017-10-23 12:42:58,773: Cancelling <Task pending coro=<Orchestrator.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:72> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:130][DEBUG] 2017-10-23 12:42:58,773: Cancelling <Task pending coro=<ImmutableProducer.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:47> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:130][DEBUG] 2017-10-23 12:42:58,773: Cancelling <Task pending coro=<ImmutableConsumer.loop() running at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:73> wait_for=<Future cancelled> cb=[_wait.<locals>._on_completion() at /usr/local/Cellar/python3/3.6.2/Frameworks/Python.framework/Versions/3.6/lib/python3.6/asyncio/tasks.py:380]>: True
+[MyOrchestrator @ orchestrator.py:245][INFO] 2017-10-23 12:42:58,774: loop finished
+[MyOrchestrator @ orchestrator.py:249][INFO] 2017-10-23 12:42:58,774: closing orchestrator
+[MyOrchestrator @ orchestrator.py:127][DEBUG] 2017-10-23 12:42:58,774: 3 tasks to cancel
+[MyOrchestrator @ orchestrator.py:130][DEBUG] 2017-10-23 12:42:58,774: Cancelling <Task cancelled coro=<Orchestrator.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:69>>: False
+[MyOrchestrator @ orchestrator.py:133][DEBUG] 2017-10-23 12:42:58,774: Task '<Task cancelled coro=<Orchestrator.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/orchestrator.py:69>>' was cancelled
+[MyOrchestrator @ orchestrator.py:130][DEBUG] 2017-10-23 12:42:58,774: Cancelling <Task cancelled coro=<ImmutableProducer.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:36>>: False
+[MyOrchestrator @ orchestrator.py:133][DEBUG] 2017-10-23 12:42:58,774: Task '<Task cancelled coro=<ImmutableProducer.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:36>>' was cancelled
+[MyOrchestrator @ orchestrator.py:130][DEBUG] 2017-10-23 12:42:58,774: Cancelling <Task cancelled coro=<ImmutableConsumer.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:66>>: False
+[MyOrchestrator @ orchestrator.py:133][DEBUG] 2017-10-23 12:42:58,774: Task '<Task cancelled coro=<ImmutableConsumer.loop() done, defined at /Users/Woz4tetra/Documents/Code/Atlasbuggy/atlasbuggy/examples/subscriptions/converted_messages.py:66>>' was cancelled
+[MyOrchestrator @ orchestrator.py:88][INFO] 2017-10-23 12:42:58,774: halting
+[MyOrchestrator @ orchestrator.py:91][INFO] 2017-10-23 12:42:58,775: Session took 1.511699914932251s to complete
+[MyOrchestrator @ orchestrator.py:77][INFO] 2017-10-23 12:42:58,775: teardown

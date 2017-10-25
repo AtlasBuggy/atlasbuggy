@@ -33,8 +33,8 @@ class FastArduinoMessage:
             raise ValueError("Invalid packet configuration: %s" % self)
 
     @classmethod
-    def parse(clc, message):
-        match = re.match(clc.message_regex, message)
+    def parse(cls, message):
+        match = re.match(cls.message_regex, message)
         if match is not None:
             message_time = float(match.group(1))
             arduino_time = float(match.group(2))
@@ -44,7 +44,7 @@ class FastArduinoMessage:
 
             return FastArduinoMessage(message_time, arduino_time, item1, item2, n)
         else:
-            match = re.match(clc.start_message_regex, message)
+            match = re.match(cls.start_message_regex, message)
             if match is not None:
                 arduino_start_time = float(match.group(1))
                 return FastArduinoMessage(arduino_start_time=arduino_start_time)

@@ -5,8 +5,10 @@ from atlasbuggy import Orchestrator, Node, run
 
 class ProducerNode(Node):
     def __init__(self, enabled=True):
-        self.counter_service = "counter"
         super(ProducerNode, self).__init__(enabled)
+
+        self.counter_service = "counter"
+        self.define_service(self.counter_service, int)
 
     async def loop(self):
         counter = 0

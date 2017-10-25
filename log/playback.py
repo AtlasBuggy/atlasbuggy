@@ -21,7 +21,7 @@ class PlaybackNode(Node):
             raise ValueError("No file names given!!")
         for file_name in file_names:
             if directory is not None:
-                path = os.path.join(file_name, directory)
+                path = os.path.join(directory, file_name)
             else:
                 path = file_name
             with open(path) as log_file:
