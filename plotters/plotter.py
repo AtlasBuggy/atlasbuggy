@@ -33,6 +33,8 @@ class PlotViewer(QWidget):
     def add_plot(self, name, xlabel, ylabel):
         if name not in self.plot_widgets:
             widget = pyg.PlotWidget(title=name, labels={'left':xlabel, 'bottom':ylabel})
+            plot = widget.getPlotItem()
+            
             self.plot_widgets[name] = widget
             self.add_widget(widget)
 
@@ -50,9 +52,9 @@ class PlotViewer(QWidget):
         self.last_t = time.time()
 
         if (symbol != None):
-            self.plot_widgets[name].plot(x, y, pen=pen, symbol=symbol, clear=True)
+            self.plot_widgets[name].plot(x, y, pen=pen, symbol=symbol, clear=True, symbolSize=2)
         else:
-            self.plot_widgets[name].plot(x, y, clear=True)
+            self.plot_widgets[name].plot(x, y, clear=True, symbolSize=2)
 
         QtGui.QApplication.processEvents()
 
@@ -90,3 +92,4 @@ class LivePlotter(Node):
 
     def plot(self, name, x, y):
         self.plotter.plot(name, x, y, pen=None, symbol='o')
+        # self.plotter.plot(name, x, y)
