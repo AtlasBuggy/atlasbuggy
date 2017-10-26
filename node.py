@@ -114,10 +114,10 @@ class Node:
                 continue
 
             if service == subscription.requested_service:
-                if subscription.expected_message_types is not None:
-                    if subscription.message_converter is not None:
-                        message = subscription.message_converter(message)
+                if subscription.message_converter is not None:
+                    message = subscription.message_converter(message)
 
+                if subscription.expected_message_types is not None:
                     satisfied = False
                     for expected_message_type in subscription.expected_message_types:
                         if isinstance(message, expected_message_type):

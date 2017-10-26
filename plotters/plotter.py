@@ -1,15 +1,16 @@
 import asyncio
 import time
 
-from atlasbuggy import Orchestrator, Node, run
+from atlasbuggy import Node
 
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QWidget
 import pyqtgraph as pyg
 
+
 class PlotViewer(QWidget):
-    def __init__(self, size=(800,600), title='Plotter', **kwargs):
-        super(PlotViewer, self).__init__();
+    def __init__(self, size=(800, 600), title='Plotter', **kwargs):
+        super(PlotViewer, self).__init__()
 
         self.open = True
         self.layout = None
@@ -32,7 +33,7 @@ class PlotViewer(QWidget):
 
     def add_plot(self, name, xlabel, ylabel):
         if name not in self.plot_widgets:
-            widget = pyg.PlotWidget(title=name, labels={'left':xlabel, 'bottom':ylabel})
+            widget = pyg.PlotWidget(title=name, labels={'left': xlabel, 'bottom': ylabel})
             self.plot_widgets[name] = widget
             self.add_widget(widget)
 
@@ -49,7 +50,7 @@ class PlotViewer(QWidget):
 
         self.last_t = time.time()
 
-        if (symbol != None):
+        if symbol is not None:
             self.plot_widgets[name].plot(x, y, pen=pen, symbol=symbol, clear=True)
         else:
             self.plot_widgets[name].plot(x, y, clear=True)
@@ -61,22 +62,31 @@ class PlotViewer(QWidget):
         self.open = False
         event.accept()
 
-class LivePlotter(Node):
-    def __init__(self, size=(800,600), title='Plotter', **kwargs):
-        super(LivePlotter, self).__init__()
 
-        size = kwargs.get('size', (800,600))
-        title = kwargs.get('title', 'Plotter')
-        maximized = kwargs.get('maximized', False)
+class LivePlotter(Node):
+    def __init__(self, enabled=True, size=(800, 600), title='Plotter', **kwargs):
+        super(LivePlotter, self).__init__(enabled)
+
+        self.size = size
+        self.title = title
+        self.plot_kwargs = kwargs
+        self.app = None
+        self.plotter = None
+
+    async def setup(self):
+        size = self.plot_kwargs.get('size', self.size)
+        title = self.plot_kwargs.get('title', self.title)
+        maximized = self.plot_kwargs.get('maximized', False)
 
         self.app = QApplication([])
         pyg.setConfigOption('background', 'w')
         pyg.setConfigOption('foreground', 'k')
 
-        self.plotter = PlotViewer(size=size, title=title, **kwargs)
+        self.plotter = PlotViewer(size=size, title=title, **self.plot_kwargs)
 
         if maximized:
             self.plotter.showMaximized()
+
 
     async def loop(self):
         while True:
