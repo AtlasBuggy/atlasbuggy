@@ -4,6 +4,7 @@ import asyncio
 
 import numpy as np
 
+
 class DataNode(Node):
     def __init__(self, name):
         super(DataNode, self).__init__()
@@ -28,13 +29,14 @@ class DataNode(Node):
             self.plotter.plot(self.plot_name, x, y)
             await asyncio.sleep(0.01)
 
+
 class Robot(Orchestrator):
     def __init__(self, event_loop):
         super(Robot, self).__init__(event_loop)
 
         plotter_node = LivePlotter(
             title='PLOTS',
-            size=(1000,1000),
+            size=(1000, 1000),
             ncols=2,
             frequency=0
         )
@@ -43,5 +45,6 @@ class Robot(Orchestrator):
 
         self.add_nodes(plotter_node, data_node1)
         self.subscribe(plotter_node, data_node1, data_node1.plotter_tag)
+
 
 run(Robot)

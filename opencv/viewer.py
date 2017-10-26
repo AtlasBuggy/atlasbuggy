@@ -142,6 +142,7 @@ class OpenCVViewer(Node):
     def key_pressed(self, delay=1):
         if not self.enabled:
             return
+        self.logger.debug("getting key")
         key = cv2.waitKey(delay)
         if key > -1:
             self.logger.debug("OpenCV key: '%s'" % key)
