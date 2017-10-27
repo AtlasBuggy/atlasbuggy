@@ -154,7 +154,8 @@ class OpenCVRecorder(Node):
         while True:
             while not self.capture_queue.empty():
                 message = yield from self.capture_queue.get()
-                self.logger.info("Recording frame #%s. Delay: %s" % (message.n, time.time() - message.timestamp))
+                self.log_to_buffer(time.time(), "Recording frame #%s. Delay: %s" % (message.n, time.time() - message.timestamp))
+                self.check_buffer(message.n)
                 self.record(message.image)
                 self.poll_for_fps()
 

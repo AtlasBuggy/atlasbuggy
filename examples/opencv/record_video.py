@@ -1,4 +1,5 @@
 import os
+import asyncio
 
 from atlasbuggy import Orchestrator, run
 from atlasbuggy.opencv import OpenCVCamera, OpenCVViewer, OpenCVRecorder

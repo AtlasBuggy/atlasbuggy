@@ -29,6 +29,9 @@ class Node:
 
         self.log_buffer = default.log_buffer_start
         self.max_log_buf_size = 16384
+        self.buffer_check_acquisition_rate = 3  # seconds
+        self.buffer_check_prev_t = time.time()
+        self.buffer_check_prev_len = 0
 
         self.start_time = time.time()
 
@@ -57,6 +60,18 @@ class Node:
         self.log_buffer += "[%s, %s]: %s\n" % (logging.getLevelName(level), timestamp, message)
         if len(self.log_buffer) > self.max_log_buf_size:
             self.dump_log_buffer()
+
+    def check_buffer(self, num_messages_received, log_level=20):
+        current_time = time.time()
+        if (current_time - self.buffer_check_prev_t) > self.buffer_check_acquisition_rate:
+            self.logger.log(log_level,
+                            "received %s messages in %s seconds. %s received in total (avg=%0.1f messages/sec)" % (
+                                num_messages_received - self.buffer_check_prev_len,
+                                self.buffer_check_acquisition_rate, num_messages_received,
+                                num_messages_received / (current_time - self.start_time)
+                            ))
+            self.buffer_check_prev_len = num_messages_received
+            self.buffer_check_prev_t = current_time
 
     def dump_log_buffer(self):
         if len(self.log_buffer) > len(default.log_buffer_start):
@@ -138,21 +153,20 @@ class Node:
     def broadcast(self, message, service="default"):
         results = self._find_matching_subscriptions(message, service)
 
-        if len(results) == 0:
-            yield from asyncio.sleep(0.0)
-        else:
-            for matched_subscription, message in results:
-                if matched_subscription.error_on_full_queue:
+        for matched_subscription, message in results:
+            if matched_subscription.error_on_full_queue:
+                yield from matched_subscription.queue.put(message)
+            else:
+                try:
                     yield from matched_subscription.queue.put(message)
-                else:
-                    try:
-                        yield from matched_subscription.queue.put(message)
-                    except asyncio.QueueFull:
-                        self.logger.info(
-                            "Producer '%s' is trying to put a message on consumer '%s's queue, but it is full" % (
-                                matched_subscription.producer_node, matched_subscription.consumer_node
-                            )
+                except asyncio.QueueFull:
+                    self.logger.info(
+                        "Producer '%s' is trying to put a message on consumer '%s's queue, but it is full" % (
+                            matched_subscription.producer_node, matched_subscription.consumer_node
                         )
+                    )
+
+        yield from asyncio.sleep(0.0)
         return len(results)
 
     def broadcast_nowait(self, message, service="default"):

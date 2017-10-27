@@ -227,11 +227,7 @@ class OpenCVCamera(Node):
 
     @asyncio.coroutine
     def loop(self):
-        t0 = time.time()
-        start_time = time.time()
-        acquisition_rate = 3
         counter = 0
-        prev_image_num = 0
 
         while True:
             success, self.frame = self.capture.read()
@@ -246,12 +242,7 @@ class OpenCVCamera(Node):
             counter += 1
 
             self.log_to_buffer(time.time(), message)
-            t1 = time.time()
-            if (t1 - t0) > acquisition_rate:
-                self.logger.info("received %s images in %s seconds. %s received in total (fps=%0.1f)" % (
-                    counter - prev_image_num, acquisition_rate, counter, self.fps
-                ))
-                t0 = time.time()
+            self.check_buffer(counter)
 
             yield from self.broadcast(message)
 
