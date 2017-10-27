@@ -11,7 +11,8 @@ class MyOrchestrator(Orchestrator):
                          directory=os.path.join("logs", "record_video_demo", "%(name)s"))
         super(MyOrchestrator, self).__init__(event_loop)
 
-        self.camera = OpenCVCamera(capture_number=0)
+        # OpenCVCamera.ignore_capture_numbers(0)
+        self.camera = OpenCVCamera()
         self.viewer = OpenCVViewer()
         self.recorder = OpenCVRecorder("video_record_demo.avi", "videos")
         self.add_nodes(self.camera, self.viewer, self.recorder)

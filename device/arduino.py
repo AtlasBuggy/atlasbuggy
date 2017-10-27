@@ -451,7 +451,7 @@ class DevicePort:
                 # apply a regex pattern to remove invalid characters
             buf = Arduino.buffer_pattern.sub('', self.buffer)
             if len(self.buffer) != len(buf):
-                self.logger.debug("Invalid characters found:", repr(self.buffer))
+                self.logger.debug("Invalid characters found: %s" % repr(self.buffer))
             self.buffer = buf
 
             if len(self.buffer) > len(Arduino.packet_end):

@@ -9,10 +9,19 @@ from .messages import ImageMessage
 
 
 class OpenCVRecorder(Node):
+    num_recorders = 0
+
     def __init__(self, file_name=None, directory="", enabled=True, logger=None, width=None, height=None, fps=None):
-        file_name_only = os.path.split(file_name)[-1]  # remove directories that might be in the name
-        file_name_only = os.path.splitext(file_name_only)[0]  # remove extensions
-        name = self.name + "-" + file_name_only
+
+        # file_name_only = os.path.split(file_name)[-1]  # remove directories that might be in the name
+        # file_name_only = os.path.splitext(file_name_only)[0]  # remove extensions
+        # name = self.name + "-" + file_name_only
+        if OpenCVRecorder.num_recorders > 0:
+            name = self.name + "-%s" % OpenCVRecorder.num_recorders
+        else:
+            name = None
+        OpenCVRecorder.num_recorders += 1
+
         super(OpenCVRecorder, self).__init__(enabled, name, logger)
 
         self.is_recording = False
@@ -34,6 +43,7 @@ class OpenCVRecorder(Node):
         self.opened = False
 
         self.set_path(file_name, directory)
+        self.logger.info("Initialized video recorder. Path set to: %s" % self.full_path)
 
         self.capture = None
         self.capture_queue = None
@@ -64,6 +74,7 @@ class OpenCVRecorder(Node):
 
     def make_dirs(self):
         if self.directory is not None and len(self.directory) > 0 and not os.path.isdir(self.directory):
+            self.logger.info("Making directory '%s'" % self.directory)
             os.makedirs(self.directory)
 
     @asyncio.coroutine
@@ -77,6 +88,7 @@ class OpenCVRecorder(Node):
         self.is_recording = True
 
     def record(self, frame):
+        print("record")
         if self.opened:
             self._write(frame)
         else:
@@ -87,6 +99,7 @@ class OpenCVRecorder(Node):
                 self.frame_buffer.append(frame)
 
     def _dump_buffer(self):
+        print("dump")
         self.logger.info("dumping frame buffer. Size: %s" % len(self.frame_buffer))
         if not self.opened and len(self.frame_buffer) > 0:
             self.height, self.width = self.frame_buffer[0].shape[0:2]
@@ -114,6 +127,7 @@ class OpenCVRecorder(Node):
             self.logger.debug("Not dumping. " + message)
 
     def _write(self, frame):
+        print("write")
         if self.height is None:
             self.height = frame.shape[0]
         if self.width is None:
@@ -128,6 +142,7 @@ class OpenCVRecorder(Node):
         self.video_writer.write(frame)
 
     def poll_for_fps(self):
+        print("poll")
         if self.prev_t is None:
             self.prev_t = time.time()
             return 0.0
@@ -140,8 +155,11 @@ class OpenCVRecorder(Node):
 
     @asyncio.coroutine
     def loop(self):
+        print("loop")
         while True:
+            print("loop-1")
             while not self.capture_queue.empty():
+                print("loop-2")
                 message = yield from self.capture_queue.get()
                 self.logger.info("Recording frame #%s. Delay: %s" % (message.n, time.time() - message.timestamp))
                 self.record(message.image)
@@ -151,6 +169,7 @@ class OpenCVRecorder(Node):
 
     @asyncio.coroutine
     def teardown(self):
+        print("teardown")
         if self.is_recording:
             if not self.opened:  # if required frame buffer size hasn't been met, dump the buffer
                 self._dump_buffer()

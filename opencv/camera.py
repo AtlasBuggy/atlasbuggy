@@ -56,6 +56,11 @@ class OpenCVCamera(Node):
         else:
             self.key_codes = {}
 
+    @classmethod
+    def ignore_capture_numbers(cls, *capture_nums):
+        for capture_num in capture_nums:
+            cls.used_captures.add(capture_num)
+
     @staticmethod
     def get_platform():
         """Use for platform specific operations"""
@@ -84,6 +89,7 @@ class OpenCVCamera(Node):
             return
 
         if self.capture_number is None:
+            self.logger.info("No capture number provided. Launching view selector...")
             capture, height, width = self.launch_selector()
             if capture is None:
                 raise FileNotFoundError(capture)
@@ -112,10 +118,13 @@ class OpenCVCamera(Node):
         self.fps = self.capture.get(cv2.CAP_PROP_FPS)
 
     def load_capture(self, arg):
-        if arg not in OpenCVCamera.captures:
-            self.logger.info("Loading capture '%s'" % arg)
-            OpenCVCamera.captures[arg] = cv2.VideoCapture(arg)
-        return OpenCVCamera.captures[arg]
+        try:
+            if arg not in OpenCVCamera.captures:
+                self.logger.info("Loading capture '%s'" % arg)
+                OpenCVCamera.captures[arg] = cv2.VideoCapture(arg)
+            return OpenCVCamera.captures[arg]
+        except cv2.error:
+            return None
 
     def launch_selector(self):
         selector_window_name = "Select camera for: " + self.name
@@ -125,22 +134,25 @@ class OpenCVCamera(Node):
         width = None
         height = None
 
+        self.logger.info("Captures in use: %s" % OpenCVCamera.used_captures)
         while current_num in OpenCVCamera.used_captures:
             current_num += 1
 
             if OpenCVCamera.max_cap_num is not None and current_num > OpenCVCamera.max_cap_num:
                 return "No cameras left!", height, width
 
-            try:
-                current_capture = self.load_capture(current_num)
-                success, frame = current_capture.read()
-                if not success:
-                    raise cv2.error
-            except cv2.error:
+            current_capture = self.load_capture(current_num)
+            if current_num is None:
                 OpenCVCamera.max_cap_num = current_num - 1
                 current_capture.release()
                 return "No cameras left!", height, width
 
+            success, frame = current_capture.read()
+            if not success:
+                raise cv2.error
+
+
+        self.logger.info("Based on used captures, loading capture number %s" % current_num)
         current_capture = self.load_capture(current_num)
 
         while selected_capture is None:
@@ -197,9 +209,9 @@ class OpenCVCamera(Node):
 
     def key_pressed(self, delay=1):
         if not self.enabled:
-            return 255
+            return -1
         key = cv2.waitKey(delay) % 255
-        if key != 255:
+        if key != -1:
             if key > 0x100000:
                 key -= 0x100000
             if key in self.key_codes:
@@ -208,6 +220,8 @@ class OpenCVCamera(Node):
                 self.key = chr(key)
             else:
                 self.logger.warning("Unrecognized key: " + str(key))
+
+            self.logger.info("Intrepreting '%s' as '%s'" % (key, self.key))
         else:
             self.key = key
 
@@ -215,7 +229,12 @@ class OpenCVCamera(Node):
 
     @asyncio.coroutine
     def loop(self):
+        t0 = time.time()
+        start_time = time.time()
+        acquisition_rate = 3
         counter = 0
+        prev_image_num = 0
+
         while True:
             success, self.frame = self.capture.read()
 
@@ -227,7 +246,15 @@ class OpenCVCamera(Node):
 
             message = ImageMessage(self.frame, counter)
             counter += 1
-            self.logger.info(message)
+
+            self.log_to_buffer(time.time(), message)
+            t1 = time.time()
+            if (t1 - t0) > acquisition_rate:
+                self.logger.info("received %s images in %s seconds. %s received in total (fps=%0.1f)" % (
+                    counter - prev_image_num, acquisition_rate, counter, self.fps
+                ))
+                t0 = time.time()
+
             yield from self.broadcast(message)
 
     def poll_for_fps(self):

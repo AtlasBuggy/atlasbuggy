@@ -3,10 +3,7 @@ import asyncio
 from atlasbuggy import Orchestrator, run
 from atlasbuggy.log.playback import PlaybackNode
 
-try:
-    from .bno055 import Bno055Message, ConsumerNode
-except ModuleNotFoundError:
-    from atlasbuggy.examples.arduino.bno055 import Bno055Message, ConsumerNode
+from atlasbuggy.examples.arduino.bno055 import Bno055Message, ConsumerNode
 
 
 class BNO055Playback(PlaybackNode):
