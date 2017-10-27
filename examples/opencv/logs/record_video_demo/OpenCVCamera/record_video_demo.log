@@ -1,35 +1,31 @@
-[OpenCVCamera @ factory.py:85][DEBUG] 2017-10-22 16:33:32,675: Logging to: logs/record_video_demo/OpenCVCamera/record_video_demo.log
-[OpenCVCamera @ camera.py:116][INFO] 2017-10-22 16:33:32,735: Loading capture '0'
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:33,342: ImageMessage(t=1508704413.341986, n=0)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:33,375: ImageMessage(t=1508704413.3756979, n=1)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:33,569: ImageMessage(t=1508704413.5695841, n=2)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:33,670: ImageMessage(t=1508704413.6702158, n=3)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:33,756: ImageMessage(t=1508704413.756145, n=4)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:33,869: ImageMessage(t=1508704413.869492, n=5)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:33,998: ImageMessage(t=1508704413.998566, n=6)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:34,094: ImageMessage(t=1508704414.0942879, n=7)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:34,172: ImageMessage(t=1508704414.1724741, n=8)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:34,283: ImageMessage(t=1508704414.2834182, n=9)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:34,387: ImageMessage(t=1508704414.387498, n=10)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:34,530: ImageMessage(t=1508704414.530601, n=11)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:34,607: ImageMessage(t=1508704414.607075, n=12)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:34,715: ImageMessage(t=1508704414.7153568, n=13)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:34,812: ImageMessage(t=1508704414.8128798, n=14)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:34,946: ImageMessage(t=1508704414.946073, n=15)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:35,044: ImageMessage(t=1508704415.0449312, n=16)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:35,144: ImageMessage(t=1508704415.1447308, n=17)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:35,276: ImageMessage(t=1508704415.27691, n=18)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:35,375: ImageMessage(t=1508704415.3752189, n=19)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:35,473: ImageMessage(t=1508704415.47374, n=20)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:35,605: ImageMessage(t=1508704415.605075, n=21)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:35,692: ImageMessage(t=1508704415.692186, n=22)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:35,822: ImageMessage(t=1508704415.822483, n=23)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:35,963: ImageMessage(t=1508704415.9632618, n=24)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:36,094: ImageMessage(t=1508704416.094392, n=25)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:36,510: ImageMessage(t=1508704416.510033, n=26)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:36,609: ImageMessage(t=1508704416.609403, n=27)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:36,728: ImageMessage(t=1508704416.728532, n=28)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:36,838: ImageMessage(t=1508704416.8388731, n=29)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:36,951: ImageMessage(t=1508704416.95157, n=30)
-[OpenCVCamera @ camera.py:230][INFO] 2017-10-22 16:33:37,081: ImageMessage(t=1508704417.081752, n=31)
-[OpenCVCamera @ node.py:83][INFO] 2017-10-22 16:33:37,095: Node took 4.419792890548706s to run
+[OpenCVCamera @ factory.py:85][DEBUG] 2017-10-27 18:14:08,101: Logging to: logs/record_video_demo/OpenCVCamera/record_video_demo.log
+[OpenCVCamera @ camera.py:91][INFO] 2017-10-27 18:14:08,858: No capture number provided. Launching view selector...
+[OpenCVCamera @ camera.py:136][INFO] 2017-10-27 18:14:08,859: Captures in use: {0}
+[OpenCVCamera @ camera.py:122][INFO] 2017-10-27 18:14:08,860: Loading capture '1'
+[OpenCVCamera @ camera.py:154][INFO] 2017-10-27 18:14:09,457: Based on used captures, loading capture number 1
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,459: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,643: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,672: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,715: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,751: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,830: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,847: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,865: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,878: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,887: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,925: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,943: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,956: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,966: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,989: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:10,749: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:12,660: Intrepreting '254' as 'þ'
+[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:28,774: Intrepreting '10' as '
+'
+[OpenCVCamera @ camera.py:197][INFO] 2017-10-27 18:14:28,776: Using capture #1 for OpenCVCamera
+[OpenCVCamera @ node.py:64][DEBUG] 2017-10-27 18:14:28,820: [log buffer start]
+[DEBUG, 1509142468.802538]: ImageMessage(t=1509142468.80253, n=0)
+[DEBUG, 1509142468.8084197]: ImageMessage(t=1509142468.808414, n=1)
+[log buffer end]
+[OpenCVCamera @ node.py:66][DEBUG] 2017-10-27 18:14:28,820: logging message buffer (len=169)
+[OpenCVCamera @ node.py:87][INFO] 2017-10-27 18:14:28,820: Node took 20.71837043762207s to run

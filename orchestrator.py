@@ -9,7 +9,7 @@ from .log import default
 
 
 class Orchestrator:
-    def __init__(self, event_loop, name=None, logger=None):
+    def __init__(self, event_loop, name=None, logger=None, return_when=asyncio.FIRST_COMPLETED):
         self.event_loop = event_loop
         self._name = name
 
@@ -24,6 +24,7 @@ class Orchestrator:
         self.loop_tasks = []
         self.teardown_tasks = []
         self.exit_event = asyncio.Event(loop=event_loop)
+        self.return_when = return_when
 
         self.event_loop.add_signal_handler(signal.SIGINT, self.cancel_loop_tasks, self.event_loop)
 
@@ -110,8 +111,8 @@ class Orchestrator:
             node.take()
             setup_tasks.append(asyncio.ensure_future(node.setup()))
 
-        self.logger.debug("Running set up tasks (%s)" % (len(setup_tasks)))
-        self.event_loop.run_until_complete(asyncio.wait(setup_tasks))
+        self.logger.debug("Running set up tasks (%s). %s and orchestrator setup" % (len(setup_tasks), self.nodes))
+        self.event_loop.run_until_complete(asyncio.wait(setup_tasks, return_when=asyncio.ALL_COMPLETED))
 
         self.logger.debug("Adding loop tasks")
         self.loop_tasks.append(asyncio.ensure_future(self.loop()))
@@ -120,7 +121,7 @@ class Orchestrator:
                 self.loop_tasks.append(asyncio.ensure_future(node.loop()))
 
         self.logger.debug("Running loop tasks (%s)" % (len(self.loop_tasks)))
-        return asyncio.wait(self.loop_tasks, return_when=asyncio.FIRST_COMPLETED)
+        return asyncio.wait(self.loop_tasks, return_when=self.return_when)
 
     def cancel_loop_tasks(self, loop):
         """Cancel all running loop node and Orchestrator tasks"""
@@ -139,11 +140,6 @@ class Orchestrator:
                     info = sys.exc_info()
                     stack_trace = traceback.format_exception(*info)
                     self.logger.error("".join(stack_trace))
-
-                # exceptions.append(task.exception())
-
-        # for exception in exceptions:
-        #     traceback.print_exception(type(exception), exception, )
 
     # ----- subscription methods -----
 
