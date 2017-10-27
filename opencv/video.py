@@ -10,7 +10,7 @@ from .messages import ImageMessage
 class OpenCVVideo(Node):
     loaded_videos = {}
 
-    def __init__(self, enabled=True, broadcast_while_paused=False, logger=None, bind_to_playback_node=False,
+    def __init__(self, enabled=True, broadcast_while_paused=False, logger=None,
                  **load_video_args):
         super(OpenCVVideo, self).__init__(enabled, logger)
 
@@ -25,7 +25,6 @@ class OpenCVVideo(Node):
 
         self.paused = False
         self.broadcast_while_paused = broadcast_while_paused
-        self.bind_to_playback_node = bind_to_playback_node
 
         if "file_name" in load_video_args and load_video_args["file_name"] is not None:
             self.load_video(**load_video_args)
@@ -34,7 +33,7 @@ class OpenCVVideo(Node):
 
         self.playback_tag = "playback"
         self.playback_queue = None
-        self.playback_sub = self.define_subscription(self.playback_tag, is_required=bind_to_playback_node,
+        self.playback_sub = self.define_subscription(self.playback_tag, is_required=False,
                                                      message_type=int)
 
     def take(self):
@@ -43,7 +42,7 @@ class OpenCVVideo(Node):
 
     def load_video(self, file_name, directory="", width=None, height=None, frame_skip=0,
                    loop_video=False, start_frame=0):
-        if self.capture is not None and self.bind_to_playback_node:
+        if self.capture is not None and self.is_subscribed(self.playback_tag):
             raise RuntimeError("Can't load another video! This node is bound to a playback node")
 
         if file_name is None:

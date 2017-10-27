@@ -155,6 +155,7 @@ class Arduino(Generic):
         current_pause_command = None
 
         self.logger.info("Device has started!")
+        self.logger.info("init packet: %s" % self.first_packet)
 
         while self.device_active():
             time.sleep(1 / Arduino.port_updates_per_second)  # maintain a constant loop speed
