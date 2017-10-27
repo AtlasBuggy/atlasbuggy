@@ -1,5 +1,3 @@
-[OpenCVViewer @ factory.py:85][DEBUG] 2017-10-27 18:14:08,102: Logging to: logs/record_video_demo/OpenCVViewer/record_video_demo.log
-[OpenCVViewer @ viewer.py:145][DEBUG] 2017-10-27 18:14:28,808: getting key
-[OpenCVViewer @ viewer.py:113][DEBUG] 2017-10-27 18:14:28,813: getting frame
-[OpenCVViewer @ node.py:87][INFO] 2017-10-27 18:14:28,820: Node took 20.71833872795105s to run
-[OpenCVViewer @ node.py:82][INFO] 2017-10-27 18:14:28,930: teardown
+[OpenCVViewer @ factory.py:85][DEBUG] 2017-10-27 19:05:02,761: Logging to: logs/record_video_demo/OpenCVViewer/record_video_demo.log
+[OpenCVViewer @ node.py:87][INFO] 2017-10-27 19:05:05,532: Node took 2.771162986755371s to run
+[OpenCVViewer @ node.py:82][INFO] 2017-10-27 19:05:05,980: teardown

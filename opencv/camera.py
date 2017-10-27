@@ -129,7 +129,6 @@ class OpenCVCamera(Node):
     def launch_selector(self):
         selector_window_name = "Select camera for: " + self.name
         selected_capture = None
-        current_capture = None
         current_num = 0
         width = None
         height = None
@@ -150,7 +149,6 @@ class OpenCVCamera(Node):
             success, frame = current_capture.read()
             if not success:
                 raise cv2.error
-
 
         self.logger.info("Based on used captures, loading capture number %s" % current_num)
         current_capture = self.load_capture(current_num)
@@ -210,7 +208,7 @@ class OpenCVCamera(Node):
     def key_pressed(self, delay=1):
         if not self.enabled:
             return -1
-        key = cv2.waitKey(delay) % 255
+        key = cv2.waitKey(delay)
         if key != -1:
             if key > 0x100000:
                 key -= 0x100000

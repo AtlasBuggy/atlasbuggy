@@ -1,7 +1,0 @@
-[OpenCVRecorder-video_record_demo @ factory.py:85][DEBUG] 2017-10-27 18:14:08,848: Logging to: logs/record_video_demo/OpenCVRecorder-video_record_demo/record_video_demo.log
-[OpenCVRecorder-video_record_demo @ recorder.py:146][INFO] 2017-10-27 18:14:28,810: Recording frame #0. Delay: 0.008157968521118164
-[OpenCVRecorder-video_record_demo @ recorder.py:146][INFO] 2017-10-27 18:14:28,811: Recording frame #1. Delay: 0.0027163028717041016
-[OpenCVRecorder-video_record_demo @ node.py:87][INFO] 2017-10-27 18:14:28,821: Node took 19.97189712524414s to run
-[OpenCVRecorder-video_record_demo @ recorder.py:90][INFO] 2017-10-27 18:14:28,931: dumping frame buffer. Size: 2
-[OpenCVRecorder-video_record_demo @ recorder.py:98][INFO] 2017-10-27 18:14:28,932: Writing to 'videos/video_record_demo.avi'. width = 640, height = 480, fps = 169.78238341968913
-[OpenCVRecorder-video_record_demo @ recorder.py:103][INFO] 2017-10-27 18:14:28,933: Writing 2 frames

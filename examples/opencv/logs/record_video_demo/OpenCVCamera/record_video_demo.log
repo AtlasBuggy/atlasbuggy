@@ -1,31 +1,8 @@
-[OpenCVCamera @ factory.py:85][DEBUG] 2017-10-27 18:14:08,101: Logging to: logs/record_video_demo/OpenCVCamera/record_video_demo.log
-[OpenCVCamera @ camera.py:91][INFO] 2017-10-27 18:14:08,858: No capture number provided. Launching view selector...
-[OpenCVCamera @ camera.py:136][INFO] 2017-10-27 18:14:08,859: Captures in use: {0}
-[OpenCVCamera @ camera.py:122][INFO] 2017-10-27 18:14:08,860: Loading capture '1'
-[OpenCVCamera @ camera.py:154][INFO] 2017-10-27 18:14:09,457: Based on used captures, loading capture number 1
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,459: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,643: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,672: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,715: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,751: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,830: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,847: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,865: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,878: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,887: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,925: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,943: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,956: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,966: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:09,989: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:10,749: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:12,660: Intrepreting '254' as 'þ'
-[OpenCVCamera @ camera.py:223][INFO] 2017-10-27 18:14:28,774: Intrepreting '10' as '
-'
-[OpenCVCamera @ camera.py:197][INFO] 2017-10-27 18:14:28,776: Using capture #1 for OpenCVCamera
-[OpenCVCamera @ node.py:64][DEBUG] 2017-10-27 18:14:28,820: [log buffer start]
-[DEBUG, 1509142468.802538]: ImageMessage(t=1509142468.80253, n=0)
-[DEBUG, 1509142468.8084197]: ImageMessage(t=1509142468.808414, n=1)
+[OpenCVCamera @ factory.py:85][DEBUG] 2017-10-27 19:05:02,761: Logging to: logs/record_video_demo/OpenCVCamera/record_video_demo.log
+[OpenCVCamera @ camera.py:123][INFO] 2017-10-27 19:05:02,814: Loading capture '0'
+[OpenCVCamera @ node.py:64][DEBUG] 2017-10-27 19:05:05,532: [log buffer start]
+[DEBUG, 1509145503.470498]: ImageMessage(t=1509145503.4704928, n=0)
+[DEBUG, 1509145503.556625]: ImageMessage(t=1509145503.5566232, n=1)
 [log buffer end]
-[OpenCVCamera @ node.py:66][DEBUG] 2017-10-27 18:14:28,820: logging message buffer (len=169)
-[OpenCVCamera @ node.py:87][INFO] 2017-10-27 18:14:28,820: Node took 20.71837043762207s to run
+[OpenCVCamera @ node.py:66][DEBUG] 2017-10-27 19:05:05,532: logging message buffer (len=171)
+[OpenCVCamera @ node.py:87][INFO] 2017-10-27 19:05:05,532: Node took 2.771362066268921s to run
