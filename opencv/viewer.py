@@ -90,8 +90,9 @@ class OpenCVViewer(Node):
                 self.slider_current_pos = slider_index
 
     def increment_slider(self):
-        self.slider_current_pos += 1
-        cv2.setTrackbarPos(self.slider_name, self.name, self.slider_current_pos)
+        if self.trackbar_enabled:
+            self.slider_current_pos += 1
+            cv2.setTrackbarPos(self.slider_name, self.name, self.slider_current_pos)
 
     def on_slider(self, slider_index):
         pass

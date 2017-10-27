@@ -14,10 +14,8 @@ class MyOrchestrator(Orchestrator):
         # OpenCVCamera.ignore_capture_numbers(0)
         self.camera = OpenCVCamera()
         self.viewer = OpenCVViewer()
-        # FIXME: if the viewer is turned off completely, the recorder's loop isn't called for some reason...
-        # self.viewer.enable_loop_fn = False
         self.recorder = OpenCVRecorder("video_record_demo.avi", "videos")
-        self.add_nodes(self.camera, self.viewer, self.recorder)
+        self.add_nodes(self.camera, self.recorder, self.viewer)
 
         self.subscribe(self.camera, self.recorder, self.recorder.capture_tag)
         self.subscribe(self.camera, self.viewer, self.viewer.capture_tag)
