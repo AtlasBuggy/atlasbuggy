@@ -20,8 +20,10 @@ class Generic(Node):
     def manage_device(self):
         try:
             self.poll_device()
-        except BaseException:
+        except BaseException as error:
             self.device_exit_event.set()
+            self.logger.debug("Catching exception in device process")
+            self.logger.exception(error)
             raise
 
     def stop_device(self):
@@ -30,17 +32,17 @@ class Generic(Node):
     def poll_device(self):
         """
         example implementation:
-        
+
         while self.device_active():
             ... poll sensor(s) ...
-            
+
             self.device_read_queue.put((current_time, data))
-            
+
             if not self.device_write_queue.empty():
                 while not self.device_write_queue.empty():
                     data = self.device_write_queue.get()
                     ... send data ...
-        
+
         """
         raise NotImplementedError("Please override this method")
 

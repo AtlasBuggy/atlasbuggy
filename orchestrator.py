@@ -97,7 +97,7 @@ class Orchestrator:
                 self.teardown_tasks.append(asyncio.ensure_future(node.teardown()))
                 node._internal_teardown()
 
-            return asyncio.wait(self.teardown_tasks)
+            return asyncio.wait(self.teardown_tasks, return_when=asyncio.ALL_COMPLETED)
 
         return asyncio.sleep(0.0)
 
@@ -114,6 +114,21 @@ class Orchestrator:
         self.logger.debug("Running set up tasks (%s). %s and orchestrator setup" % (len(setup_tasks), self.nodes))
         self.event_loop.run_until_complete(asyncio.wait(setup_tasks, return_when=asyncio.ALL_COMPLETED))
 
+        exception_raised = False
+        for task in setup_tasks:
+            if self.check_task_result(task):
+                exception_raised = True
+        if exception_raised:
+            self.logger.error("Shutting down. Encountered an error!")
+            halt_task = self.halt()
+            self.event_loop.run_until_complete(halt_task)
+
+            for task in self.teardown_tasks:
+                if self.check_task_result(task):
+                    self.logger.error("Encountered an error while tearing down! What a mess...")
+
+            raise RuntimeError("An error was encountered during setup!")
+
         self.logger.debug("Adding loop tasks")
         self.loop_tasks.append(asyncio.ensure_future(self.loop()))
         for node in self.nodes:
@@ -123,23 +138,29 @@ class Orchestrator:
         self.logger.debug("Running loop tasks (%s)" % (len(self.loop_tasks)))
         return asyncio.wait(self.loop_tasks, return_when=self.return_when)
 
+    def check_task_result(self, task):
+        result = task.cancel()
+        self.logger.debug("Cancelling %s: %s" % (task, result))
+        exception_raised = False
+
+        if task.cancelled():
+            self.logger.debug("Task '%s' was cancelled" % task)
+        elif task.done() and task.exception() is not None:
+            try:
+                raise task.exception()
+            except:
+                exception_raised = True
+                info = sys.exc_info()
+                stack_trace = traceback.format_exception(*info)
+                self.logger.error("".join(stack_trace))
+        return exception_raised
+
     def cancel_loop_tasks(self, loop):
         """Cancel all running loop node and Orchestrator tasks"""
 
         self.logger.debug("%s tasks to cancel" % (len(self.loop_tasks)))
         for task in self.loop_tasks:
-            result = task.cancel()
-            self.logger.debug("Cancelling %s: %s" % (task, result))
-
-            if task.cancelled():
-                self.logger.debug("Task '%s' was cancelled" % task)
-            elif task.done() and task.exception() is not None:
-                try:
-                    raise task.exception()
-                except:
-                    info = sys.exc_info()
-                    stack_trace = traceback.format_exception(*info)
-                    self.logger.error("".join(stack_trace))
+            self.check_task_result(task)
 
     # ----- subscription methods -----
 
