@@ -209,6 +209,12 @@ class Arduino(Generic):
 
         self.device_port.write(self.stop_packet)
 
+        self.logger.info("Closing down device port")
+        self.device_port.device.close()
+
+        self.logger.info("Device process stopped")
+
+
     def filter_packet(self, packet):
         # check for protocol packet responses (responses to whoareyou, init?, start, stop)
         for header in self.protocol_packets:
@@ -226,11 +232,6 @@ class Arduino(Generic):
     def pause(self, pause_time):
         self.device_write_queue.put(PauseCommand(pause_time))
         self.log_to_buffer(time.time(), "pausing for %ss" % pause_time)
-
-    @asyncio.coroutine
-    def teardown(self):
-        yield from super(Arduino, self).teardown()
-        self.device_port.device.close()
 
 
 class PauseCommand:
