@@ -1,6 +1,0 @@
-[ImmutableProducer @ factory.py:85][DEBUG] 2017-10-23 12:42:57,263: Logging to: logs/converted_messages_demo/ImmutableProducer/converted_messages_demo.log
-[ImmutableProducer @ node.py:72][INFO] 2017-10-23 12:42:57,264: setup
-[ImmutableProducer @ converted_messages.py:48][INFO] 2017-10-23 12:42:57,769: sending: ProducerMessage(t=1508776977.2647092, n=0, x=0.3032156586355197, y=0.8545080744340269, z=0.9005113662114779)
-[ImmutableProducer @ converted_messages.py:48][INFO] 2017-10-23 12:42:58,274: sending: ProducerMessage(t=1508776977.769938, n=1, x=0.6267575369887992, y=0.8927798140970225, z=0.46969323816611264)
-[ImmutableProducer @ node.py:85][INFO] 2017-10-23 12:42:58,775: Node took 1.5115160942077637s to run
-[ImmutableProducer @ node.py:80][INFO] 2017-10-23 12:42:58,775: teardown

@@ -57,7 +57,9 @@ class OpenCVPipeline(Node):
                 self.logger.info("pipeline_message image received: %s" % message)
                 self.logger.info("receive delay: %ss" % (time.time() - message.timestamp))
 
-                image = self.pipeline(message.image)
+                image = yield from self.pipeline(message)
+                if image is None:
+                    image = message.image
                 pipeline_message = ImageMessage(image, n=message.n)
                 self.logger.info("pipeline delay: %ss" % (pipeline_message.timestamp - message.timestamp))
 
@@ -66,5 +68,6 @@ class OpenCVPipeline(Node):
                 yield from self.broadcast(pipeline_message)
             yield from asyncio.sleep(0.5 / self.capture.fps)
 
-    def pipeline(self, image):
+    @asyncio.coroutine
+    def pipeline(self, message):
         raise NotImplementedError("Please override this method.")
