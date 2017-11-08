@@ -9,6 +9,7 @@ class Generic(Node):
         super(Generic, self).__init__(enabled, logger)
 
         self.device_port = None
+        self.device_start_event = Event()
         self.device_exit_event = Event()
         self.device_read_queue = Queue()
         self.device_write_queue = Queue()
@@ -55,9 +56,13 @@ class Generic(Node):
     def empty(self):
         return self.device_read_queue.empty()
 
-    @asyncio.coroutine
-    def setup(self):
-        self.device_process.start()
+    def start(self):
+        if not self.device_start_event.is_set():
+            self.device_process.start()
+            self.device_start_event.set()
+        else:
+            self.logger.warning("Device start already called!!")
+
 
     @asyncio.coroutine
     def teardown(self):

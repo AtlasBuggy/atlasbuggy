@@ -133,7 +133,10 @@ class Orchestrator:
         self.loop_tasks.append(asyncio.ensure_future(self.loop()))
         for node in self.nodes:
             if node.enable_loop_fn:
+                self.logger.debug("Appending %s's loop task" % node)
                 self.loop_tasks.append(asyncio.ensure_future(node.loop()))
+            else:
+                self.logger.debug("%s has a disabled loop function" % node)
 
         self.logger.debug("Running loop tasks (%s)" % (len(self.loop_tasks)))
         return asyncio.wait(self.loop_tasks, return_when=self.return_when)

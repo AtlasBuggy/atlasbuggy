@@ -52,8 +52,10 @@ class Arduino(Generic):
     @asyncio.coroutine
     def setup(self):
         self.configure_device()
+        self.logger.info("%s's setup complete" % self.whoiam)
 
-        yield from super(Arduino, self).setup()
+    def device_active(self):
+        return not self.device_exit_event.is_set()
 
     @staticmethod
     def list_addresses():
