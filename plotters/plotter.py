@@ -1,11 +1,12 @@
-import asyncio
 import time
-
-from atlasbuggy import Node, Message
-
+import asyncio
 from PyQt5 import QtGui
-from PyQt5.QtWidgets import QApplication, QWidget
 import pyqtgraph as pyg
+from PyQt5.QtWidgets import QApplication, QWidget
+
+from atlasbuggy import Node
+
+from .messages import PlotMessage
 
 
 class PlotViewer(QWidget):
@@ -33,7 +34,7 @@ class PlotViewer(QWidget):
 
     def add_plot(self, name, xlabel, ylabel):
         if name not in self.plot_widgets:
-            widget = pyg.PlotWidget(title=name, labels={'left':xlabel, 'bottom':ylabel})
+            widget = pyg.PlotWidget(title=name, labels={'left': xlabel, 'bottom': ylabel})
             plot = widget.getPlotItem()
 
             self.plot_widgets[name] = widget
@@ -65,22 +66,6 @@ class PlotViewer(QWidget):
         event.accept()
 
 
-class PlotMessage(Message):
-    def __init__(self, plot_name, x_values, y_values, pen=None, symbol='o'):
-        self.plot_name = plot_name
-        self.x_values = x_values
-        self.y_values = y_values
-        self.pen = pen
-        self.symbol = symbol
-
-
-class PlotConfigMessage(Message):
-    def __init__(self, plot_name, x_label="X", y_label="Y"):
-        self.plot_name = plot_name
-        self.x_label = x_label
-        self.y_label = y_label
-
-
 class LivePlotter(Node):
     def __init__(self, enabled=True, size=(800, 600), title='Plotter', **kwargs):
         super(LivePlotter, self).__init__(enabled)
@@ -91,20 +76,30 @@ class LivePlotter(Node):
         self.app = None
         self.plotter = None
 
-        self.plots = {}
-
-        self.xy_tag = "xy"
-        self.xy_sub = self.define_subscription(self.xy_tag, message_type=PlotMessage, is_required=False)
-        self.xy_queue = None
+        self.plot_queues = {}
+        self.plot_subs = {}
+        self.plot_data = {}
 
         self.is_active = False
 
+        self.init_plotter()
+
+    def add_plot(self, plot_name, xlabel="X", ylabel="Y", **sub_kwargs):
+        self.plotter.add_plot(plot_name, xlabel, ylabel)
+
+        self.plot_subs[plot_name] = self.define_subscription(
+            plot_name, message_type=PlotMessage, is_required=False, **sub_kwargs
+        )
+        self.plot_data[plot_name] = [[], []]
+
+        return plot_name
+
     def take(self):
-        if self.is_subscribed(self.xy_queue):
-            self.xy_queue = self.xy_queue.get_queue()
+        for plot_name, plot_sub in self.plot_subs.items():
+            self.plot_queues[plot_name] = plot_sub.get_queue()
             self.is_active = True
 
-    async def setup(self):
+    def init_plotter(self):
         size = self.plot_kwargs.get('size', self.size)
         title = self.plot_kwargs.get('title', self.title)
         maximized = self.plot_kwargs.get('maximized', False)
@@ -125,13 +120,13 @@ class LivePlotter(Node):
             if not self.plotter.open:
                 return
 
-            if self.is_subscribed(self.xy_queue):
-                while not self.xy_queue.empty():
-                    message = await self.xy_queue.get()
-                    if isinstance(message, PlotMessage):
-                        self.plotter.plot(message.plot_name, message.x_label, message.y_label, pen=message.pen, symbol=message.symbol)
+            for plot_name, plot_queue in self.plot_queues.items():
+                while not plot_queue.empty():
+                    message = await plot_queue.get()
+                    self.plot_data[plot_name][0].append(message.x_values)
+                    self.plot_data[plot_name][1].append(message.y_values)
 
-                    elif isinstance(message, PlotConfigMessage):
-                        self.plotter.add_plot(message.plot_name, message.xlabel, message.ylabel)
+                    self.plotter.plot(plot_name, self.plot_data[plot_name][0], self.plot_data[plot_name][1],
+                                      pen=message.pen, symbol=message.symbol)
 
             await asyncio.sleep(0.01)
