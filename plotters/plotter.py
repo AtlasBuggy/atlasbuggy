@@ -1,7 +1,7 @@
 import asyncio
 import time
 
-from atlasbuggy import Node
+from atlasbuggy import Node, Message
 
 from PyQt5 import QtGui
 from PyQt5.QtWidgets import QApplication, QWidget
@@ -65,6 +65,22 @@ class PlotViewer(QWidget):
         event.accept()
 
 
+class PlotMessage(Message):
+    def __init__(self, plot_name, x_values, y_values, pen=None, symbol='o'):
+        self.plot_name = plot_name
+        self.x_values = x_values
+        self.y_values = y_values
+        self.pen = pen
+        self.symbol = symbol
+
+
+class PlotConfigMessage(Message):
+    def __init__(self, plot_name, x_label="X", y_label="Y"):
+        self.plot_name = plot_name
+        self.x_label = x_label
+        self.y_label = y_label
+
+
 class LivePlotter(Node):
     def __init__(self, enabled=True, size=(800, 600), title='Plotter', **kwargs):
         super(LivePlotter, self).__init__(enabled)
@@ -74,6 +90,19 @@ class LivePlotter(Node):
         self.plot_kwargs = kwargs
         self.app = None
         self.plotter = None
+
+        self.plots = {}
+
+        self.xy_tag = "xy"
+        self.xy_sub = self.define_subscription(self.xy_tag, message_type=PlotMessage, is_required=False)
+        self.xy_queue = None
+
+        self.is_active = False
+
+    def take(self):
+        if self.is_subscribed(self.xy_queue):
+            self.xy_queue = self.xy_queue.get_queue()
+            self.is_active = True
 
     async def setup(self):
         size = self.plot_kwargs.get('size', self.size)
@@ -90,15 +119,19 @@ class LivePlotter(Node):
             self.plotter.showMaximized()
 
     async def loop(self):
+        if not self.is_active:
+            return
         while True:
             if not self.plotter.open:
                 return
 
-            await asyncio.sleep(0.1)
+            if self.is_subscribed(self.xy_queue):
+                while not self.xy_queue.empty():
+                    message = await self.xy_queue.get()
+                    if isinstance(message, PlotMessage):
+                        self.plotter.plot(message.plot_name, message.x_label, message.y_label, pen=message.pen, symbol=message.symbol)
 
-    def add_plot(self, name, xlabel='X', ylabel='Y'):
-        self.plotter.add_plot(name, xlabel, ylabel)
+                    elif isinstance(message, PlotConfigMessage):
+                        self.plotter.add_plot(message.plot_name, message.xlabel, message.ylabel)
 
-    def plot(self, name, x, y):
-        self.plotter.plot(name, x, y, pen=None, symbol='o')
-        # self.plotter.plot(name, x, y)
+            await asyncio.sleep(0.01)
