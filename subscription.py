@@ -40,8 +40,8 @@ class Subscription:
     def check_subscription(self):
         if self.is_required:
             if self.producer_node is None or self.consumer_node is None:
-                raise ValueError("Subscription named '%s' not applied!! "
-                                 "Please call subscribe() in your orchestrator class" % self.tag)
+                raise ValueError("Subscription '%s' not applied!! "
+                                 "Please call subscribe() in your orchestrator class" % self)
 
     def set_event_loop(self, event_loop):
         if self.queue_size is not None:
@@ -52,11 +52,16 @@ class Subscription:
         yield from self.queue.put(message)
 
     def get_queue(self):
-        if self.queue is None:
-            raise ValueError("This subscription was defined to not have a queue!")
         self.check_subscription()
+        if self.queue is None:
+            raise ValueError("The subscription '%s' was defined to not have a queue!" % self)
         return self.queue
 
     def get_producer(self):
         self.check_subscription()
         return self.producer_node
+
+    def __str__(self):
+        return "%s<tag=%s, service=%s, consumer=%s, producer=%s>" % (
+            self.__class__.__name__, self.tag, self.requested_service, self.consumer_node, self.producer_node
+        )

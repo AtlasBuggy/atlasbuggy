@@ -105,10 +105,13 @@ class Orchestrator:
         """First call each node's startup task then return the collected node coroutines to run indefinitely"""
         self.exit_event.clear()
 
-        self.logger.debug("Adding setup tasks. Apply subscriptions")
-        setup_tasks = [asyncio.ensure_future(self.setup())]
+        self.logger.debug("Applying subscriptions")
         for node in self.nodes:
             node.take()
+
+        self.logger.debug("Adding setup tasks")
+        setup_tasks = [asyncio.ensure_future(self.setup())]
+        for node in self.nodes:
             setup_tasks.append(asyncio.ensure_future(node.setup()))
 
         self.logger.debug("Running set up tasks (%s). %s and orchestrator setup" % (len(setup_tasks), self.nodes))
