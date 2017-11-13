@@ -34,7 +34,7 @@ class PlotViewer(QWidget):
 
     def add_plot(self, name, xlabel, ylabel):
         if name not in self.plot_widgets:
-            widget = pyg.PlotWidget(title=name, labels={'left': xlabel, 'bottom': ylabel})
+            widget = pyg.PlotWidget(title=name, labels={'left': ylabel, 'bottom': xlabel})
             plot = widget.getPlotItem()
 
             self.plot_widgets[name] = widget
