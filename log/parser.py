@@ -85,6 +85,7 @@ class LogParser:
             self.lines.append(line)
 
         all_buffer_lines = []
+        extracted_lines = []
         for index in range(0, len(self.lines) - 1):
             buffer_lines = self.extract_message(
                 log_contents, self.lines[index],
@@ -93,6 +94,9 @@ class LogParser:
             )
             if len(buffer_lines) > 0:
                 all_buffer_lines.extend(buffer_lines)
+            else:
+                extracted_lines.append(self.lines[index])
+        self.lines = extracted_lines
 
         buffer_lines = self.extract_message(
             log_contents, self.lines[-1],
@@ -160,6 +164,7 @@ class LogParser:
 
         buffer_lines = []
         if default.log_buffer_start in message:
+            message = message[len(default.log_buffer_start):]
             self._resort_by_time = True
 
             buffer_matches = re.finditer(self.buffer_regex, message)
