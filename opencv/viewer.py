@@ -10,7 +10,8 @@ from .messages import ImageMessage
 
 
 class OpenCVViewer(Node):
-    def __init__(self, enabled=True, logger=None, enable_trackbar=False, draw_while_paused=False):
+    def __init__(self, enabled=True, logger=None, enable_trackbar=False, draw_while_paused=False,
+                 producer_service="default"):
         super(OpenCVViewer, self).__init__(enabled, logger)
 
         if self.enabled:
@@ -56,9 +57,10 @@ class OpenCVViewer(Node):
         self.capture_tag = "capture"
         self.capture = None
         self.capture_queue = None
-        self.capture_sub = self.define_subscription(self.capture_tag, message_type=ImageMessage, queue_size=1,
-                                                    required_attributes=self.capture_required_attributes,
-                                                    required_methods=self.capture_required_methods)
+        self.capture_sub = self.define_subscription(
+            self.capture_tag, producer_service, message_type=ImageMessage, queue_size=1,
+            required_attributes=self.capture_required_attributes,
+            required_methods=self.capture_required_methods)
 
     def take(self):
         self.capture = self.capture_sub.get_producer()
@@ -109,7 +111,10 @@ class OpenCVViewer(Node):
             if self.key_pressed() is False:
                 return
 
-            yield from asyncio.sleep(0.5 / self.capture.fps)  # operate faster than the camera
+            if type(self.capture.fps) == float or type(self.capture.fps) == int:
+                yield from asyncio.sleep(0.5 / self.capture.fps)  # operate faster than the camera
+            else:
+                yield from asyncio.sleep(0.01)
 
             self.logger.debug("getting frame")
             if self.capture_queue.empty():

@@ -1,6 +1,8 @@
+import sys
 import time
 import asyncio
 import logging
+import traceback
 
 from .subscription import Subscription
 from .log.factory import make_logger

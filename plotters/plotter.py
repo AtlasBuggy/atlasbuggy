@@ -123,8 +123,15 @@ class LivePlotter(Node):
             for plot_name, plot_queue in self.plot_queues.items():
                 while not plot_queue.empty():
                     message = await plot_queue.get()
-                    self.plot_data[plot_name][0].append(message.x_values)
-                    self.plot_data[plot_name][1].append(message.y_values)
+                    if message.option == PlotMessage.APPEND:
+                        self.plot_data[plot_name][0].append(message.x_values)
+                        self.plot_data[plot_name][1].append(message.y_values)
+                    elif message.option == PlotMessage.EXTEND:
+                        self.plot_data[plot_name][0].extend(message.x_values)
+                        self.plot_data[plot_name][1].extend(message.y_values)
+                    else:
+                        self.plot_data[plot_name][0] = message.x_values
+                        self.plot_data[plot_name][1] = message.y_values
 
                     self.plotter.plot(plot_name, self.plot_data[plot_name][0], self.plot_data[plot_name][1],
                                       pen=message.pen, symbol=message.symbol)

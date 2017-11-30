@@ -213,7 +213,7 @@ class Orchestrator:
                     producer, subscription.expected_producer_classes, consumer
                 ))
 
-    def subscribe(self, producer, consumer, tag, message_converter=None):
+    def subscribe(self, producer, consumer, tag, service=None, message_converter=None):
         """Define a producer-consumer relationship between two nodes. """
 
         if not producer.enabled:
@@ -234,6 +234,8 @@ class Orchestrator:
         # find a suitable subscription
         for subscription in consumer.producer_subs:
             if subscription.tag == tag:
+                if service is not None:
+                    subscription.requested_service = service
                 self._check_services(subscription, producer, consumer, tag)
                 self._check_attributes(subscription, producer, consumer)
                 self._check_methods(subscription, producer, consumer)
