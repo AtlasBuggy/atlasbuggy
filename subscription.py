@@ -62,6 +62,6 @@ class Subscription:
         return self.producer_node
 
     def __str__(self):
-        return "%s<tag=%s, service=%s, consumer=%s, producer=%s>" % (
-            self.__class__.__name__, self.tag, self.requested_service, self.consumer_node, self.producer_node
+        return "%s<tag=%s, service=%s, enabled=%s, consumer=%s, producer=%s>" % (
+            self.__class__.__name__, self.tag, self.requested_service, self.enabled, self.consumer_node, self.producer_node
         )
