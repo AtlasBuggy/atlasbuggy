@@ -452,11 +452,11 @@ class DevicePort:
                 self.logger.debug("Found non-ascii characters! '%s'" % incoming)
                 raise
 
-                # apply a regex pattern to remove invalid characters
-            buf = Arduino.buffer_pattern.sub('', self.buffer)
-            if len(self.buffer) != len(buf):
-                self.logger.debug("Invalid characters found: %s" % repr(self.buffer))
-            self.buffer = buf
+            # apply a regex pattern to remove invalid characters
+            # buf = Arduino.buffer_pattern.sub('', self.buffer)
+            # if len(self.buffer) != len(buf):
+            #     self.logger.debug("Invalid characters found: %s" % repr(self.buffer))
+            # self.buffer = buf
 
             if len(self.buffer) > len(Arduino.packet_end):
                 # split based on user defined packet end
