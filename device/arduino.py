@@ -24,7 +24,7 @@ class Arduino(Generic):
     start_packet = "start"
 
     # misc. device protocol
-    protocol_timeout = 3  # seconds
+    protocol_timeout = 5  # seconds
     packet_end = "\n"  # what this microcontroller's packets end with
     default_rate = 115200
     buffer_pattern = re.compile("([^\r\n\t\x20-\x7e]|_)+")
@@ -86,6 +86,9 @@ class Arduino(Generic):
             Arduino.collect_all_devices(addresses, self.logger, *self.device_args, **self.device_kwargs)
 
         self.logger.info("configuring done. Finding whoiam=%s" % self.whoiam)
+
+        if self.whoiam not in Arduino.ports:
+            raise RuntimeError("Failed to find arduino device named %s" % self.whoiam)
 
         device_port_info = Arduino.ports[self.whoiam]
         device_port_info["logger"] = self.logger
@@ -196,7 +199,6 @@ class Arduino(Generic):
 
             if current_pause_command is None:
                 if not self.device_write_queue.empty():
-                    self.logger.debug("Write queue not empty")
                     while not self.device_write_queue.empty():
                         packet = self.device_write_queue.get()
                         if type(packet) == PauseCommand:
@@ -286,7 +288,8 @@ class DevicePort:
                 )
                 return
         self.logger.debug("%s is ready" % self.address)
-        time.sleep(1.59)  # wait for the device to boot (found by minimizing time difference of arduino and computer)
+        # time.sleep(1.59)  # wait for the device to boot (found by minimizing time difference of arduino and computer)
+        time.sleep(2)
 
         self.whoiam = self.find_whoiam()
         if self.whoiam is not None:
