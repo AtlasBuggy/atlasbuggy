@@ -26,9 +26,11 @@ class Orchestrator:
         self.exit_event = asyncio.Event(loop=event_loop)
         self.return_when = return_when
 
-        self.event_loop.add_signal_handler(signal.SIGINT, self.cancel_loop_tasks, self.event_loop)
+        if sys.platform != "win32":
+            self.event_loop.add_signal_handler(signal.SIGINT, self.cancel_loop_tasks, self.event_loop)
 
         self.start_time = time.time()
+
 
     @property
     def name(self):
