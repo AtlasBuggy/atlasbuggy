@@ -11,13 +11,15 @@ from atlasbuggy.message import Message
 
 
 class ImageMessage(Message):
-    def __init__(self, image, n, width=None, height=None, depth=3, timestamp=None):
+    message_regex = r"ImageMessage\(t=(\d.*), n=(\d*)\)"
+
+    def __init__(self, image=None, n=None, width=None, height=None, depth=3, timestamp=None):
         assert type(n) == int
         assert timestamp is None or type(timestamp) == float
 
         self.image = image
 
-        if width is None or height is None:
+        if (width is None or height is None) and image is not None:
             width, height, depth = self.get_image_dimensions(image)
 
         self.width = width
@@ -37,6 +39,17 @@ class ImageMessage(Message):
     def __str__(self):
         return "%s(t=%s, n=%s)" % (self.__class__.__name__, self.timestamp, self.n)
 
+    @classmethod
+    def parse(cls, message):
+        match = re.match(cls.message_regex, message)
+        if match is not None:
+            message_time = float(match.group(1))
+            frame_num = int(match.group(2))
+
+            return cls(n=frame_num, timestamp=message_time)
+        else:
+            return None
+
     @staticmethod
     def bytes_to_numpy(bytes_image):
         if opencv_installed:
@@ -52,11 +65,17 @@ class ImageMessage(Message):
 
 
 class StereoImageMessage(ImageMessage):
-    def __init__(self, left_image, right_image, n, separation_dist, width=None, height=None, depth=3, timestamp=None):
+    message_regex = r"StereoImageMessage\(t=(\d.*), n=(\d*), dist=([-\d.e]*), lt=(\d.*), rt=(\d.*), diff=([-\d.e]*)\)"
+
+    def __init__(self, left_image, right_image, n, separation_dist, width=None, height=None, depth=3, timestamp=None,
+                 left_timestamp=None, right_timestamp=None):
         self.left_image = left_image
         self.right_image = right_image
 
         self.separation_dist = separation_dist
+        self.left_timestamp = left_timestamp
+        self.right_timestamp = right_timestamp
+        self.time_diff = left_timestamp - right_timestamp
 
         super(StereoImageMessage, self).__init__(left_image, n, width, height, depth, timestamp)
 
@@ -68,3 +87,26 @@ class StereoImageMessage(ImageMessage):
             "Height of left image (%s) does not match right image (%s)!!" % (self.height, height)
         assert depth == self.depth, \
             "Depth of left image (%s) does not match right image (%s)!!" % (self.depth, depth)
+
+    @classmethod
+    def parse(cls, message):
+        match = re.match(cls.message_regex, message)
+        if match is not None:
+            message_time = float(match.group(1))
+            frame_num = int(match.group(2))
+            separation_dist = float(match.group(3))
+            left_timestamp = float(match.group(4))
+            right_timestamp = float(match.group(5))
+
+            return cls(
+                None, None, frame_num, separation_dist, timestamp=message_time,
+                left_timestamp=left_timestamp, right_timestamp=right_timestamp
+            )
+        else:
+            return None
+
+    def __str__(self):
+        return "%s(t=%s, n=%s, dist=%s, lt=%s, rt=%s, diff=%s)" % (
+            self.__class__.__name__, self.timestamp, self.n, self.separation_dist,
+            self.left_timestamp, self.right_timestamp, self.time_diff
+        )

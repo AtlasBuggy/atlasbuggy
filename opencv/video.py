@@ -154,7 +154,8 @@ class OpenCVVideo(Node):
 
             if self.is_subscribed(self.playback_tag):
                 while not self.playback_queue.empty():
-                    self.next_frame = yield from self.playback_queue.get()
+                    image_message = yield from self.playback_queue.get()
+                    self.next_frame = image_message.n
                     if self.next_frame - self.current_frame != 1:
                         self.set_frame(self.next_frame)
                     success = yield from self.load_frame()
