@@ -79,24 +79,26 @@ class LivePlotter(Node):
         self.plot_queues = {}
         self.plot_subs = {}
         self.plot_data = {}
+        self.plot_line_names = {}
 
         self.is_active = False
 
         self.init_plotter()
 
-    def add_plot(self, plot_name, xlabel="X", ylabel="Y", **sub_kwargs):
-        self.plotter.add_plot(plot_name, xlabel, ylabel)
+    def add_plot(self, plot_line_name, plot_name, xlabel="X", ylabel="Y", **sub_kwargs):
+        self.plotter.add_plot(plot_name, xlabel, ylabel):
+        self.plot_line_names[plot_line_name] = plot_name
 
-        self.plot_subs[plot_name] = self.define_subscription(
-            plot_name, message_type=PlotMessage, is_required=False, **sub_kwargs
+        self.plot_subs[plot_line_name] = self.define_subscription(
+            plot_line_name, message_type=PlotMessage, is_required=False, **sub_kwargs
         )
-        self.plot_data[plot_name] = [[], []]
+        self.plot_data[plot_line_name] = [[], []]
 
-        return plot_name
+        return plot_line_name
 
     def take(self):
-        for plot_name, plot_sub in self.plot_subs.items():
-            self.plot_queues[plot_name] = plot_sub.get_queue()
+        for plot_line_name, plot_sub in self.plot_subs.items():
+            self.plot_queues[plot_line_name] = plot_sub.get_queue()
             self.is_active = True
 
     def init_plotter(self):
@@ -120,20 +122,21 @@ class LivePlotter(Node):
             if not self.plotter.open:
                 return
 
-            for plot_name, plot_queue in self.plot_queues.items():
+            for plot_line_name, plot_queue in self.plot_queues.items():
                 while not plot_queue.empty():
                     message = await plot_queue.get()
                     if message.option == PlotMessage.APPEND:
-                        self.plot_data[plot_name][0].append(message.x_values)
-                        self.plot_data[plot_name][1].append(message.y_values)
+                        self.plot_data[plot_line_name][0].append(message.x_values)
+                        self.plot_data[plot_line_name][1].append(message.y_values)
                     elif message.option == PlotMessage.EXTEND:
-                        self.plot_data[plot_name][0].extend(message.x_values)
-                        self.plot_data[plot_name][1].extend(message.y_values)
+                        self.plot_data[plot_line_name][0].extend(message.x_values)
+                        self.plot_data[plot_line_name][1].extend(message.y_values)
                     else:
-                        self.plot_data[plot_name][0] = message.x_values
-                        self.plot_data[plot_name][1] = message.y_values
+                        self.plot_data[plot_line_name][0] = message.x_values
+                        self.plot_data[plot_line_name][1] = message.y_values
 
-                    self.plotter.plot(plot_name, self.plot_data[plot_name][0], self.plot_data[plot_name][1],
+                    plot_name = self.plot_line_names[plot_line_name]
+                    self.plotter.plot(plot_name, self.plot_data[plot_line_name][0], self.plot_data[plot_line_name][1],
                                       pen=message.pen, symbol=message.symbol)
 
             await asyncio.sleep(0.01)
