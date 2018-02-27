@@ -16,6 +16,8 @@ class ProducerMessage1(Message):
         self.z = z
         super(ProducerMessage1, self).__init__(timestamp, n)
 
+        self.id = "%s-%s" % (self.name, n)
+
     def __str__(self):
         return "ProducerMessage1(t=%s, n=%s, w=%s, x=%s, y=%s, z=%s)" % (
             self.timestamp, self.n, self.w, self.x, self.y, self.z)
@@ -31,6 +33,8 @@ class ProducerMessage2(Message):
         self.z = z
         super(ProducerMessage2, self).__init__(timestamp, n)
 
+        self.id = "%s-%s" % (self.name, n)
+
     def __str__(self):
         return "ProducerMessage2(t=%s, n=%s, x=%s, y=%s, z=%s)" % (
             self.timestamp, self.n, self.x, self.y, self.z)
@@ -45,20 +49,24 @@ class ProducerMessage3(Message):
         self.y = y
         super(ProducerMessage3, self).__init__(timestamp, n)
 
+        self.id = "%s-%s" % (self.name, n)
+
     def __str__(self):
         return "ProducerMessage3(t=%s, n=%s, x=%s, y=%s)" % (
             self.timestamp, self.n, self.x, self.y)
 
 
 class ConsumerMessage(Message):
-    def __init__(self, timestamp, n, a=0.0, b=0.0):
+    def __init__(self, timestamp, message_id, n, a=0.0, b=0.0):
         self.timestamp = timestamp
         self.a = a
         self.b = b
         super(ConsumerMessage, self).__init__(timestamp, n)
 
+        self.id = message_id
+
     def __str__(self):
-        return "ConsumerMessage(t=%s, n=%s a=%s, b=%s)" % (self.timestamp, self.n, self.a, self.b)
+        return "ConsumerMessage(t=%s, id=%s, n=%s a=%s, b=%s)" % (self.timestamp, self.id, self.n, self.a, self.b)
 
 
 class GenericProducerBase(Node):
@@ -122,15 +130,15 @@ class AnyConsumer(Node):
 
 
 def producer1_to_consumer(message: ProducerMessage1):
-    return ConsumerMessage(message.timestamp, message.n, message.w + message.x, message.y + message.z)
+    return ConsumerMessage(message.timestamp, message.id, message.n, message.w + message.x, message.y + message.z)
 
 
 def producer2_to_consumer(message: ProducerMessage2):
-    return ConsumerMessage(message.timestamp, message.n, message.x, message.y + message.z)
+    return ConsumerMessage(message.timestamp, message.id, message.n, message.x, message.y + message.z)
 
 
 def producer3_to_consumer(message: ProducerMessage3):
-    return ConsumerMessage(message.timestamp, message.n, message.x, message.y)
+    return ConsumerMessage(message.timestamp, message.id, message.n, message.x, message.y)
 
 
 class MyOrchestrator(Orchestrator):
@@ -144,9 +152,9 @@ class MyOrchestrator(Orchestrator):
 
         self.add_nodes(generic_producer1, generic_producer2, generic_producer3, any_consumer)
 
-        self.subscribe(generic_producer1, any_consumer, any_consumer.any_tag, producer1_to_consumer)
-        self.subscribe(generic_producer2, any_consumer, any_consumer.any_tag, producer2_to_consumer)
-        self.subscribe(generic_producer3, any_consumer, any_consumer.any_tag, producer3_to_consumer)
+        self.subscribe(generic_producer1, any_consumer, any_consumer.any_tag, message_converter=producer1_to_consumer)
+        self.subscribe(generic_producer2, any_consumer, any_consumer.any_tag, message_converter=producer2_to_consumer)
+        self.subscribe(generic_producer3, any_consumer, any_consumer.any_tag, message_converter=producer3_to_consumer)
 
 
 if __name__ == '__main__':

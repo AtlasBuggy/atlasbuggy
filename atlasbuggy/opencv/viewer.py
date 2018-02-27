@@ -122,8 +122,8 @@ class OpenCVViewer(Node):
             else:
                 self.increment_slider()
                 message = yield from self.capture_queue.get()
-                self.logger.info("viewer delay: %ss" % (time.time() - message.timestamp))
-                self.logger.info("viewer image received: %s" % message)
+                self.logger.debug("viewer delay: %ss" % (time.time() - message.timestamp))
+                self.logger.debug("viewer image received: %s" % message)
 
                 frame = self.draw(message.image)
 

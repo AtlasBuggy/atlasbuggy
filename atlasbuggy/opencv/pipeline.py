@@ -54,14 +54,14 @@ class OpenCVPipeline(Node):
         while True:
             while not self.capture_queue.empty():
                 message = yield from self.capture_queue.get()
-                self.logger.info("pipeline_message image received: %s" % message)
-                self.logger.info("receive delay: %ss" % (time.time() - message.timestamp))
+                self.logger.debug("pipeline_message image received: %s" % message)
+                self.logger.debug("receive delay: %ss" % (time.time() - message.timestamp))
 
                 image = yield from self.pipeline(message)
                 if image is None:
                     image = message.image
                 pipeline_message = ImageMessage(image, n=message.n)
-                self.logger.info("pipeline delay: %ss" % (pipeline_message.timestamp - message.timestamp))
+                self.logger.debug("pipeline delay: %ss" % (pipeline_message.timestamp - message.timestamp))
 
                 self._num_frames = message.n
 
