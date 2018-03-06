@@ -12,16 +12,16 @@ from .errors import *
 class Arduino(Generic):
     # whoiam ID info
     whoiam_header = "iam"  # whoiam packets start with "iam"
-    whoiam_ask = "whoareyou"
+    whoiam_ask = "~?"
 
     # first packet info
-    first_packet_ask = "init?"
+    first_packet_ask = "~|"
     first_packet_header = "init:"
 
-    stop_packet = "stop"
+    stop_packet = "~<"
     stop_packet_header = "stopping"
 
-    start_packet = "start"
+    start_packet = "~>"
 
     # misc. device protocol
     protocol_timeout = 5  # seconds

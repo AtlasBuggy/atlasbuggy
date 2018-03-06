@@ -6,4 +6,8 @@ setup(
     packages=find_packages(),
     license='Creative Commons Attribution-Noncommercial-Share Alike license',
     long_description=open('README.md').read(),
+    install_requires=[
+      'serial',
+      # opencv installation not required but needs to be done separately
+  ]
 )
