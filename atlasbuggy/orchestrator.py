@@ -234,7 +234,7 @@ class Orchestrator:
         matched_subscription = None
 
         # find a suitable subscription
-        for subscription in consumer.producer_subs:
+        for subscription in consumer._producer_subs:
             if subscription.tag == tag:
                 if service is not None:
                     subscription.requested_service = service
@@ -255,7 +255,7 @@ class Orchestrator:
         matched_subscription.set_nodes(producer, consumer)
         matched_subscription.set_event_loop(self.event_loop)
         matched_subscription.message_converter = message_converter
-        consumer.subscription_tags.add(tag)
+        consumer._subscription_tags.add(tag)
 
         producer.append_subscription(matched_subscription)
 

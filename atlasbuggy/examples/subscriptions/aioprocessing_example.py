@@ -32,31 +32,35 @@ def primes(n):
 class ProcessingQueueNode(Node):
     def __init__(self, enabled=True):
         super(ProcessingQueueNode, self).__init__(enabled)
-        self.process = aioprocessing.AioProcess(target=self.processor_heavy_fn)
+
         self.read_queue = aioprocessing.AioQueue()
         self.write_queue = aioprocessing.AioQueue()
         self.lock = aioprocessing.AioLock()
         self.exit_event = aioprocessing.AioEvent()
 
+        self.process = aioprocessing.AioProcess(target=self.processor_heavy_fn, args=(self.exit_event, self.lock, self.write_queue, self.read_queue))
+
     async def setup(self):
         self.process.start()
 
-    def processor_heavy_fn(self):
+    # making this method static for windows compatibility
+    @staticmethod
+    def processor_heavy_fn(exit_event, lock, write_queue, read_queue):
         while True:
-            if self.exit_event.is_set():
+            if exit_event.is_set():
                 return
 
-            with self.lock:
+            with lock:
                 results = []
-                if not self.write_queue.empty():
-                    while not self.write_queue.empty():
-                        if self.exit_event.is_set():
+                if not write_queue.empty():
+                    while not write_queue.empty():
+                        if exit_event.is_set():
                             return
 
-                        n = self.write_queue.get()
+                        n = write_queue.get()
                         results.append(primes(n))
 
-                    self.read_queue.put(results)
+                    read_queue.put(results)
                 else:
                     time.sleep(0.01)
 
@@ -87,4 +91,5 @@ class MyOrchestrator(Orchestrator):
         self.add_nodes(self.processing_queue)
 
 
-run(MyOrchestrator)
+if __name__ == '__main__':
+    run(MyOrchestrator)

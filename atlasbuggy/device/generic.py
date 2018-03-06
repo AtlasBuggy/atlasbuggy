@@ -1,19 +1,31 @@
+import os
+import queue
 import asyncio
-from multiprocessing import Event, Queue, Process
-
+import threading
+import multiprocessing
 from ..node import Node
 
 
 class Generic(Node):
-    def __init__(self, enabled=True, logger=None):
+    def __init__(self, enabled=True, logger=None, use_multiprocessing=True):
         super(Generic, self).__init__(enabled, logger)
 
+        if os.name == "nt":
+            use_multiprocessing = False
+
         self.device_port = None
-        self.device_start_event = Event()
-        self.device_exit_event = Event()
-        self.device_read_queue = Queue()
-        self.device_write_queue = Queue()
-        self.device_process = Process(target=self.manage_device)
+        if use_multiprocessing:
+            self.device_start_event = multiprocessing.Event()
+            self.device_exit_event = multiprocessing.Event()
+            self.device_read_queue = multiprocessing.Queue()
+            self.device_write_queue = multiprocessing.Queue()
+            self.device_process = multiprocessing.Process(target=self.manage_device)
+        else:
+            self.device_start_event = threading.Event()
+            self.device_exit_event = threading.Event()
+            self.device_read_queue = queue.Queue()
+            self.device_write_queue = queue.Queue()
+            self.device_process = threading.Thread(target=self.manage_device)
 
     def device_active(self):
         return not self.device_exit_event.is_set()

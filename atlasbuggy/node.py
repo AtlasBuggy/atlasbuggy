@@ -20,20 +20,20 @@ class Node:
                 self.logger = logger
                 self.log_file_name = self.log_directory = ""
 
-        self.producer_subs = []
-        self.consumer_subs = []
-        self.subscription_tags = set()
+        self._producer_subs = []
+        self._consumer_subs = []
+        self._subscription_tags = set()
         self.services = {
             "default": None
         }
 
         self.event_loop = None  # assigned by the orchestrator when orchestrator.add_nodes is called
 
-        self.log_buffer = default.log_buffer_start
-        self.max_log_buf_size = 16384
-        self.buffer_check_acquisition_rate = 3  # seconds
-        self.buffer_check_prev_t = time.time()
-        self.buffer_check_prev_len = 0
+        self._log_buffer = default.log_buffer_start
+        self._max_log_buf_size = 16384
+        self._buffer_check_acquisition_rate = 3  # seconds
+        self._buffer_check_prev_t = time.time()
+        self._buffer_check_prev_len = 0
 
         self.start_time = time.time()
 
@@ -59,30 +59,30 @@ class Node:
         return hasattr(self, "logger")
 
     def log_to_buffer(self, timestamp, message, level=logging.DEBUG):
-        self.log_buffer += "[%s, %s]: %s\n" % (logging.getLevelName(level), timestamp, message)
-        if len(self.log_buffer) > self.max_log_buf_size:
+        self._log_buffer += "[%s, %s]: %s\n" % (logging.getLevelName(level), timestamp, message)
+        if len(self._log_buffer) > self._max_log_buf_size:
             self.dump_log_buffer()
 
     def check_buffer(self, num_messages_received, log_level=20):
         current_time = time.time()
-        if (current_time - self.buffer_check_prev_t) > self.buffer_check_acquisition_rate:
+        if (current_time - self._buffer_check_prev_t) > self._buffer_check_acquisition_rate:
             self.logger.log(log_level,
                             "received %s messages in %s seconds. %s received in total (avg=%0.1f messages/sec)" % (
-                                num_messages_received - self.buffer_check_prev_len,
-                                self.buffer_check_acquisition_rate, num_messages_received,
+                                num_messages_received - self._buffer_check_prev_len,
+                                self._buffer_check_acquisition_rate, num_messages_received,
                                 num_messages_received / (current_time - self.start_time)
                             ))
-            self.buffer_check_prev_len = num_messages_received
-            self.buffer_check_prev_t = current_time
+            self._buffer_check_prev_len = num_messages_received
+            self._buffer_check_prev_t = current_time
 
     def dump_log_buffer(self):
-        if len(self.log_buffer) > len(default.log_buffer_start):
-            self.log_buffer += default.log_buffer_end
-            self.logger.debug(self.log_buffer)
+        if len(self._log_buffer) > len(default.log_buffer_start):
+            self._log_buffer += default.log_buffer_end
+            self.logger.debug(self._log_buffer)
 
-            self.logger.debug("logging message buffer (len=%s)" % len(self.log_buffer))
+            self.logger.debug("logging message buffer (len=%s)" % len(self._log_buffer))
 
-            self.log_buffer = default.log_buffer_start
+            self._log_buffer = default.log_buffer_start
 
     # ----- event order methods -----
 
@@ -126,7 +126,7 @@ class Node:
 
     def _find_matching_subscriptions(self, message, service):
         results = []
-        for subscription in self.consumer_subs:
+        for subscription in self._consumer_subs:
             if not subscription.enabled or subscription.queue is None:
                 continue
 
@@ -198,25 +198,25 @@ class Node:
                             required_attributes=None,
                             required_methods=None):
 
-        for subscription in self.producer_subs:
+        for subscription in self._producer_subs:
             if tag == subscription.tag:
                 raise ValueError("Tag '%s' is already being used! "
                                  "Did you call define_subscription with the same tag?" % tag)
         subscription = Subscription(tag, service, is_required, message_type, producer_type, queue_size,
                                     error_on_full_queue,
                                     required_attributes, required_methods)
-        self.producer_subs.append(subscription)
+        self._producer_subs.append(subscription)
 
         return subscription
 
     def is_subscribed(self, tag):
-        return tag in self.subscription_tags
+        return tag in self._subscription_tags
 
     def define_service(self, service="default", message_type=None):
-        self.services[service] = message_type
+        self._services[service] = message_type
 
     def append_subscription(self, subscription):
-        self.consumer_subs.append(subscription)
+        self._consumer_subs.append(subscription)
 
     def __str__(self):
         return self.name
