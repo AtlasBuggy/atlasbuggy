@@ -48,10 +48,10 @@ class OpenCVViewer(Node):
         self.key = 255
 
         if enable_trackbar:
-            self.capture_required_attributes = "num_frames",
-            self.capture_required_methods = "set_pause", "get_pause", "set_frame"
+            self.capture_required_attributes = "num_frames", "fps"
+            self.capture_required_methods = "set_pause", "get_pause", "set_frame", "get_frame"
         else:
-            self.capture_required_attributes = None
+            self.capture_required_attributes = "fps",
             self.capture_required_methods = None
 
         self.capture_tag = "capture"
@@ -93,7 +93,7 @@ class OpenCVViewer(Node):
 
     def increment_slider(self):
         if self.trackbar_enabled:
-            self.slider_current_pos += 1
+            self.slider_current_pos = self.capture.get_frame() + 1
             cv2.setTrackbarPos(self.slider_name, self.name, self.slider_current_pos)
 
     def on_slider(self, slider_index):
@@ -149,7 +149,7 @@ class OpenCVViewer(Node):
         if not self.enabled:
             return
         # self.logger.debug("getting key")
-        key = cv2.waitKey(delay)
+        key = cv2.waitKeyEx(delay)
         if key > -1:
             self.logger.debug("OpenCV key: '%s'" % key)
             if key > 0x100000:

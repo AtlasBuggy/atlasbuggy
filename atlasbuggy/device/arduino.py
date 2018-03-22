@@ -218,7 +218,6 @@ class Arduino(Generic):
 
         self.logger.info("Device process stopped")
 
-
     def filter_packet(self, packet):
         # check for protocol packet responses (responses to whoareyou, init?, start, stop)
         for header in self.protocol_packets:

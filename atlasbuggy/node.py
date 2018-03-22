@@ -213,7 +213,7 @@ class Node:
         return tag in self._subscription_tags
 
     def define_service(self, service="default", message_type=None):
-        self._services[service] = message_type
+        self.services[service] = message_type
 
     def append_subscription(self, subscription):
         self._consumer_subs.append(subscription)

@@ -227,9 +227,13 @@ class Orchestrator:
             return
 
         if producer not in self.nodes:
-            raise RuntimeError("Producer node wasn't added!! Call add_nodes(producer_instance) in orchestrator")
+            self.add_nodes(producer)
+            self.logger.info("Producer node wasn't added. Automatically adding based on subscription")
+            # raise RuntimeError("Producer node wasn't added!! Call add_nodes(producer_instance) in orchestrator")
         if consumer not in self.nodes:
-            raise RuntimeError("Consumer node wasn't added!! Call add_nodes(consumer_instance) in orchestrator")
+            self.add_nodes(consumer)
+            self.logger.info("Consumer node wasn't added. Automatically adding based on subscription")
+            # raise RuntimeError("Consumer node wasn't added!! Call add_nodes(consumer_instance) in orchestrator")
 
         matched_subscription = None
 
