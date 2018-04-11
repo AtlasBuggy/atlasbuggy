@@ -232,21 +232,26 @@ class Arduino(Generic):
                 return False
         return True
 
-    def pause(self, pause_time):
-        self.device_write_queue.put(PauseCommand(pause_time))
+    def pause(self, pause_time, relative_time=True):
+        self.device_write_queue.put(PauseCommand(pause_time, relative_time))
         self.log_to_buffer(time.time(), "pausing for %ss" % pause_time)
 
 
 class PauseCommand:
-    def __init__(self, pause_time):
+    def __init__(self, pause_time, relative_time):
         self.pause_time = pause_time
         self.start_time = 0.0
+        self.relative_time = relative_time
 
     def start(self):
-        self.start_time = time.time()
+        if self.relative_time:
+            self.start_time = time.time()
 
     def expired(self):
-        return time.time() - self.start_time > self.pause_time
+        if self.relative_time:
+            return time.time() - self.start_time > self.pause_time
+        else:
+            return time.time() > self.pause_time
 
 
 class DevicePort:
