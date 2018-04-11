@@ -1,9 +1,7 @@
-import time
-import copy
 import string
 import random
-from atlasbuggy import Message
-
+from atlasbuggy import Orchestrator, Message
+from atlasbuggy.log import PlaybackNode
 
 class MyMessage(Message):
     def __init__(self, n, timestamp=None):
@@ -84,7 +82,7 @@ if __name__ == '__main__':
         assert Message.float_regex == r"([-+]?(?:(?:\d*\.\d+)|(?:\d+\.?))(?:[Ee][+-]?\d+)?)", assert_message % "float_regex "
         assert Message.int_regex == r"([-+]?[0-9]+)", assert_message % "int_regex "
         assert Message.str_regex == r"\'(.*?)\'", assert_message % "str_regex "
-        assert Message.ignored_properties == ["n", "timestamp"], assert_message % "ignored_properties "
+        assert Message.ignored_properties == ["n", "timestamp", "is_auto_serialized", "ignored_properties"], assert_message % "ignored_properties "
 
         print("Original Message class preserved")
 

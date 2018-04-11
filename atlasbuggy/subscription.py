@@ -13,7 +13,7 @@ def wrap_iter(iterable):
 
 class Subscription:
     def __init__(self, tag, requested_service, is_required, expected_message_types, expected_producer_classes, queue_size,
-                 error_on_full_queue, required_attributes, required_methods):
+                 error_on_full_queue, required_attributes, required_methods, callback, callback_args):
         self.tag = tag
         self.enabled = True
         self.requested_service = requested_service
@@ -23,6 +23,13 @@ class Subscription:
         self.error_on_full_queue = error_on_full_queue
         self.required_attributes = required_attributes
         self.required_methods = required_methods
+        self.callback = callback
+        self.callback_args = callback_args
+
+        if self.callback is not None and not callable(self.callback):
+            raise ValueError("Object '%s' is not a function." % self.callback)
+        if self.callback_args is not None and type(self.callback_args) != tuple:
+            raise ValueError("Callback args is not a tuple: '%s'" % self.callback_args)
 
         self.producer_node = None
         self.consumer_node = None

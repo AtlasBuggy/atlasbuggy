@@ -12,27 +12,30 @@ class Message:
     int_regex = r"([-+]?[0-9]+)"
     str_regex = r"\'(.*?)\'"
 
-    ignored_properties = ["n", "timestamp"]
-
     def __init__(self, n, timestamp=None):
         if timestamp is None:
             self.timestamp = time.time()
         else:
             self.timestamp = timestamp
         self.n = n
+        self.is_auto_serialized = False
 
         init_signature = tuple(inspect.signature(self.__init__).parameters.keys())
         if init_signature != ("n", "timestamp"):
             raise ValueError("Message classes must have init parameters (n, timestamp=None)! "
                              "This message has the signature: %s" % str(init_signature))
 
+        self.ignored_properties = ["n", "timestamp", "is_auto_serialized", "ignored_properties"]
+
     @classmethod
     def parse(cls, message):
         match = re.match(cls.message_regex, message)
-        if match is not None:
+        if match is None or len(match.groups()) == 0:
+            return None
+        else:
             n = int(match.group(1))
             message_time = float(match.group(2))
-            new_message = cls(message_time, n)
+            new_message = cls(n, message_time)
 
             groups = match.groups()[2:]
 
@@ -41,13 +44,21 @@ class Message:
                 group_value = groups[index + 1]
                 group_type = cls.message_data_types[index // 2]
 
-                value = group_type(group_value)
+                if group_type in [int, float, str]:
+                    value = group_type(group_value)
+                else:
+                    value = cls.parse_field(group_name, group_value)
 
                 setattr(new_message, group_name, value)
 
             return new_message
-        else:
-            return None
+
+    @classmethod
+    def parse_field(cls, name, value):
+        return value
+
+    def ignore_properties(self, *property_names):
+        self.ignored_properties.extend(property_names)
 
     def get_message_props(self):
         properties_table = copy.deepcopy(self.__dict__)
@@ -57,21 +68,18 @@ class Message:
         return properties_table
 
     def get_serialization(self):
-        properties_table = self.get_message_props()
-        properties_table = list(properties_table.items())
-        properties_table.sort(key=lambda p: p[0])
-        properties_table = [str(item) for sublist in properties_table for item in sublist]
-
         serialization_props = [self.name, self.n, self.timestamp]
-        serialization_props.extend(properties_table)
+        if self.is_auto_serialized:
+            properties_table = self.get_message_props()
+            properties_table = list(properties_table.items())
+            properties_table.sort(key=lambda p: p[0])
+            properties_table = [str(item) for sublist in properties_table for item in sublist]
+            serialization_props.extend(properties_table)
 
         return self.__class__.str_serialization % tuple(serialization_props)
 
-    @classmethod
-    def ignore_prop_named(cls, property_name):
-        cls.ignored_properties.append(property_name)
-
     def auto_serialize(self):
+        self.is_auto_serialized = True
         str_serialization = "%s(n=%s, t=%s"
         regex_serialization = r"%s\(n=%s, t=%s" % (self.name, self.int_regex, self.float_regex)
 
@@ -96,7 +104,7 @@ class Message:
             else:
                 # if this is the last item, match the string until ")" instead of ","
                 regex_serialization += r"%s" % self.str_regex
-                message_data_types.append(str)
+                message_data_types.append(type(value))
 
         str_serialization += ")"
         regex_serialization += r"\)"

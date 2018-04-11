@@ -53,7 +53,8 @@ class Node:
     def set_logger(self, *args, **kwargs):
         if self.is_logger_created():
             raise ValueError("A logger was created for this node already. Call this before the call to super().")
-        self.logger, self.log_file_name, self.log_directory = make_logger(self.name, default.default_settings, *args, **kwargs)
+        self.logger, self.log_file_name, self.log_directory = make_logger(self.name, default.default_settings, *args,
+                                                                          **kwargs)
 
     def is_logger_created(self):
         return hasattr(self, "logger")
@@ -93,6 +94,7 @@ class Node:
     @asyncio.coroutine
     def loop(self):
         self.logger.info("loop")
+        yield from asyncio.Event().wait()  # stall loop if not overridden
 
     @asyncio.coroutine
     def teardown(self):
@@ -127,7 +129,7 @@ class Node:
     def _find_matching_subscriptions(self, message, service):
         results = []
         for subscription in self._consumer_subs:
-            if not subscription.enabled or subscription.queue is None:
+            if not subscription.enabled:
                 continue
 
             if service == subscription.requested_service:
@@ -156,17 +158,24 @@ class Node:
         results = self._find_matching_subscriptions(message, service)
 
         for matched_subscription, message in results:
-            if matched_subscription.error_on_full_queue:
-                yield from matched_subscription.queue.put(message)
-            else:
-                try:
+            if matched_subscription.callback is not None:
+                if matched_subscription.callback_args is None:
+                    matched_subscription.callback(message)
+                else:
+                    matched_subscription.callback(message, *matched_subscription.callback_args)
+
+            elif matched_subscription.queue is not None:
+                if matched_subscription.error_on_full_queue:
                     yield from matched_subscription.queue.put(message)
-                except asyncio.QueueFull:
-                    self.logger.info(
-                        "Producer '%s' is trying to put a message on consumer '%s's queue, but it is full" % (
-                            matched_subscription.producer_node, matched_subscription.consumer_node
+                else:
+                    try:
+                        yield from matched_subscription.queue.put(message)
+                    except asyncio.QueueFull:
+                        self.logger.info(
+                            "Producer '%s' is trying to put a message on consumer '%s's queue, but it is full" % (
+                                matched_subscription.producer_node, matched_subscription.consumer_node
+                            )
                         )
-                    )
 
         yield from asyncio.sleep(0.0)
         return len(results)
@@ -176,17 +185,24 @@ class Node:
 
         if len(results) != 0:
             for matched_subscription, message in results:
-                if matched_subscription.error_on_full_queue:
-                    matched_subscription.queue.put_nowait(message)
-                else:
-                    try:
+                if matched_subscription.callback is not None:
+                    if matched_subscription.callback_args is None:
+                        matched_subscription.callback(message)
+                    else:
+                        matched_subscription.callback(message, *matched_subscription.callback_args)
+
+                elif matched_subscription.queue is not None:
+                    if matched_subscription.error_on_full_queue:
                         matched_subscription.queue.put_nowait(message)
-                    except asyncio.QueueFull:
-                        self.logger.info(
-                            "Producer '%s' is trying to put a message on consumer '%s's queue, but it is full" % (
-                                matched_subscription.producer_node, matched_subscription.consumer_node
+                    else:
+                        try:
+                            matched_subscription.queue.put_nowait(message)
+                        except asyncio.QueueFull:
+                            self.logger.info(
+                                "Producer '%s' is trying to put a message on consumer '%s's queue, but it is full" % (
+                                    matched_subscription.producer_node, matched_subscription.consumer_node
+                                )
                             )
-                        )
         return len(results)
 
     def define_subscription(self, tag, service="default",
@@ -196,15 +212,21 @@ class Node:
                             queue_size=0,
                             error_on_full_queue=False,
                             required_attributes=None,
-                            required_methods=None):
+                            required_methods=None,
+                            callback=None, callback_args=None):
+        if queue_size == 0 and callback is not None:
+            queue_size = None  # disable queues by default if a callback function is enabled
 
         for subscription in self._producer_subs:
             if tag == subscription.tag:
                 raise ValueError("Tag '%s' is already being used! "
                                  "Did you call define_subscription with the same tag?" % tag)
-        subscription = Subscription(tag, service, is_required, message_type, producer_type, queue_size,
-                                    error_on_full_queue,
-                                    required_attributes, required_methods)
+        subscription = Subscription(
+            tag, service, is_required, message_type, producer_type, queue_size,
+            error_on_full_queue,
+            required_attributes, required_methods,
+            callback, callback_args
+        )
         self._producer_subs.append(subscription)
 
         return subscription
