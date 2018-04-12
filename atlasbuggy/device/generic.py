@@ -19,12 +19,14 @@ class Generic(Node):
             self.device_exit_event = multiprocessing.Event()
             self.device_read_queue = multiprocessing.Queue()
             self.device_write_queue = multiprocessing.Queue()
+            self.device_write_lock = multiprocessing.Lock()
             self.device_process = multiprocessing.Process(target=self.manage_device)
         else:
             self.device_start_event = threading.Event()
             self.device_exit_event = threading.Event()
             self.device_read_queue = queue.Queue()
             self.device_write_queue = queue.Queue()
+            self.device_write_lock = threading.Lock()
             self.device_process = threading.Thread(target=self.manage_device)
 
     def device_active(self):
@@ -60,7 +62,8 @@ class Generic(Node):
         raise NotImplementedError("Please override this method")
 
     def write(self, packet):
-        self.device_write_queue.put(packet)
+        with self.device_write_lock:
+            self.device_write_queue.put(packet)
 
     def read(self):
         return self.device_read_queue.get()
