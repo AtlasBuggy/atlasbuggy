@@ -66,8 +66,7 @@ class PlaybackNode(Node):
     @asyncio.coroutine
     def parse(self, line):
         if self.message_parse_fn is not None:
-            message = self.message_parse_fn(line)
-            yield from self.broadcast(message)
+            yield from self.message_parse_fn(line)
 
         elif self.is_type_message:
             message = self.message_class.parse(line.message)
