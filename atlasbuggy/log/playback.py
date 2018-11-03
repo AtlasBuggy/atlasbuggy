@@ -9,8 +9,6 @@ from ..message import Message
 
 
 class PlaybackNode(Node):
-    central_clock = 0.0
-
     def __init__(self, *file_names, directory=None, update_rate=None, enabled=True, logger=None, name=None, message_class=None,
                  message_parse_fn=None, parse_field_fn=None):
         self.set_logger(write=False,
@@ -62,6 +60,12 @@ class PlaybackNode(Node):
             else:
                 yield from self.parse(line)
                 yield from asyncio.sleep(self.update_rate)
+        self.logger.info("Playback node complete.")
+        yield from self.completed()
+
+    @asyncio.coroutine
+    def completed(self):
+        pass
 
     @asyncio.coroutine
     def parse(self, line):
